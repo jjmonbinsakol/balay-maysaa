@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Balay Maysa | Modern Tropical Private Resort</title>
+  <!-- Tailwind + Fonts + Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
+    .font-display { font-family: 'Playfair Display', serif; }
+    .hero-pattern { background-image: linear-gradient(135deg, rgba(0,0,0,0.45), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600'); background-size: cover; background-position: center 30%; }
+    .gold-text { color: #c9a03d; }
+    .bg-tropical { background-color: #2d5a3b; }
+    .btn-gold { background-color: #c9a03d; transition: all 0.2s ease; }
+    .btn-gold:hover { background-color: #b0882a; transform: translateY(-2px); }
+    .transition-smooth { transition: all 0.2s ease; }
+  </style>
+</head>
+<body class="bg-white text-gray-800">
+
+  <!-- ======================== NAVIGATION ======================== -->
+  <nav class="bg-white/95 backdrop-blur-sm shadow-md fixed w-full z-50 top-0">
+    <div class="container mx-auto px-5 py-3 flex flex-wrap justify-between items-center">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-umbrella-beach text-2xl text-[#2d5a3b]"></i>
+        <span class="font-display text-2xl font-bold text-[#2d5a3b]">Balay Maysa</span>
+      </div>
+      <div class="hidden md:flex space-x-6 text-gray-700 font-medium">
+        <a href="#home" class="hover:text-[#c9a03d] transition">Home</a>
+        <a href="#about" class="hover:text-[#c9a03d] transition">About</a>
+        <a href="#accommodations" class="hover:text-[#c9a03d] transition">Rooms</a>
+        <a href="#addons" class="hover:text-[#c9a03d] transition">Add‑Ons</a>
+        <a href="#promos" class="hover:text-[#c9a03d] transition">Promos</a>
+        <a href="#feedbacks" class="hover:text-[#c9a03d] transition">Feedbacks</a>
+        <a href="#contact" class="hover:text-[#c9a03d] transition">Contact</a>
+      </div>
+      <div class="flex gap-3 items-center">
+        <button id="googleLoginBtn" class="bg-[#2d5a3b] text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md hover:bg-[#1f4530] transition"><i class="fab fa-google mr-1"></i> Login</button>
+        <button id="openBookingNavBtn" class="border-2 border-[#c9a03d] text-[#c9a03d] px-4 py-2 rounded-full font-semibold hover:bg-[#c9a03d] hover:text-white transition">Book Now</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ======================== HERO ======================== -->
+  <section id="home" class="hero-pattern h-screen flex items-center justify-center text-white text-center pt-20">
+    <div class="px-4 max-w-3xl">
+      <h2 class="text-xl tracking-widest mb-2">WELCOME TO</h2>
+      <h1 class="font-display text-6xl md:text-7xl font-bold mb-4">Balay Maysa</h1>
+      <p class="text-xl md:text-2xl mb-8">MODERN TROPICAL PRIVATE RESORT</p>
+      <button class="btn-gold text-white px-8 py-3 rounded-full text-lg font-semibold shadow-lg">LEARN MORE</button>
+    </div>
+  </section>
+
+  <!-- ======================== ABOUT ======================== -->
+  <section id="about" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-6 max-w-5xl text-center">
+      <h2 class="font-display text-4xl text-[#2d5a3b] mb-2">ABOUT US</h2>
+      <div class="w-24 h-1 bg-[#c9a03d] mx-auto mb-8"></div>
+      <p class="text-gray-700 leading-relaxed text-lg">A modern tropical staycation designed for slow mornings, quiet afternoons, and meaningful nights. Tucked in Caloocan North, your private escape from city chaos. “Balay” means home, “Maysa” means first — a beginning. Built with love by MTP Construction, a family‑run legacy of warmth.</p>
+      <div class="mt-8 bg-white p-6 rounded-2xl shadow-md italic text-gray-600">“You're not just booking a stay — you're creating moments that feel personal, heartfelt, and beautifully unhurried.”</div>
+    </div>
+  </section>
+
+  <!-- ======================== ACCOMMODATIONS ======================== -->
+  <section id="accommodations" class="py-20">
+    <div class="container mx-auto px-5">
+      <h2 class="font-display text-4xl text-center text-[#2d5a3b]">Accommodations</h2>
+      <div class="w-24 h-1 bg-[#c9a03d] mx-auto my-4"></div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+        <!-- Silayan -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:-translate-y-1 transition">
+          <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=500" class="w-full h-52 object-cover" alt="Silayan">
+          <div class="p-4"><h3 class="font-display text-2xl text-[#2d5a3b]">Silayan Room</h3><p class="text-sm text-gray-500">1 Queen Bed | Bathtub | Pool view</p><p class="text-sm mt-1 font-semibold">👥 2-3 adults + 1 child</p><button class="book-trigger mt-3 w-full bg-tropical text-white py-2 rounded-xl" data-room="silayan">Check Availability</button></div>
+        </div>
+        <!-- Sinta -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden"><img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=500" class="w-full h-52 object-cover"><div class="p-4"><h3 class="font-display text-2xl text-[#2d5a3b]">Sinta Room</h3><p class="text-sm text-gray-500">1 Queen Bed | 2nd floor | AC + Fan</p><p class="text-sm mt-1 font-semibold">👥 2-3 adults + 1 child</p><button class="book-trigger mt-3 w-full bg-tropical text-white py-2 rounded-xl" data-room="sinta">Check Availability</button></div></div>
+        <!-- Tahanan -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden"><img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=500" class="w-full h-52 object-cover"><div class="p-4"><h3 class="font-display text-2xl text-[#2d5a3b]">Tahanan Room</h3><p class="text-sm text-gray-500">2 Queen Beds | Family suite</p><p class="text-sm mt-1 font-semibold">👥 4-6 adults + 1 child</p><button class="book-trigger mt-3 w-full bg-tropical text-white py-2 rounded-xl" data-room="tahanan">Check Availability</button></div></div>
+        <!-- Barkada -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden"><img src="https://images.unsplash.com/photo-1622106221696-217736f1ec1c?w=500" class="w-full h-52 object-cover"><div class="p-4"><h3 class="font-display text-2xl text-[#2d5a3b]">Barkada Room</h3><p class="text-sm text-gray-500">2 Queen + 2 Single Beds | 8-10 pax</p><p class="text-sm mt-1 font-semibold">👥 8-10 adults + 2 children</p><button class="book-trigger mt-3 w-full bg-tropical text-white py-2 rounded-xl" data-room="barkada">Check Availability</button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== ADD-ONS ======================== -->
+  <section id="addons" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-6 text-center"><h2 class="font-display text-3xl text-[#2d5a3b]">Add‑On Services</h2><div class="w-20 h-0.5 bg-[#c9a03d] mx-auto my-3"></div><p class="text-gray-500 mb-8">(additional fee)</p>
+    <div class="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto text-left">
+      <div class="flex gap-3 bg-white p-4 rounded-xl shadow"><i class="fas fa-dog text-2xl text-[#c9a03d]"></i><div><h4 class="font-bold">Fur Baby Fee</h4><p class="text-sm">Pets welcome</p></div></div>
+      <div class="flex gap-3 bg-white p-4 rounded-xl shadow"><i class="fas fa-fire text-2xl text-[#c9a03d]"></i><div><h4 class="font-bold">Barrel Griller</h4><p class="text-sm">BBQ nights</p></div></div>
+      <div class="flex gap-3 bg-white p-4 rounded-xl shadow"><i class="fas fa-user-plus text-2xl text-[#c9a03d]"></i><div><h4 class="font-bold">Additional Pax Fee</h4><p class="text-sm">Extra guests</p></div></div>
+      <div class="flex gap-3 bg-white p-4 rounded-xl shadow"><i class="fas fa-gas-pump text-2xl text-[#c9a03d]"></i><div><h4 class="font-bold">Gas Stove Access</h4><p class="text-sm">Cooking allowed</p></div></div>
+      <div class="flex gap-3 bg-white p-4 rounded-xl shadow"><i class="fas fa-camera text-2xl text-[#c9a03d]"></i><div><h4 class="font-bold">Photoshoot / Ads</h4><p class="text-sm">Special rates</p></div></div>
+      <div class="flex gap-3 bg-white p-4 rounded-xl shadow"><i class="fas fa-utensils text-2xl text-[#c9a03d]"></i><div><h4 class="font-bold">In-House Food</h4><p class="text-sm">Pre-order menu</p></div></div>
+    </div></div>
+  </section>
+
+  <!-- ======================== PROMOS ======================== -->
+  <section id="promos" class="py-16"><div class="container mx-auto px-6 text-center"><h2 class="font-display text-3xl text-[#2d5a3b]">Promos & Packages</h2><div class="w-20 h-0.5 bg-[#c9a03d] mx-auto my-3"></div><div class="flex flex-wrap justify-center gap-5 mt-8"><span class="bg-[#2d5a3b]/10 px-5 py-2 rounded-full">🏆 Early Bird Discount</span><span class="bg-[#2d5a3b]/10 px-5 py-2 rounded-full">🔄 Returning Guest Discount</span><span class="bg-[#2d5a3b]/10 px-5 py-2 rounded-full">📅 Book 6+1 Nights Free</span><span class="bg-[#2d5a3b]/10 px-5 py-2 rounded-full">🎂 Wedding/Birthday Package</span><span class="bg-[#2d5a3b]/10 px-5 py-2 rounded-full">💼 Business Event Package</span></div></div></section>
+
+  <!-- ======================== FEEDBACKS ======================== -->
+  <section id="feedbacks" class="py-16 bg-gray-50"><div class="container mx-auto px-6"><h2 class="font-display text-3xl text-center text-[#2d5a3b]">Guest Feedbacks</h2><div class="w-24 h-1 bg-[#c9a03d] mx-auto my-3"></div><div id="feedbacksContainer" class="grid md:grid-cols-3 gap-6 mt-10">Loading reviews...</div></div></section>
+
+  <!-- ======================== CONTACT & BOOKING ======================== -->
+  <section id="contact" class="py-16"><div class="container mx-auto px-6 max-w-6xl"><div class="grid md:grid-cols-2 gap-12"><div><h3 class="font-display text-2xl text-[#2d5a3b]">Reservations Office</h3><p class="mt-3"><i class="fas fa-map-marker-alt text-[#c9a03d] w-6"></i> Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North</p><p><i class="fas fa-phone text-[#c9a03d] w-6"></i> 09175657918</p><p><i class="fas fa-envelope text-[#c9a03d] w-6"></i> balaymaysa@gmail.com</p><div class="flex gap-5 mt-6 text-2xl text-[#2d5a3b]"><i class="fab fa-facebook"></i><i class="fab fa-instagram"></i><i class="fab fa-tiktok"></i></div></div><div><form id="contactForm" class="space-y-4 bg-white p-6 rounded-2xl shadow"><h4 class="font-bold text-xl">Send us a message</h4><input type="text" id="contactName" placeholder="Your name" class="w-full border p-3 rounded-xl"><input type="email" id="contactEmail" placeholder="Email" class="w-full border p-3 rounded-xl"><textarea id="contactMsg" rows="3" placeholder="Message" class="w-full border p-3 rounded-xl"></textarea><button type="submit" class="btn-gold text-white px-6 py-2 rounded-xl w-full">Send</button></form></div></div></div></section>
+
+  <!-- ======================== BOOKING MODAL ======================== -->
+  <div id="bookingModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 relative"><button id="closeModalBtn" class="absolute right-4 top-3 text-2xl text-gray-500">&times;</button><h3 class="font-display text-2xl text-[#2d5a3b]">Request to Book</h3><form id="bookingForm" class="mt-4 space-y-3"><input type="hidden" id="bookingRoom"><input type="text" id="guestName" placeholder="Full name" class="w-full border p-2 rounded-lg" required><input type="email" id="guestEmail" placeholder="Email address" class="w-full border p-2 rounded-lg" required><div class="grid grid-cols-2 gap-2"><input type="date" id="checkInDate" class="border p-2 rounded"><input type="date" id="checkOutDate" class="border p-2 rounded"></div><input type="number" id="adultsCount" placeholder="Adults (max 10)" min="1" max="10" class="border p-2 rounded w-full"><div class="flex gap-2"><label class="flex items-center"><input type="checkbox" id="hasPet" class="mr-1"> 🐾 Pet?</label></div><button type="submit" class="w-full bg-[#c9a03d] text-white py-2 rounded-xl font-bold">Submit Request</button></form><div id="modalMsg" class="mt-3 text-center text-sm hidden"></div></div>
+  </div>
+
+  <!-- ======================== LOGIN MODAL (google) ======================== -->
+  <div id="loginModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"><div class="bg-white p-8 rounded-2xl text-center w-96"><i class="fas fa-tree text-5xl text-[#2d5a3b]"></i><h3 class="text-xl font-bold mt-2">Sign in</h3><button id="googleAuthBtn" class="mt-5 w-full bg-red-600 text-white py-2 rounded-full"><i class="fab fa-google mr-2"></i> Continue with Google</button><button id="closeLoginModalBtn" class="mt-3 text-gray-500">Cancel</button></div></div>
+
+  <script>
+    // ======================== SUPABASE CONFIG (EDIT WITH YOUR KEYS) ========================
+    const SUPABASE_URL = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_9hJ_a1e1413lFxkhnc8aRQ_lmTFb';  // ← REPLACE WITH YOUR ACTUAL PUBLISHABLE KEY
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ---------- DOM elements ----------
+    const bookingModal = document.getElementById('bookingModal');
+    const closeModal = document.getElementById('closeModalBtn');
+    const bookTriggers = document.querySelectorAll('.book-trigger');
+    const bookingForm = document.getElementById('bookingForm');
+    const modalMsgDiv = document.getElementById('modalMsg');
+    const loginModal = document.getElementById('loginModal');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const googleAuthBtn = document.getElementById('googleAuthBtn');
+    const closeLoginModal = document.getElementById('closeLoginModalBtn');
+    const openBookingNav = document.getElementById('openBookingNavBtn');
+    let currentUser = null;
+
+    // ---------- helper: open booking modal with room ----------
+    function openBookingModal(roomType) {
+      document.getElementById('bookingRoom').value = roomType;
+      bookingModal.classList.remove('hidden');
+      bookingModal.classList.add('flex');
+    }
+    bookTriggers.forEach(btn => btn.addEventListener('click', (e) => {
+      const room = btn.getAttribute('data-room');
+      openBookingModal(room);
+    }));
+    openBookingNav.addEventListener('click', () => openBookingModal('silayan'));
+    closeModal.addEventListener('click', () => { bookingModal.classList.add('hidden'); bookingModal.classList.remove('flex'); modalMsgDiv.classList.add('hidden'); });
+
+    // ---------- Google Auth (popup) ----------
+    googleLoginBtn.addEventListener('click', () => loginModal.classList.add('flex'));
+    closeLoginModal.addEventListener('click', () => loginModal.classList.remove('flex'));
+    googleAuthBtn.addEventListener('click', async () => {
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+        if (error) throw error;
+      } catch (err) { alert('Google login error: ' + err.message); }
+    });
+    // get session after redirect
+    supabase.auth.getSession().then(({ data: { session } }) => { if (session?.user) currentUser = session.user; });
+
+    // ---------- BOOKING SUBMIT (stores in Supabase) ----------
+    bookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const room = document.getElementById('bookingRoom').value;
+      const guestName = document.getElementById('guestName').value.trim();
+      const guestEmail = document.getElementById('guestEmail').value.trim();
+      const checkIn = document.getElementById('checkInDate').value;
+      const checkOut = document.getElementById('checkOutDate').value;
+      const adults = parseInt(document.getElementById('adultsCount').value);
+      const hasPet = document.getElementById('hasPet').checked;
+
+      if (!guestName || !guestEmail || !checkIn || !checkOut || !adults) {
+        showModalMessage('Please fill all fields', true);
+        return;
+      }
+      if (new Date(checkIn) >= new Date(checkOut)) { showModalMessage('Check-out must be after check-in', true); return; }
+
+      const bookingPayload = {
+        guest_name: guestName, guest_email: guestEmail, room_type: room, check_in_date: checkIn,
+        check_out_date: checkOut, adults: adults, children: 0, has_pet: hasPet, status: 'pending_approval'
+      };
+      const { error } = await supabase.from('bookings').insert([bookingPayload]);
+      if (error) { showModalMessage('❌ Booking error: ' + error.message, true); } 
+      else { showModalMessage('✅ Booking request sent! Admin will confirm within 24h.', false); bookingForm.reset(); setTimeout(() => { bookingModal.classList.add('hidden'); bookingModal.classList.remove('flex'); modalMsgDiv.classList.add('hidden'); }, 2500); }
+    });
+    function showModalMessage(msg, isError) { modalMsgDiv.innerText = msg; modalMsgDiv.className = `mt-3 text-center text-sm p-2 rounded ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`; modalMsgDiv.classList.remove('hidden'); }
+
+    // ---------- LOAD FEEDBACKS from Supabase ----------
+    async function loadFeedbacks() {
+      const { data, error } = await supabase.from('feedbacks').select('*').eq('is_approved', true).order('created_at', { ascending: false });
+      const container = document.getElementById('feedbacksContainer');
+      if (error || !data?.length) { container.innerHTML = '<div class="col-span-3 text-center text-gray-400">No reviews yet.</div>'; return; }
+      container.innerHTML = data.map(fb => `<div class="bg-white p-5 rounded-2xl shadow"><div class="flex justify-between"><div><p class="font-bold">${fb.guest_name}</p><div class="text-yellow-500">${'★'.repeat(fb.rating)}${'☆'.repeat(5-fb.rating)}</div></div><i class="fas fa-quote-right text-gray-300"></i></div><p class="mt-3 text-gray-600">“${fb.message.substring(0, 180)}”</p></div>`).join('');
+    }
+    loadFeedbacks();
+
+    // ---------- CONTACT FORM ----------
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('contactName').value;
+      const email = document.getElementById('contactEmail').value;
+      const message = document.getElementById('contactMsg').value;
+      if (!name || !email || !message) { alert('Please fill all fields'); return; }
+      const { error } = await supabase.from('contact_messages').insert([{ name, email, message, is_read: false }]);
+      alert(error ? 'Error sending: ' + error.message : 'Message sent! We’ll reply soon.');
+      if (!error) document.getElementById('contactForm').reset();
+    });
+  </script>
+</body>
+</html>
