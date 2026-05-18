@@ -1,361 +1,537 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balay Maysa - Admin Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background: #f1f5f9; font-family: system-ui, 'Segoe UI', sans-serif; }
-        .status-pending { background: #fef3c7; color: #b45309; }
-        .status-confirmed { background: #d1fae5; color: #065f46; }
-        .status-declined { background: #fee2e2; color: #991b1b; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Balay Maysa – Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: '#2d5a3b',
+            'forest-dark': '#1e3d28',
+            gold: '#c9a03d',
+          },
+          fontFamily: {
+            heading: ['"Cormorant Garamond"', 'serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f3f4f1; }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      padding: 14px 20px; border-radius: 10px; font-size: 13px; font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18); display: flex; align-items: center; gap-8px;
+      gap: 8px; max-width: 340px; transition: opacity 0.3s, transform 0.3s;
+    }
+    #toast.hidden { opacity: 0; transform: translateY(12px); pointer-events: none; }
+    #toast.success { background: #2d5a3b; color: white; }
+    #toast.error { background: #c0392b; color: white; }
+    .table-cell { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 13px; }
+    .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-confirmed { background: #d1fae5; color: #065f46; }
+    .badge-declined { background: #fee2e2; color: #991b1b; }
+  </style>
 </head>
 <body>
 
-    <!-- Login Panel -->
-    <div id="loginPanel" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#2d5a3b] to-[#1e3d28]">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-            <div class="text-center mb-6">
-                <i class="fas fa-lock text-4xl text-[#c9a03d]"></i>
-                <h2 class="text-2xl font-bold mt-2">Admin Access</h2>
-                <p class="text-gray-500">Balay Maysa Management</p>
-            </div>
-            <form id="adminLoginForm">
-                <input type="text" id="adminUsername" placeholder="Username" class="w-full border p-3 rounded-lg mb-3" required>
-                <input type="password" id="adminPassword" placeholder="Password" class="w-full border p-3 rounded-lg mb-4" required>
-                <button type="submit" class="w-full bg-[#2d5a3b] text-white py-3 rounded-lg font-bold">Login</button>
-            </form>
-            <div id="loginError" class="text-red-600 text-center text-sm mt-3 hidden"></div>
+<!-- ========== LOGIN SCREEN ========== -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center bg-forest px-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-sm">
+    <div class="text-center mb-8">
+      <h1 class="font-heading text-4xl text-forest font-light mb-1">Balay Maysa</h1>
+      <p class="text-xs text-gray-400 uppercase tracking-widest">Admin Panel</p>
+    </div>
+    <div class="mb-4">
+      <label class="block text-xs font-medium text-gray-500 mb-1.5">Username</label>
+      <input id="loginUser" type="text" placeholder="Username"
+        class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/10" />
+    </div>
+    <div class="mb-6">
+      <label class="block text-xs font-medium text-gray-500 mb-1.5">Password</label>
+      <input id="loginPass" type="password" placeholder="Password"
+        class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/10" />
+    </div>
+    <p id="loginErr" class="hidden text-red-500 text-xs mb-3 text-center">Invalid credentials. Please try again.</p>
+    <button onclick="doLogin()" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">
+      Log In
+    </button>
+  </div>
+</div>
+
+<!-- ========== ADMIN DASHBOARD ========== -->
+<div id="adminPanel" class="hidden min-h-screen">
+
+  <!-- Sidebar -->
+  <div class="fixed inset-y-0 left-0 w-56 bg-forest-dark z-30 flex flex-col">
+    <div class="px-6 py-6 border-b border-white/10">
+      <h1 class="font-heading text-xl text-white font-light">Balay Maysa</h1>
+      <p class="text-white/40 text-xs mt-0.5">Admin Panel</p>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <button onclick="showTab('dashboard')" id="tab-dashboard"
+        class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3 font-medium">
+        <i class="fas fa-chart-bar w-4"></i> Dashboard
+      </button>
+      <button onclick="showTab('pending')" id="tab-pending"
+        class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3">
+        <i class="fas fa-clock w-4"></i> Pending
+        <span id="pendingBadge" class="ml-auto bg-gold text-white text-xs px-2 py-0.5 rounded-full hidden"></span>
+      </button>
+      <button onclick="showTab('confirmed')" id="tab-confirmed"
+        class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3">
+        <i class="fas fa-check-circle w-4"></i> Confirmed
+      </button>
+      <button onclick="showTab('all')" id="tab-all"
+        class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3">
+        <i class="fas fa-list w-4"></i> All Bookings
+      </button>
+    </nav>
+    <div class="p-4 border-t border-white/10">
+      <button onclick="doLogout()" class="w-full text-left px-4 py-2 text-white/50 text-xs hover:text-white transition-colors flex items-center gap-2">
+        <i class="fas fa-sign-out-alt"></i> Log Out
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="ml-56 p-8">
+
+    <!-- DASHBOARD TAB -->
+    <div id="view-dashboard" class="tab-view">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-6">Dashboard</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Pending</span>
+            <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center"><i class="fas fa-clock text-yellow-500 text-sm"></i></div>
+          </div>
+          <div id="statPending" class="text-3xl font-semibold text-gray-800">–</div>
         </div>
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Confirmed</span>
+            <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center"><i class="fas fa-check-circle text-green-500 text-sm"></i></div>
+          </div>
+          <div id="statConfirmed" class="text-3xl font-semibold text-gray-800">–</div>
+        </div>
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-gray-400 uppercase tracking-wide">Total Bookings</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i class="fas fa-calendar text-blue-500 text-sm"></i></div>
+          </div>
+          <div id="statTotal" class="text-3xl font-semibold text-gray-800">–</div>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <h3 class="font-medium text-gray-700 mb-4 text-sm">Recent Bookings</h3>
+        <div id="recentList" class="text-sm text-gray-400">Loading...</div>
+      </div>
     </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="hidden">
-        <nav class="bg-[#2d5a3b] text-white px-6 py-4 shadow-lg flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-umbrella-beach text-xl"></i>
-                <span class="font-bold text-xl">Balay Maysa · Admin</span>
-            </div>
-            <button id="logoutBtn" class="bg-red-700 px-4 py-2 rounded-lg hover:bg-red-800">Logout</button>
-        </nav>
-        
-        <div class="p-6 max-w-7xl mx-auto">
-            <!-- Stats Cards -->
-            <div class="grid md:grid-cols-4 gap-5 mb-8">
-                <div class="bg-white p-5 rounded-xl shadow"><p class="text-gray-500">Pending</p><p id="statPending" class="text-3xl font-bold text-[#c9a03d]">0</p></div>
-                <div class="bg-white p-5 rounded-xl shadow"><p class="text-gray-500">Confirmed</p><p id="statConfirmed" class="text-3xl font-bold text-green-600">0</p></div>
-                <div class="bg-white p-5 rounded-xl shadow"><p class="text-gray-500">Total Bookings</p><p id="statTotal" class="text-3xl font-bold">0</p></div>
-                <div class="bg-white p-5 rounded-xl shadow"><p class="text-gray-500">Blocked Dates</p><p id="statBlocked" class="text-3xl font-bold">0</p></div>
-            </div>
-            
-            <!-- Tabs -->
-            <div class="flex gap-2 border-b mb-6">
-                <button id="tabPendingBtn" class="py-2 px-5 font-semibold text-[#2d5a3b] border-b-2 border-[#c9a03d]">📋 Pending</button>
-                <button id="tabConfirmedBtn" class="py-2 px-5 font-semibold text-gray-500">✅ Confirmed</button>
-                <button id="tabBlockBtn" class="py-2 px-5 font-semibold text-gray-500">🚫 Block Dates</button>
-            </div>
-            
-            <!-- Pending Section -->
-            <div id="pendingSection" class="bg-white rounded-xl shadow overflow-x-auto">
-                <table class="min-w-full">
-                    <thead class="bg-gray-100">
-                        <tr><th class="p-3">Date</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Adults</th><th>Actions</th></tr>
-                    </thead>
-                    <tbody id="pendingTableBody"><tr><td colspan="7" class="text-center p-6">Loading...</td></tr></tbody>
-                </table>
-            </div>
-            
-            <!-- Confirmed Section -->
-            <div id="confirmedSection" class="hidden bg-white rounded-xl shadow overflow-x-auto">
-                <table class="min-w-full">
-                    <thead class="bg-gray-100"><tr><th class="p-3">Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead>
-                    <tbody id="confirmedTableBody"></tbody>
-                </table>
-            </div>
-            
-            <!-- Block Dates Section -->
-            <div id="blockSection" class="hidden bg-white rounded-xl p-5 shadow">
-                <div class="flex gap-3 flex-wrap mb-6">
-                    <input type="date" id="newBlockDate" class="border p-2 rounded">
-                    <input type="text" id="blockReason" placeholder="Reason (maintenance/event)" class="border p-2 rounded flex-1">
-                    <button id="addBlockBtn" class="bg-red-600 text-white px-5 py-2 rounded hover:bg-red-700">+ Block Date</button>
-                </div>
-                <table class="w-full">
-                    <thead><tr><th class="p-2 text-left">Date</th><th class="p-2 text-left">Reason</th><th class="p-2">Action</th></tr></thead>
-                    <tbody id="blockedDatesList"></tbody>
-                </table>
-            </div>
+    <!-- PENDING TAB -->
+    <div id="view-pending" class="tab-view hidden">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-heading text-3xl text-gray-800 font-light">Pending Approvals</h2>
+        <button onclick="loadAll()" class="text-xs text-forest hover:underline flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-100">
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Submitted</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Guest</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Email</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Room</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-in</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-out</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Adults</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pendingTable">
+              <tr><td colspan="8" class="table-cell text-center text-gray-400">Loading...</td></tr>
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
 
-    <script>
-        // EmailJS initialization with your public key
-        emailjs.init('yupgCoqLB4unb0OAz');
-        
-        // SUPABASE CONFIGURATION - REPLACE WITH YOUR ACTUAL KEY
-        const SUPABASE_URL = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_9hJ_a1e14l3lFxkhnc8aRQ_lmTFbNq2';  // ← IMPORTANT: REPLACE THIS
-        
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const ADMIN_USER = 'balayadmin';
-        const ADMIN_PASS = 'BalayMaysa2026';
-        
-        let isLogged = false;
-        
-        // Login handler
-        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('adminUsername').value;
-            const password = document.getElementById('adminPassword').value;
-            
-            if (username === ADMIN_USER && password === ADMIN_PASS) {
-                isLogged = true;
-                document.getElementById('loginPanel').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                loadAllData();
-                setInterval(() => { if(isLogged) loadAllData(); }, 30000);
-            } else {
-                document.getElementById('loginError').innerText = 'Invalid username or password';
-                document.getElementById('loginError').classList.remove('hidden');
-                setTimeout(() => document.getElementById('loginError').classList.add('hidden'), 2000);
-            }
-        });
-        
-        // Logout
-        document.getElementById('logoutBtn').onclick = () => {
-            isLogged = false;
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('loginPanel').classList.remove('hidden');
-            document.getElementById('adminUsername').value = '';
-            document.getElementById('adminPassword').value = '';
-        };
-        
-        // Load all data
-        async function loadAllData() {
-            await Promise.all([loadPending(), loadConfirmed(), loadStats(), loadBlockedDates()]);
-        }
-        
-        // Send confirmation email with Google Calendar link
-        async function sendConfirmationEmail(guestEmail, guestName, bookingRef, checkIn, checkOut, roomType) {
-            const calendarLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Balay+Maysa+Booking+${bookingRef}&dates=${checkIn.replace(/-/g, '')}/${checkOut.replace(/-/g, '')}&details=Your+stay+at+Balay+Maysa+Resort.+Room:+${roomType}+Booking+Ref:+${bookingRef}&location=Blk+8+Lot+12+M.Cuenco+St.,+Congress+Village,+Caloocan+North&sf=true&output=xml`;
-            
-            const emailContent = `
-                <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; background: #f5f0e8; padding: 20px; border-radius: 15px;">
-                    <h2 style="color: #2d5a3b;">🌴 Balay Maysa Resort</h2>
-                    <p>Hello <strong>${guestName}</strong>,</p>
-                    <p>Your booking has been <strong style="color: green;">CONFIRMED!</strong> 🎉</p>
-                    <div style="background: white; padding: 15px; border-radius: 10px; margin: 15px 0;">
-                        <p><strong>📋 Booking Details:</strong></p>
-                        <p>Reference: ${bookingRef}<br>
-                        Room: ${roomType}<br>
-                        Check-in: ${checkIn}<br>
-                        Check-out: ${checkOut}</p>
-                    </div>
-                    <p><strong>📅 Add to your calendar:</strong></p>
-                    <p><a href="${calendarLink}" style="background: #c9a03d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 25px;">Click here to add to Google Calendar</a></p>
-                    <p>We look forward to hosting you!</p>
-                    <p>Warm regards,<br>Balay Maysa Team<br>📞 0917 565 7918</p>
-                </div>
-            `;
-            
-            try {
-                await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        service_id: 'service_t13ealt',
-                        user_id: 'yupgCoqLB4unb0OAz',
-                        template_params: {
-                            to_email: guestEmail,
-                            to_name: guestName,
-                            subject: `Balay Maysa Booking CONFIRMED - ${bookingRef}`,
-                            message_html: emailContent
-                        }
-                    })
-                });
-                return true;
-            } catch(e) {
-                console.error('Email error:', e);
-                return false;
-            }
-        }
-        
-        // Load pending bookings
-        async function loadPending() {
-            const { data, error } = await supabase
-                .from('bookings')
-                .select('*')
-                .eq('status', 'pending_approval')
-                .order('created_at', { ascending: true });
-            
-            const tbody = document.getElementById('pendingTableBody');
-            if (error || !data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-gray-400">No pending requests</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = data.map(booking => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 text-sm">${new Date(booking.created_at).toLocaleDateString()}</td>
-                    <td class="p-3 font-medium">${booking.guest_name}</td>
-                    <td class="p-3 capitalize">${booking.room_type}</td>
-                    <td class="p-3">${booking.check_in_date}</td>
-                    <td class="p-3">${booking.check_out_date}</td>
-                    <td class="p-3">${booking.adults}</td>
-                    <td class="p-3">
-                        <button onclick="approveBooking('${booking.id}', '${booking.guest_email}', '${booking.guest_name}', '${booking.check_in_date}', '${booking.check_out_date}', '${booking.room_type}', '${booking.booking_ref}')" class="bg-green-600 text-white px-3 py-1 rounded mr-2 hover:bg-green-700">✓ Confirm</button>
-                        <button onclick="declineBooking('${booking.id}', '${booking.guest_email}', '${booking.guest_name}', '${booking.booking_ref}')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">✗ Decline</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-        
-        // Load confirmed bookings
-        async function loadConfirmed() {
-            const { data, error } = await supabase
-                .from('bookings')
-                .select('*')
-                .eq('status', 'confirmed')
-                .order('check_in_date', { ascending: true });
-            
-            const tbody = document.getElementById('confirmedTableBody');
-            if (error || !data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-400">No confirmed bookings</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = data.map(booking => `
-                <tr class="border-b">
-                    <td class="p-3">${booking.guest_name}</td>
-                    <td class="p-3 capitalize">${booking.room_type}</td>
-                    <td class="p-3">${booking.check_in_date}</td>
-                    <td class="p-3">${booking.check_out_date}</td>
-                    <td class="p-3"><span class="status-confirmed px-2 py-1 rounded text-sm">Confirmed</span></td>
-                </tr>
-            `).join('');
-        }
-        
-        // Load statistics
-        async function loadStats() {
-            const { count: pending } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending_approval');
-            const { count: confirmed } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'confirmed');
-            const { count: total } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
-            const { count: blocked } = await supabase.from('blocked_dates').select('*', { count: 'exact', head: true });
-            
-            document.getElementById('statPending').innerText = pending || 0;
-            document.getElementById('statConfirmed').innerText = confirmed || 0;
-            document.getElementById('statTotal').innerText = total || 0;
-            document.getElementById('statBlocked').innerText = blocked || 0;
-        }
-        
-        // Load blocked dates
-        async function loadBlockedDates() {
-            const { data, error } = await supabase.from('blocked_dates').select('*').order('block_date', { ascending: true });
-            const tbody = document.getElementById('blockedDatesList');
-            if (error || !data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="text-center p-3 text-gray-400">No blocked dates</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = data.map(block => `
-                <tr class="border-b">
-                    <td class="p-2">${block.block_date}</td>
-                    <td class="p-2">${block.reason || '—'}</td>
-                    <td class="p-2"><button onclick="deleteBlockedDate('${block.id}')" class="text-red-500 hover:text-red-700 text-sm">Remove</button></td>
-                </tr>
-            `).join('');
-        }
-        
-        // Approve booking
-        window.approveBooking = async (id, email, name, checkIn, checkOut, room, ref) => {
-            if (!confirm(`Confirm booking ${ref} for ${name}?`)) return;
-            
-            const { error } = await supabase
-                .from('bookings')
-                .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
-                .eq('id', id);
-            
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                await sendConfirmationEmail(email, name, ref, checkIn, checkOut, room);
-                alert(`✅ Booking ${ref} confirmed! Email sent to ${email} with calendar invite.`);
-                loadAllData();
-            }
-        };
-        
-        // Decline booking
-        window.declineBooking = async (id, email, name, ref) => {
-            if (!confirm(`Decline booking ${ref} for ${name}?`)) return;
-            
-            const { error } = await supabase
-                .from('bookings')
-                .update({ status: 'declined' })
-                .eq('id', id);
-            
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                alert(`❌ Booking ${ref} declined`);
-                loadAllData();
-            }
-        };
-        
-        // Delete blocked date
-        window.deleteBlockedDate = async (id) => {
-            if (!confirm('Remove this blocked date?')) return;
-            await supabase.from('blocked_dates').delete().eq('id', id);
-            loadBlockedDates();
-            loadStats();
-        };
-        
-        // Add blocked date
-        document.getElementById('addBlockBtn').addEventListener('click', async () => {
-            const date = document.getElementById('newBlockDate').value;
-            const reason = document.getElementById('blockReason').value;
-            
-            if (!date) {
-                alert('Please select a date');
-                return;
-            }
-            
-            const { error } = await supabase
-                .from('blocked_dates')
-                .insert([{ block_date: date, reason: reason || 'Blocked by admin' }]);
-            
-            if (error) {
-                alert('Error: ' + error.message);
-            } else {
-                document.getElementById('newBlockDate').value = '';
-                document.getElementById('blockReason').value = '';
-                loadBlockedDates();
-                loadStats();
-            }
-        });
-        
-        // Tab switching
-        document.getElementById('tabPendingBtn').onclick = () => {
-            document.getElementById('pendingSection').classList.remove('hidden');
-            document.getElementById('confirmedSection').classList.add('hidden');
-            document.getElementById('blockSection').classList.add('hidden');
-        };
-        
-        document.getElementById('tabConfirmedBtn').onclick = () => {
-            document.getElementById('pendingSection').classList.add('hidden');
-            document.getElementById('confirmedSection').classList.remove('hidden');
-            document.getElementById('blockSection').classList.add('hidden');
-        };
-        
-        document.getElementById('tabBlockBtn').onclick = () => {
-            document.getElementById('pendingSection').classList.add('hidden');
-            document.getElementById('confirmedSection').classList.add('hidden');
-            document.getElementById('blockSection').classList.remove('hidden');
-        };
-    </script>
+    <!-- CONFIRMED TAB -->
+    <div id="view-confirmed" class="tab-view hidden">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-6">Confirmed Bookings</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-100">
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Reference</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Guest</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Room</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-in</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-out</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Status</th>
+              </tr>
+            </thead>
+            <tbody id="confirmedTable">
+              <tr><td colspan="6" class="table-cell text-center text-gray-400">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALL BOOKINGS TAB -->
+    <div id="view-all" class="tab-view hidden">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-6">All Bookings</h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-100">
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Reference</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Guest</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Room</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-in</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-out</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Status</th>
+                <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Submitted</th>
+              </tr>
+            </thead>
+            <tbody id="allTable">
+              <tr><td colspan="7" class="table-cell text-center text-gray-400">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="hidden"><i id="toastIcon" class="fas fa-check-circle"></i> <span id="toastMsg"></span></div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // ─── CONFIG ───────────────────────────────────────────────
+  const SUPABASE_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
+  const SUPABASE_ANON = 'sb_publishable_9hJ_a1e1413lFxkhnc8aRQ_lmTFb';
+  const EMAILJS_PK    = 'yupgCoqLB4unb0OAz';
+  const EMAILJS_SID   = 'service_t13ealt';
+  const ADMIN_USER    = 'balayadmin';
+  const ADMIN_PASS    = 'BalayMaysa2026';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  let allBookings = [];
+
+  // ─── AUTH ─────────────────────────────────────────────────
+  function doLogin() {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value;
+    if (u === ADMIN_USER && p === ADMIN_PASS) {
+      sessionStorage.setItem('bm_admin', '1');
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('adminPanel').classList.remove('hidden');
+      showTab('dashboard');
+      loadAll();
+    } else {
+      document.getElementById('loginErr').classList.remove('hidden');
+    }
+  }
+  document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+  function doLogout() {
+    sessionStorage.removeItem('bm_admin');
+    location.reload();
+  }
+
+  // Auto-login check
+  if (sessionStorage.getItem('bm_admin') === '1') {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+    showTab('dashboard');
+    loadAll();
+  }
+
+  // ─── TABS ─────────────────────────────────────────────────
+  function showTab(name) {
+    document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+    document.getElementById('view-' + name).classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('bg-white/10', 'text-white'));
+    const btn = document.getElementById('tab-' + name);
+    if (btn) { btn.classList.add('bg-white/10', 'text-white'); }
+  }
+
+  // ─── LOAD DATA ────────────────────────────────────────────
+  async function loadAll() {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      allBookings = data || [];
+      renderAll();
+    } catch (err) {
+      console.error('Load error:', err);
+      showToast('Failed to load bookings.', 'error');
+    }
+  }
+
+  function renderAll() {
+    const pending   = allBookings.filter(b => b.status === 'pending_approval');
+    const confirmed = allBookings.filter(b => b.status === 'confirmed');
+
+    // Stats
+    document.getElementById('statPending').textContent   = pending.length;
+    document.getElementById('statConfirmed').textContent = confirmed.length;
+    document.getElementById('statTotal').textContent     = allBookings.length;
+
+    // Pending badge
+    const badge = document.getElementById('pendingBadge');
+    if (pending.length > 0) { badge.textContent = pending.length; badge.classList.remove('hidden'); }
+    else { badge.classList.add('hidden'); }
+
+    // Recent
+    const recentList = document.getElementById('recentList');
+    if (allBookings.length === 0) {
+      recentList.innerHTML = '<p class="text-center text-gray-300 py-6">No bookings yet.</p>';
+    } else {
+      recentList.innerHTML = allBookings.slice(0, 5).map(b => `
+        <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+          <div>
+            <span class="font-medium text-gray-800">${b.guest_name}</span>
+            <span class="text-gray-400 mx-2">·</span>
+            <span class="text-gray-500">${b.room_type}</span>
+            <span class="text-gray-300 mx-2">·</span>
+            <span class="text-gray-400 text-xs">${b.booking_ref}</span>
+          </div>
+          <span class="badge ${b.status === 'confirmed' ? 'badge-confirmed' : b.status === 'declined' ? 'badge-declined' : 'badge-pending'}">
+            ${b.status === 'pending_approval' ? 'Pending' : b.status.charAt(0).toUpperCase() + b.status.slice(1)}
+          </span>
+        </div>`).join('');
+    }
+
+    // Pending table
+    const pTbl = document.getElementById('pendingTable');
+    if (pending.length === 0) {
+      pTbl.innerHTML = '<tr><td colspan="8" class="table-cell text-center text-gray-300 py-8">No pending bookings.</td></tr>';
+    } else {
+      pTbl.innerHTML = pending.map(b => `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="table-cell text-gray-500 text-xs">${fmtDateTime(b.created_at)}</td>
+          <td class="table-cell font-medium text-gray-800">${b.guest_name}</td>
+          <td class="table-cell text-gray-500"><a href="mailto:${b.guest_email}" class="hover:text-forest">${b.guest_email}</a></td>
+          <td class="table-cell text-gray-700">${b.room_type}</td>
+          <td class="table-cell text-gray-700">${fmtDate(b.check_in_date)}</td>
+          <td class="table-cell text-gray-700">${fmtDate(b.check_out_date)}</td>
+          <td class="table-cell text-gray-700">${b.adults}</td>
+          <td class="table-cell">
+            <div class="flex gap-2">
+              <button onclick="confirmBooking('${b.id}')"
+                class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                <i class="fas fa-check"></i> Confirm
+              </button>
+              <button onclick="declineBooking('${b.id}')"
+                class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                <i class="fas fa-times"></i> Decline
+              </button>
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+
+    // Confirmed table
+    const cTbl = document.getElementById('confirmedTable');
+    if (confirmed.length === 0) {
+      cTbl.innerHTML = '<tr><td colspan="6" class="table-cell text-center text-gray-300 py-8">No confirmed bookings.</td></tr>';
+    } else {
+      cTbl.innerHTML = confirmed.map(b => `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="table-cell text-gray-500 text-xs font-mono">${b.booking_ref}</td>
+          <td class="table-cell font-medium text-gray-800">${b.guest_name}</td>
+          <td class="table-cell text-gray-700">${b.room_type}</td>
+          <td class="table-cell text-gray-700">${fmtDate(b.check_in_date)}</td>
+          <td class="table-cell text-gray-700">${fmtDate(b.check_out_date)}</td>
+          <td class="table-cell"><span class="badge badge-confirmed">Confirmed</span></td>
+        </tr>`).join('');
+    }
+
+    // All bookings table
+    const aTbl = document.getElementById('allTable');
+    if (allBookings.length === 0) {
+      aTbl.innerHTML = '<tr><td colspan="7" class="table-cell text-center text-gray-300 py-8">No bookings yet.</td></tr>';
+    } else {
+      aTbl.innerHTML = allBookings.map(b => `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="table-cell text-xs font-mono text-gray-500">${b.booking_ref}</td>
+          <td class="table-cell font-medium text-gray-800">${b.guest_name}</td>
+          <td class="table-cell text-gray-700">${b.room_type}</td>
+          <td class="table-cell text-gray-700">${fmtDate(b.check_in_date)}</td>
+          <td class="table-cell text-gray-700">${fmtDate(b.check_out_date)}</td>
+          <td class="table-cell">
+            <span class="badge ${b.status === 'confirmed' ? 'badge-confirmed' : b.status === 'declined' ? 'badge-declined' : 'badge-pending'}">
+              ${b.status === 'pending_approval' ? 'Pending' : b.status.charAt(0).toUpperCase() + b.status.slice(1)}
+            </span>
+          </td>
+          <td class="table-cell text-gray-400 text-xs">${fmtDateTime(b.created_at)}</td>
+        </tr>`).join('');
+    }
+  }
+
+  // ─── CONFIRM ──────────────────────────────────────────────
+  async function confirmBooking(id) {
+    const booking = allBookings.find(b => b.id === id);
+    if (!booking) return;
+    if (!confirm(`Confirm booking for ${booking.guest_name} (${booking.room_type}, ${fmtDate(booking.check_in_date)})?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+
+      // Google Calendar link
+      const calStart = booking.check_in_date.replace(/-/g, '');
+      const calEnd   = booking.check_out_date.replace(/-/g, '');
+      const calUrl   = `https://calendar.google.com/calendar/render?action=TEMPLATE`
+        + `&text=${encodeURIComponent('Balay Maysa Booking ' + booking.booking_ref)}`
+        + `&dates=${calStart}/${calEnd}`
+        + `&details=${encodeURIComponent('Your stay at Balay Maysa Resort. Room: ' + booking.room_type)}`
+        + `&location=${encodeURIComponent('Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North')}`;
+
+      // Send confirmation email
+      const html = `
+<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
+  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
+    <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1>
+    <p style="color:rgba(255,255,255,0.7);font-size:13px;margin:8px 0 0;">Booking Confirmed 🎉</p>
+  </div>
+  <div style="padding:40px;">
+    <p style="color:#1a1a1a;font-size:16px;">Hello <strong>${booking.guest_name}</strong>,</p>
+    <p style="color:#666;line-height:1.7;">Great news! Your booking has been <strong style="color:#2d5a3b;">CONFIRMED</strong>. We look forward to hosting you at Balay Maysa!</p>
+    <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
+      <h3 style="margin:0 0 16px;color:#2d5a3b;font-family:Georgia,serif;font-weight:400;font-size:18px;">Booking Details</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr><td style="padding:8px 0;color:#666;width:140px;">Reference</td><td style="color:#1a1a1a;font-weight:600;">${booking.booking_ref}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Room</td><td style="color:#1a1a1a;">${booking.room_type}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Check-in</td><td style="color:#1a1a1a;">${fmtDate(booking.check_in_date)}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Check-out</td><td style="color:#1a1a1a;">${fmtDate(booking.check_out_date)}</td></tr>
+      </table>
+    </div>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${calUrl}" style="display:inline-block;background:#2d5a3b;color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;">
+        📅 Add to Google Calendar
+      </a>
+    </div>
+    <div style="background:#fef9ee;border-radius:12px;padding:18px 24px;margin-top:16px;">
+      <p style="margin:0;color:#92400e;font-size:13px;"><strong>📍 Address:</strong> Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North</p>
+      <p style="margin:8px 0 0;color:#92400e;font-size:13px;"><strong>📞 Contact:</strong> <a href="tel:09175657918" style="color:#92400e;">0917 565 7918</a></p>
+    </div>
+  </div>
+  <div style="background:#2d5a3b;padding:20px;text-align:center;">
+    <p style="color:rgba(255,255,255,0.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p>
+  </div>
+</div>`;
+
+      await sendEmail(booking.guest_email, `Balay Maysa Booking CONFIRMED – ${booking.booking_ref}`, html);
+
+      showToast(`Booking confirmed for ${booking.guest_name}!`, 'success');
+      await loadAll();
+    } catch (err) {
+      console.error('Confirm error:', err);
+      showToast('Failed to confirm booking.', 'error');
+    }
+  }
+
+  // ─── DECLINE ──────────────────────────────────────────────
+  async function declineBooking(id) {
+    const booking = allBookings.find(b => b.id === id);
+    if (!booking) return;
+    if (!confirm(`Decline booking for ${booking.guest_name}? They will be notified by email.`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'declined' })
+        .eq('id', id);
+      if (error) throw error;
+
+      const html = `
+<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
+  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
+    <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1>
+  </div>
+  <div style="padding:40px;">
+    <p style="color:#1a1a1a;font-size:16px;">Hello <strong>${booking.guest_name}</strong>,</p>
+    <p style="color:#666;line-height:1.7;">We regret to inform you that your booking request (<strong>${booking.booking_ref}</strong>) could not be accommodated for the requested dates.</p>
+    <p style="color:#666;line-height:1.7;">We apologize for the inconvenience. Please feel free to try different dates or contact us directly for assistance.</p>
+    <p style="color:#666;font-size:13px;">📞 <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a> | ✉️ <a href="mailto:balaymaysa@gmail.com" style="color:#2d5a3b;">balaymaysa@gmail.com</a></p>
+  </div>
+  <div style="background:#2d5a3b;padding:20px;text-align:center;">
+    <p style="color:rgba(255,255,255,0.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p>
+  </div>
+</div>`;
+
+      await sendEmail(booking.guest_email, `Balay Maysa Booking Update – ${booking.booking_ref}`, html);
+
+      showToast(`Booking for ${booking.guest_name} declined.`, 'success');
+      await loadAll();
+    } catch (err) {
+      console.error('Decline error:', err);
+      showToast('Failed to decline booking.', 'error');
+    }
+  }
+
+  // ─── EMAILJS ──────────────────────────────────────────────
+  async function sendEmail(to, subject, html) {
+    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id: EMAILJS_SID,
+        user_id: EMAILJS_PK,
+        template_params: { to_email: to, subject, message_html: html },
+      }),
+    });
+    if (!res.ok) { const t = await res.text(); console.warn('EmailJS:', res.status, t); }
+    return res;
+  }
+
+  // ─── HELPERS ──────────────────────────────────────────────
+  function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+  function fmtDateTime(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ─── TOAST ────────────────────────────────────────────────
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.className = type === 'success' ? 'success' : 'error';
+    setTimeout(() => t.classList.add('hidden'), 5000);
+  }
+</script>
+
 </body>
 </html>
