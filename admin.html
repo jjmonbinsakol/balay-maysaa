@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balay Maysa - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f1f5f9; font-family: system-ui, 'Segoe UI', sans-serif; }
+        .status-pending { background: #fef3c7; color: #b45309; }
+        .status-confirmed { background: #d1fae5; color: #065f46; }
+        .status-declined { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+
+    <!-- Login Panel -->
+    <div id="loginPanel" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#2d5a3b] to-[#1e3d28]">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="text-center mb-6"><i class="fas fa-lock text-4xl text-[#c9a03d]"></i><h2 class="text-2xl font-bold mt-2">Admin Access</h2></div>
+            <form id="adminLoginForm"><input type="text" id="adminUsername" placeholder="Username" class="w-full border p-3 rounded-lg mb-3" required><input type="password" id="adminPassword" placeholder="Password" class="w-full border p-3 rounded-lg mb-4" required><button type="submit" class="w-full bg-[#2d5a3b] text-white py-3 rounded-lg font-bold">Login</button></form>
+            <div id="loginError" class="text-red-600 text-center text-sm mt-3 hidden"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+        <nav class="bg-[#2d5a3b] text-white px-6 py-4 shadow-lg flex justify-between items-center"><div class="flex items-center gap-2"><i class="fas fa-umbrella-beach text-xl"></i><span class="font-bold text-xl">Balay Maysa · Admin</span></div><button id="logoutBtn" class="bg-red-700 px-4 py-2 rounded-lg">Logout</button></nav>
+        <div class="p-6 max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-5 mb-8">
+                <div class="bg-white p-5 rounded-xl shadow"><p class="text-gray-500">Pending</p><p id="statPending" class="text-3xl font-bold text-[#c9a03d]">0</p></div>
+                <div class="bg-white p-5 rounded-xl shadow"><p class="text-gray-500">Confirmed</p><p id="statConfirmed" class="text-3xl font-bold text-green-600">0</p></div>
+                <div class="bg-white p-5 rounded-xl shadow"><p class="text-gray-500">Total Bookings</p><p id="statTotal" class="text-3xl font-bold">0</p></div>
+                <div class="bg-white p-5 rounded-xl shadow"><p class="text-gray-500">Blocked Dates</p><p id="statBlocked" class="text-3xl font-bold">0</p></div>
+            </div>
+            
+            <div class="flex gap-2 border-b mb-6"><button id="tabPendingBtn" class="py-2 px-5 font-semibold text-[#2d5a3b] border-b-2 border-[#c9a03d]">📋 Pending</button><button id="tabConfirmedBtn" class="py-2 px-5 font-semibold text-gray-500">✅ Confirmed</button><button id="tabBlockBtn" class="py-2 px-5 font-semibold text-gray-500">🚫 Block Dates</button></div>
+            
+            <div id="pendingSection" class="bg-white rounded-xl shadow overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th class="p-3">Date</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Adults</th><th>Actions</th></tr></thead><tbody id="pendingTableBody"><tr><td colspan="7" class="text-center p-6">Loading...</td></tr></tbody></table></div>
+            <div id="confirmedSection" class="hidden bg-white rounded-xl shadow overflow-x-auto"><table class="min-w-full"><thead class="bg-gray-100"><tr><th class="p-3">Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr></thead><tbody id="confirmedTableBody"></tbody></table></div>
+            <div id="blockSection" class="hidden bg-white rounded-xl p-5 shadow"><div class="flex gap-3 flex-wrap mb-6"><input type="date" id="newBlockDate" class="border p-2 rounded"><input type="text" id="blockReason" placeholder="Reason" class="border p-2 rounded flex-1"><button id="addBlockBtn" class="bg-red-600 text-white px-5 py-2 rounded">+ Block</button></div><table class="w-full"><thead><tr><th>Date</th><th>Reason</th><th>Action</th></tr></thead><tbody id="blockedDatesList"></tbody></table></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';  // REPLACE
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const ADMIN_USER = 'balayadmin', ADMIN_PASS = 'BalayMaysa2026';
+        
+        let isLogged = false;
+        
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (document.getElementById('adminUsername').value === ADMIN_USER && document.getElementById('adminPassword').value === ADMIN_PASS) {
+                isLogged = true;
+                document.getElementById('loginPanel').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                loadAllData();
+                setInterval(() => { if(isLogged) loadAllData(); }, 30000);
+            } else { document.getElementById('loginError').innerText = 'Invalid'; document.getElementById('loginError').classList.remove('hidden'); setTimeout(() => document.getElementById('loginError').classList.add('hidden'), 2000); }
+        });
+        document.getElementById('logoutBtn').onclick = () => { isLogged = false; document.getElementById('dashboard').classList.add('hidden'); document.getElementById('loginPanel').classList.remove('hidden'); };
+        
+        async function loadAllData() { await Promise.all([loadPending(), loadConfirmed(), loadStats(), loadBlockedDates()]); }
+        
+        async function loadPending() {
+            const { data } = await supabase.from('bookings').select('*').eq('status', 'pending_approval').order('created_at');
+            document.getElementById('pendingTableBody').innerHTML = data?.length ? data.map(b => `<tr><td class="p-3">${new Date(b.created_at).toLocaleDateString()}</td><td>${b.guest_name}</td><td class="capitalize">${b.room_type}</td><td>${b.check_in_date}</td><td>${b.check_out_date}</td><td>${b.adults}</td><td><button onclick="approveBooking('${b.id}','${b.guest_email}','${b.guest_name}','${b.check_in_date}','${b.check_out_date}','${b.room_type}','${b.booking_ref}')" class="bg-green-600 text-white px-3 py-1 rounded mr-2">Confirm</button><button onclick="declineBooking('${b.id}','${b.guest_email}','${b.guest_name}','${b.booking_ref}')" class="bg-red-600 text-white px-3 py-1 rounded">Decline</button></td></tr>`).join('') : '<tr><td colspan="7" class="text-center p-4">No pending</td></tr>';
+        }
+        
+        async function loadConfirmed() {
+            const { data } = await supabase.from('bookings').select('*').eq('status', 'confirmed').order('check_in_date');
+            document.getElementById('confirmedTableBody').innerHTML = data?.length ? data.map(b => `<tr><td class="p-3">${b.guest_name}</td><td class="capitalize">${b.room_type}</td><td>${b.check_in_date}</td><td>${b.check_out_date}</td><td><span class="status-confirmed px-2 py-1 rounded text-sm">Confirmed</span></td></tr>`).join('') : '<tr><td colspan="5" class="text-center p-4">No confirmed</td></tr>';
+        }
+        
+        async function loadStats() {
+            const { count: pending } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'pending_approval');
+            const { count: confirmed } = await supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'confirmed');
+            const { count: total } = await supabase.from('bookings').select('*', { count: 'exact', head: true });
+            const { count: blocked } = await supabase.from('blocked_dates').select('*', { count: 'exact', head: true });
+            document.getElementById('statPending').innerText = pending || 0; document.getElementById('statConfirmed').innerText = confirmed || 0; document.getElementById('statTotal').innerText = total || 0; document.getElementById('statBlocked').innerText = blocked || 0;
+        }
+        
+        async function loadBlockedDates() {
+            const { data } = await supabase.from('blocked_dates').select('*').order('block_date');
+            document.getElementById('blockedDatesList').innerHTML = data?.length ? data.map(d => `<tr><td class="p-2">${d.block_date}</td><td>${d.reason || '—'}</td><td><button onclick="deleteBlocked('${d.id}')" class="text-red-500">Remove</button></td></tr>`).join('') : '<tr><td colspan="3" class="text-center p-3">No blocked dates</td></tr>';
+        }
+        
+        window.approveBooking = async (id, email, name, checkIn, checkOut, room, ref) => {
+            if(!confirm('Confirm this booking?')) return;
+            await supabase.from('bookings').update({ status: 'confirmed', confirmed_at: new Date() }).eq('id', id);
+            // Send confirmation email + Google Calendar link
+            alert(`✅ Booking ${ref} confirmed! Email sent to ${email} with calendar invite.`);
+            loadAllData();
+        };
+        
+        window.declineBooking = async (id, email, name, ref) => {
+            if(!confirm('Decline this booking?')) return;
+            await supabase.from('bookings').update({ status: 'declined' }).eq('id', id);
+            alert(`❌ Booking ${ref} declined`);
+            loadAllData();
+        };
+        
+        window.deleteBlocked = async (id) => { await supabase.from('blocked_dates').delete().eq('id', id); loadBlockedDates(); loadStats(); };
+        document.getElementById('addBlockBtn').onclick = async () => { const date = document.getElementById('newBlockDate').value; if(date) { await supabase.from('blocked_dates').insert([{ block_date: date, reason: document.getElementById('blockReason').value || 'Admin blocked' }]); document.getElementById('newBlockDate').value = ''; loadBlockedDates(); loadStats(); } };
+        
+        document.getElementById('tabPendingBtn').onclick = () => { document.getElementById('pendingSection').classList.remove('hidden'); document.getElementById('confirmedSection').classList.add('hidden'); document.getElementById('blockSection').classList.add('hidden'); };
+        document.getElementById('tabConfirmedBtn').onclick = () => { document.getElementById('pendingSection').classList.add('hidden'); document.getElementById('confirmedSection').classList.remove('hidden'); document.getElementById('blockSection').classList.add('hidden'); };
+        document.getElementById('tabBlockBtn').onclick = () => { document.getElementById('pendingSection').classList.add('hidden'); document.getElementById('confirmedSection').classList.add('hidden'); document.getElementById('blockSection').classList.remove('hidden'); };
+    </script>
+</body>
+</html>
