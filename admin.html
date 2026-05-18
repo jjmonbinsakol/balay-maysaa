@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -29,15 +30,18 @@
     body { font-family: 'Inter', sans-serif; background: #f3f4f1; }
     .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* TOAST - FIXED */
     #toast {
       position: fixed; bottom: 24px; right: 24px; z-index: 9999;
       padding: 14px 20px; border-radius: 10px; font-size: 13px; font-weight: 500;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18); display: flex; align-items: center; gap-8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18); display: flex; align-items: center;
       gap: 8px; max-width: 340px; transition: opacity 0.3s, transform 0.3s;
     }
-    #toast.hidden { opacity: 0; transform: translateY(12px); pointer-events: none; }
+    #toast.hidden { display: none !important; }
     #toast.success { background: #2d5a3b; color: white; }
     #toast.error { background: #c0392b; color: white; }
+    
     .table-cell { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 13px; }
     .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
     .badge-pending { background: #fef3c7; color: #92400e; }
@@ -223,21 +227,61 @@
 </div>
 
 <!-- TOAST -->
-<div id="toast" class="hidden"><i id="toastIcon" class="fas fa-check-circle"></i> <span id="toastMsg"></span></div>
+<div id="toast" class="hidden">
+  <i id="toastIcon" class="fas fa-check-circle"></i>
+  <span id="toastMsg"></span>
+</div>
 
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+  // Initialize EmailJS
+  emailjs.init('yupgCoqLB4unb0OAz');
+
   // ─── CONFIG ───────────────────────────────────────────────
   const SUPABASE_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_9hJ_a1e1413lFxkhnc8aRQ_lmTFb';
-  const EMAILJS_PK    = 'yupgCoqLB4unb0OAz';
   const EMAILJS_SID   = 'service_t13ealt';
   const ADMIN_USER    = 'balayadmin';
   const ADMIN_PASS    = 'BalayMaysa2026';
 
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   let allBookings = [];
+
+  // ─── TOAST - FIXED ────────────────────────────────────────
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    const icon = document.getElementById('toastIcon');
+    const msgSpan = document.getElementById('toastMsg');
+    
+    toast.classList.remove('success', 'error', 'hidden');
+    toast.classList.add(type);
+    msgSpan.textContent = msg;
+    icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 5000);
+  }
+
+  // ─── EMAILJS - FIXED ──────────────────────────────────────
+  async function sendEmail(to, subject, html) {
+    try {
+      const templateParams = {
+        to_email: to,
+        subject: subject,
+        message_html: html,
+        to_name: to.split('@')[0]
+      };
+      
+      const response = await emailjs.send(EMAILJS_SID, 'template_balaymaysa', templateParams);
+      console.log('Email sent:', response);
+      return true;
+    } catch (e) {
+      console.error('EmailJS error:', e);
+      return false;
+    }
+  }
 
   // ─── AUTH ─────────────────────────────────────────────────
   function doLogin() {
@@ -249,10 +293,14 @@
       document.getElementById('adminPanel').classList.remove('hidden');
       showTab('dashboard');
       loadAll();
+      showToast('Login successful!', 'success');
     } else {
-      document.getElementById('loginErr').classList.remove('hidden');
+      const errDiv = document.getElementById('loginErr');
+      errDiv.classList.remove('hidden');
+      setTimeout(() => errDiv.classList.add('hidden'), 3000);
     }
   }
+  
   document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
   function doLogout() {
@@ -315,7 +363,7 @@
       recentList.innerHTML = allBookings.slice(0, 5).map(b => `
         <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
           <div>
-            <span class="font-medium text-gray-800">${b.guest_name}</span>
+            <span class="font-medium text-gray-800">${escapeHtml(b.guest_name)}</span>
             <span class="text-gray-400 mx-2">·</span>
             <span class="text-gray-500">${b.room_type}</span>
             <span class="text-gray-300 mx-2">·</span>
@@ -335,7 +383,7 @@
       pTbl.innerHTML = pending.map(b => `
         <tr class="hover:bg-gray-50 transition-colors">
           <td class="table-cell text-gray-500 text-xs">${fmtDateTime(b.created_at)}</td>
-          <td class="table-cell font-medium text-gray-800">${b.guest_name}</td>
+          <td class="table-cell font-medium text-gray-800">${escapeHtml(b.guest_name)}</td>
           <td class="table-cell text-gray-500"><a href="mailto:${b.guest_email}" class="hover:text-forest">${b.guest_email}</a></td>
           <td class="table-cell text-gray-700">${b.room_type}</td>
           <td class="table-cell text-gray-700">${fmtDate(b.check_in_date)}</td>
@@ -364,7 +412,7 @@
       cTbl.innerHTML = confirmed.map(b => `
         <tr class="hover:bg-gray-50 transition-colors">
           <td class="table-cell text-gray-500 text-xs font-mono">${b.booking_ref}</td>
-          <td class="table-cell font-medium text-gray-800">${b.guest_name}</td>
+          <td class="table-cell font-medium text-gray-800">${escapeHtml(b.guest_name)}</td>
           <td class="table-cell text-gray-700">${b.room_type}</td>
           <td class="table-cell text-gray-700">${fmtDate(b.check_in_date)}</td>
           <td class="table-cell text-gray-700">${fmtDate(b.check_out_date)}</td>
@@ -380,7 +428,7 @@
       aTbl.innerHTML = allBookings.map(b => `
         <tr class="hover:bg-gray-50 transition-colors">
           <td class="table-cell text-xs font-mono text-gray-500">${b.booking_ref}</td>
-          <td class="table-cell font-medium text-gray-800">${b.guest_name}</td>
+          <td class="table-cell font-medium text-gray-800">${escapeHtml(b.guest_name)}</td>
           <td class="table-cell text-gray-700">${b.room_type}</td>
           <td class="table-cell text-gray-700">${fmtDate(b.check_in_date)}</td>
           <td class="table-cell text-gray-700">${fmtDate(b.check_out_date)}</td>
@@ -394,7 +442,7 @@
     }
   }
 
-  // ─── CONFIRM ──────────────────────────────────────────────
+  // ─── CONFIRM BOOKING - FIXED ──────────────────────────────
   async function confirmBooking(id) {
     const booking = allBookings.find(b => b.id === id);
     if (!booking) return;
@@ -424,7 +472,7 @@
     <p style="color:rgba(255,255,255,0.7);font-size:13px;margin:8px 0 0;">Booking Confirmed 🎉</p>
   </div>
   <div style="padding:40px;">
-    <p style="color:#1a1a1a;font-size:16px;">Hello <strong>${booking.guest_name}</strong>,</p>
+    <p style="color:#1a1a1a;font-size:16px;">Hello <strong>${escapeHtml(booking.guest_name)}</strong>,</p>
     <p style="color:#666;line-height:1.7;">Great news! Your booking has been <strong style="color:#2d5a3b;">CONFIRMED</strong>. We look forward to hosting you at Balay Maysa!</p>
     <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
       <h3 style="margin:0 0 16px;color:#2d5a3b;font-family:Georgia,serif;font-weight:400;font-size:18px;">Booking Details</h3>
@@ -451,8 +499,7 @@
 </div>`;
 
       await sendEmail(booking.guest_email, `Balay Maysa Booking CONFIRMED – ${booking.booking_ref}`, html);
-
-      showToast(`Booking confirmed for ${booking.guest_name}!`, 'success');
+      showToast(`✅ Booking confirmed for ${booking.guest_name}!`, 'success');
       await loadAll();
     } catch (err) {
       console.error('Confirm error:', err);
@@ -460,7 +507,7 @@
     }
   }
 
-  // ─── DECLINE ──────────────────────────────────────────────
+  // ─── DECLINE BOOKING ──────────────────────────────────────
   async function declineBooking(id) {
     const booking = allBookings.find(b => b.id === id);
     if (!booking) return;
@@ -479,7 +526,7 @@
     <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1>
   </div>
   <div style="padding:40px;">
-    <p style="color:#1a1a1a;font-size:16px;">Hello <strong>${booking.guest_name}</strong>,</p>
+    <p style="color:#1a1a1a;font-size:16px;">Hello <strong>${escapeHtml(booking.guest_name)}</strong>,</p>
     <p style="color:#666;line-height:1.7;">We regret to inform you that your booking request (<strong>${booking.booking_ref}</strong>) could not be accommodated for the requested dates.</p>
     <p style="color:#666;line-height:1.7;">We apologize for the inconvenience. Please feel free to try different dates or contact us directly for assistance.</p>
     <p style="color:#666;font-size:13px;">📞 <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a> | ✉️ <a href="mailto:balaymaysa@gmail.com" style="color:#2d5a3b;">balaymaysa@gmail.com</a></p>
@@ -490,7 +537,6 @@
 </div>`;
 
       await sendEmail(booking.guest_email, `Balay Maysa Booking Update – ${booking.booking_ref}`, html);
-
       showToast(`Booking for ${booking.guest_name} declined.`, 'success');
       await loadAll();
     } catch (err) {
@@ -499,38 +545,32 @@
     }
   }
 
-  // ─── EMAILJS ──────────────────────────────────────────────
-  async function sendEmail(to, subject, html) {
-    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        service_id: EMAILJS_SID,
-        user_id: EMAILJS_PK,
-        template_params: { to_email: to, subject, message_html: html },
-      }),
-    });
-    if (!res.ok) { const t = await res.text(); console.warn('EmailJS:', res.status, t); }
-    return res;
-  }
-
   // ─── HELPERS ──────────────────────────────────────────────
   function fmtDate(d) {
     if (!d) return '—';
     return new Date(d + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
   }
+  
   function fmtDateTime(d) {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
-
-  // ─── TOAST ────────────────────────────────────────────────
-  function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = msg;
-    t.className = type === 'success' ? 'success' : 'error';
-    setTimeout(() => t.classList.add('hidden'), 5000);
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
   }
+
+  // Auto-refresh every 30 seconds
+  setInterval(() => {
+    if (!document.getElementById('loginScreen').classList.contains('hidden')) return;
+    loadAll();
+  }, 30000);
 </script>
 
 </body>
