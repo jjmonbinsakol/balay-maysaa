@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -63,19 +64,20 @@
     .form-input:focus { border-color: #2d5a3b; box-shadow: 0 0 0 3px rgba(45,90,59,0.1); }
     .form-label { display: block; font-size: 13px; font-weight: 500; color: #444; margin-bottom: 6px; }
 
-    /* TOAST */
+    /* TOAST - FIXED */
     #toast {
       position: fixed; bottom: 30px; right: 30px; z-index: 9999;
       padding: 16px 24px; border-radius: 12px; font-size: 14px; font-weight: 500;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18); transition: opacity 0.3s, transform 0.3s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
       display: flex; align-items: center; gap: 10px; max-width: 380px;
+      opacity: 1; transform: translateY(0);
     }
-    #toast.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
+    #toast.hidden { display: none !important; }
     #toast.success { background: #2d5a3b; color: white; }
     #toast.error { background: #c0392b; color: white; }
 
     /* LOADER */
-    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* WAVE DIVIDER */
@@ -408,6 +410,9 @@
   const EMAILJS_SID    = 'service_t13ealt';
   const ADMIN_EMAIL    = 'balaymaysa@gmail.com';
 
+  // Initialize EmailJS
+  emailjs.init(EMAILJS_PK);
+
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
   // ─── NAVBAR SCROLL ────────────────────────────────────────
@@ -449,7 +454,7 @@
         .from('bookings')
         .select('id')
         .eq('room_type', room)
-        .in('status', ['pending_approval', 'confirmed'])
+        .in('status', ['confirmed'])
         .lt('check_in_date', co)
         .gt('check_out_date', ci);
 
@@ -489,39 +494,49 @@
     return new Date(d + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  // ─── TOAST ────────────────────────────────────────────────
+  // ─── TOAST - FIXED ────────────────────────────────────────
   function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
+    const toast = document.getElementById('toast');
     const icon = document.getElementById('toastIcon');
-    document.getElementById('toastMsg').textContent = msg;
-    t.className = type === 'success' ? 'success' : 'error';
+    const msgSpan = document.getElementById('toastMsg');
+    
+    // Reset classes
+    toast.classList.remove('success', 'error', 'hidden');
+    
+    // Add type class
+    toast.classList.add(type);
+    msgSpan.textContent = msg;
+    
+    // Set icon
     icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
-    setTimeout(() => t.classList.add('hidden'), 5000);
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 5000);
   }
 
-  // ─── EMAILJS ──────────────────────────────────────────────
+  // ─── EMAILJS - FIXED ──────────────────────────────────────
   async function sendEmail(to, subject, html) {
-    const params = {
-      service_id: EMAILJS_SID,
-      user_id: EMAILJS_PK,
-      accessToken: EMAILJS_PK,
-    };
-    const body = {
-      service_id: EMAILJS_SID,
-      user_id: EMAILJS_PK,
-      template_params: { to_email: to, subject, message_html: html },
-    };
-    // EmailJS API send
-    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`EmailJS failed: ${res.status}`);
-    return res;
+    try {
+      const templateParams = {
+        to_email: to,
+        subject: subject,
+        message_html: html,
+        to_name: to.split('@')[0]
+      };
+      
+      const response = await emailjs.send(EMAILJS_SID, 'template_balaymaysa', templateParams);
+      console.log('Email sent:', response);
+      return true;
+    } catch (e) {
+      console.error('EmailJS error:', e);
+      // Don't throw - email failure shouldn't break booking
+      return false;
+    }
   }
 
-  // ─── FORM SUBMIT ──────────────────────────────────────────
+  // ─── FORM SUBMIT - FIXED ──────────────────────────────────
   document.getElementById('bookingForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -559,15 +574,16 @@
         room_type: room,
         check_in_date: ci,
         check_out_date: co,
-        adults,
+        adults: adults,
         children: kids,
         status: 'pending_approval',
       });
+      
       if (dbErr) throw dbErr;
 
-      console.log('Booking saved:', ref);
+      console.log('✅ Booking saved:', ref);
 
-      // 2. Guest email
+      // 2. Guest email (try, but don't fail if it doesn't work)
       const guestHtml = `
 <div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
   <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
@@ -587,7 +603,7 @@
         <tr><td style="padding:8px 0;color:#666;">Guests</td><td style="color:#1a1a1a;">${adults} adult${adults>1?'s':''}, ${kids} child${kids!==1?'ren':''}</td></tr>
       </table>
     </div>
-    <p style="color:#666;font-size:13px;line-height:1.7;">If you have any questions, contact us at <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a> or <a href="mailto:balaymaysa@gmail.com" style="color:#2d5a3b;">balaymaysa@gmail.com</a>.</p>
+    <p style="color:#666;font-size:13px;">If you have questions, contact us at <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a> or <a href="mailto:balaymaysa@gmail.com" style="color:#2d5a3b;">balaymaysa@gmail.com</a>.</p>
   </div>
   <div style="background:#2d5a3b;padding:20px;text-align:center;">
     <p style="color:rgba(255,255,255,0.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p>
@@ -603,29 +619,28 @@
     <h2 style="color:white;font-size:20px;margin:0;">🏡 New Booking Request</h2>
   </div>
   <div style="background:#f9f9f9;padding:32px;">
-    <table style="width:100%;border-collapse:collapse;font-size:14px;">
-      <tr><td style="padding:8px 0;color:#666;width:100px;">Guest</td><td style="color:#1a1a1a;font-weight:600;">${name}</td></tr>
-      <tr><td style="padding:8px 0;color:#666;">Email</td><td><a href="mailto:${email}" style="color:#2d5a3b;">${email}</a></td></tr>
-      <tr><td style="padding:8px 0;color:#666;">Phone</td><td style="color:#1a1a1a;">${phone || '—'}</td></tr>
-      <tr><td style="padding:8px 0;color:#666;">Room</td><td style="color:#1a1a1a;">${room}</td></tr>
-      <tr><td style="padding:8px 0;color:#666;">Dates</td><td style="color:#1a1a1a;">${fmtDate(ci)} → ${fmtDate(co)}</td></tr>
-      <tr><td style="padding:8px 0;color:#666;">Ref</td><td style="color:#1a1a1a;font-weight:600;">${ref}</td></tr>
-    </table>
-    <p style="margin-top:24px;font-size:13px;color:#666;">Log in to the admin panel to approve or decline this booking.</p>
+    <p><strong>Guest:</strong> ${name}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Phone:</strong> ${phone || '—'}</p>
+    <p><strong>Room:</strong> ${room}</p>
+    <p><strong>Dates:</strong> ${fmtDate(ci)} → ${fmtDate(co)}</p>
+    <p><strong>Reference:</strong> ${ref}</p>
+    <p><strong>Adults:</strong> ${adults} | <strong>Children:</strong> ${kids}</p>
+    <p style="margin-top:24px;"><a href="https://balay-maysaa.vercel.app/admin.html" style="background:#2d5a3b;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;">Go to Admin Panel</a></p>
   </div>
 </div>`;
 
-      await sendEmail(ADMIN_EMAIL, `New Booking Request – ${ref}`, adminHtml).catch(err => console.warn('Admin email failed:', err));
+      await sendEmail(ADMIN_EMAIL, `New Booking Request – ${ref} – ${name}`, adminHtml);
 
-      // 4. Success UI
-      showToast(`Booking submitted! Reference: ${ref}`, 'success');
+      // 4. Success
+      showToast(`✅ Booking submitted! Reference: ${ref}. We'll contact you within 24 hours.`);
       document.getElementById('bookingForm').reset();
       document.getElementById('availabilityMsg').classList.add('hidden');
       window.scrollTo({ top: document.getElementById('booking').offsetTop - 80, behavior: 'smooth' });
 
     } catch (err) {
       console.error('Booking error:', err);
-      showToast('Something went wrong. Please try again or contact us directly.', 'error');
+      showToast('❌ Something went wrong. Please try again or contact us directly.', 'error');
     } finally {
       document.getElementById('submitText').textContent = 'Send Booking Request';
       document.getElementById('submitSpinner').classList.add('hidden');
