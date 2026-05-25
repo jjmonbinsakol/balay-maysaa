@@ -241,6 +241,7 @@
   const SUPABASE_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
   const EMAILJS_SID   = 'service_t13ealt';
+  const EMAILJS_TEMPLATE = 'template_s17clcj';
   const ADMIN_USER    = 'balayadmin';
   const ADMIN_PASS    = 'BalayMaysa2026';
 
@@ -274,7 +275,7 @@
         to_name: to.split('@')[0]
       };
       
-      const response = await emailjs.send(EMAILJS_SID, 'template_balaymaysa', templateParams);
+      const response = await emailjs.send(EMAILJS_SID, 'template_s17clcj', templateParams);
       console.log('Email sent:', response);
       return true;
     } catch (e) {
