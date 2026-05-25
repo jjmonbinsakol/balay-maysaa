@@ -70,7 +70,6 @@
       padding: 16px 24px; border-radius: 12px; font-size: 14px; font-weight: 500;
       box-shadow: 0 8px 32px rgba(0,0,0,0.18);
       display: flex; align-items: center; gap: 10px; max-width: 380px;
-      opacity: 1; transform: translateY(0);
     }
     #toast.hidden { display: none !important; }
     #toast.success { background: #2d5a3b; color: white; }
@@ -413,7 +412,8 @@
   // Initialize EmailJS
   emailjs.init(EMAILJS_PK);
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  // FIXED: Renamed to 'sb' to avoid conflict with window.supabase
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
   // ─── NAVBAR SCROLL ────────────────────────────────────────
   window.addEventListener('scroll', () => {
@@ -450,7 +450,7 @@
     if (!ci || !co || !room) { msg.classList.add('hidden'); return; }
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from('bookings')
         .select('id')
         .eq('room_type', room)
@@ -460,7 +460,7 @@
 
       if (error) throw error;
 
-      const { data: blocked } = await supabase
+      const { data: blocked } = await sb
         .from('blocked_dates')
         .select('block_date')
         .gte('block_date', ci)
@@ -500,17 +500,11 @@
     const icon = document.getElementById('toastIcon');
     const msgSpan = document.getElementById('toastMsg');
     
-    // Reset classes
     toast.classList.remove('success', 'error', 'hidden');
-    
-    // Add type class
     toast.classList.add(type);
     msgSpan.textContent = msg;
-    
-    // Set icon
     icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
     
-    // Auto hide after 5 seconds
     setTimeout(() => {
       toast.classList.add('hidden');
     }, 5000);
@@ -531,7 +525,6 @@
       return true;
     } catch (e) {
       console.error('EmailJS error:', e);
-      // Don't throw - email failure shouldn't break booking
       return false;
     }
   }
@@ -566,7 +559,7 @@
 
     try {
       // 1. Save to Supabase
-      const { error: dbErr } = await supabase.from('bookings').insert({
+      const { error: dbErr } = await sb.from('bookings').insert({
         booking_ref: ref,
         guest_name: name,
         guest_email: email,
@@ -583,7 +576,7 @@
 
       console.log('✅ Booking saved:', ref);
 
-      // 2. Guest email (try, but don't fail if it doesn't work)
+      // 2. Guest email
       const guestHtml = `
 <div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
   <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
