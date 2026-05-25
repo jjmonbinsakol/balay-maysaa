@@ -36,7 +36,7 @@
       position: fixed; bottom: 24px; right: 24px; z-index: 9999;
       padding: 14px 20px; border-radius: 10px; font-size: 13px; font-weight: 500;
       box-shadow: 0 8px 24px rgba(0,0,0,0.18); display: flex; align-items: center;
-      gap: 8px; max-width: 340px; transition: opacity 0.3s, transform 0.3s;
+      gap: 8px; max-width: 340px;
     }
     #toast.hidden { display: none !important; }
     #toast.success { background: #2d5a3b; color: white; }
@@ -232,7 +232,6 @@
   <span id="toastMsg"></span>
 </div>
 
-<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
   // Initialize EmailJS
@@ -240,12 +239,13 @@
 
   // ─── CONFIG ───────────────────────────────────────────────
   const SUPABASE_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
-  const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
   const EMAILJS_SID   = 'service_t13ealt';
   const ADMIN_USER    = 'balayadmin';
   const ADMIN_PASS    = 'BalayMaysa2026';
 
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  // FIXED: Renamed to 'sb' to avoid conflict with window.supabase
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   let allBookings = [];
 
   // ─── TOAST - FIXED ────────────────────────────────────────
@@ -328,7 +328,7 @@
   // ─── LOAD DATA ────────────────────────────────────────────
   async function loadAll() {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from('bookings')
         .select('*')
         .order('created_at', { ascending: false });
@@ -442,14 +442,14 @@
     }
   }
 
-  // ─── CONFIRM BOOKING - FIXED ──────────────────────────────
+  // ─── CONFIRM BOOKING ──────────────────────────────────────
   async function confirmBooking(id) {
     const booking = allBookings.find(b => b.id === id);
     if (!booking) return;
     if (!confirm(`Confirm booking for ${booking.guest_name} (${booking.room_type}, ${fmtDate(booking.check_in_date)})?`)) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await sb
         .from('bookings')
         .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
         .eq('id', id);
@@ -481,7 +481,7 @@
         <tr><td style="padding:8px 0;color:#666;">Room</td><td style="color:#1a1a1a;">${booking.room_type}</td></tr>
         <tr><td style="padding:8px 0;color:#666;">Check-in</td><td style="color:#1a1a1a;">${fmtDate(booking.check_in_date)}</td></tr>
         <tr><td style="padding:8px 0;color:#666;">Check-out</td><td style="color:#1a1a1a;">${fmtDate(booking.check_out_date)}</td></tr>
-      </table>
+      }</table>
     </div>
     <div style="text-align:center;margin:28px 0;">
       <a href="${calUrl}" style="display:inline-block;background:#2d5a3b;color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;">
@@ -514,7 +514,7 @@
     if (!confirm(`Decline booking for ${booking.guest_name}? They will be notified by email.`)) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await sb
         .from('bookings')
         .update({ status: 'declined' })
         .eq('id', id);
