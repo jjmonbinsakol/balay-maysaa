@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check Booking Status – Balay Maysa Resort</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { forest: '#2d5a3b', 'forest-dark': '#1e3d28', gold: '#c9a03d', 'gold-light': '#e4c06e', cream: '#faf8f5' },
+          fontFamily: { heading: ['"Cormorant Garamond"', 'serif'], body: ['Inter', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #faf8f5; color: #1a1a1a; min-height: 100vh; }
+    .form-input { width: 100%; border: 1.5px solid #d4d0ca; border-radius: 10px; padding: 12px 16px; font-size: 15px; background: white; color: #1a1a1a; transition: border-color 0.2s; outline: none; }
+    .form-input:focus { border-color: #2d5a3b; box-shadow: 0 0 0 3px rgba(45,90,59,0.1); }
+    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-card { border-radius: 16px; padding: 20px 24px; }
+    .status-pending { background: #fef3c7; border: 1px solid #fcd34d; }
+    .status-confirmed { background: #d1fae5; border: 1px solid #34d399; }
+    .status-declined { background: #fee2e2; border: 1px solid #fca5a5; }
+    .status-completed { background: #ede9fe; border: 1px solid #c4b5fd; }
+    .status-paid { background: #d1fae5; border: 1px solid #34d399; }
+
+    .ornament { display: flex; align-items: center; gap: 16px; }
+    .ornament::before, .ornament::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, transparent, #c9a03d, transparent); }
+
+    /* Timeline */
+    .timeline-step { display: flex; gap: 12px; }
+    .timeline-dot { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; margin-top: 2px; }
+    .timeline-line { width: 2px; background: #e5e3df; margin: 4px 0 0 11px; min-height: 20px; }
+    .dot-done { background: #2d5a3b; color: white; }
+    .dot-active { background: #c9a03d; color: white; }
+    .dot-pending { background: #e5e3df; color: #aaa; }
+    .line-done { background: #2d5a3b; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="bg-forest-dark px-6 py-5">
+  <div class="max-w-4xl mx-auto flex items-center justify-between">
+    <a href="index.html" class="font-heading text-xl text-white font-light tracking-wide">Balay Maysa</a>
+    <a href="index.html" class="text-white/60 text-sm hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-arrow-left text-xs"></i> Back to Resort</a>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="max-w-lg mx-auto px-6 py-16">
+  <div class="text-center mb-10">
+    <p class="ornament text-gold/60 text-xs tracking-widest uppercase mb-6">Reservation Status</p>
+    <h1 class="font-heading text-5xl text-forest font-light mb-3">Track Your Booking</h1>
+    <p class="text-gray-500 text-sm">Enter your booking reference and email to check your reservation status.</p>
+  </div>
+
+  <!-- Search Form -->
+  <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+    <div class="mb-4">
+      <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Booking Reference</label>
+      <input type="text" id="refInput" class="form-input font-mono" placeholder="e.g. BM-20260528-AB12" />
+    </div>
+    <div class="mb-6">
+      <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Email Address</label>
+      <input type="email" id="emailInput" class="form-input" placeholder="juan@email.com" onkeydown="if(event.key==='Enter')lookup()" />
+    </div>
+    <button onclick="lookup()" id="lookupBtn" class="w-full bg-forest hover:bg-forest-dark text-white font-medium py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
+      <span id="lookupText">Check Status</span>
+      <div id="lookupSpinner" class="spinner hidden"></div>
+    </button>
+  </div>
+
+  <!-- Result -->
+  <div id="result" class="hidden">
+
+    <!-- Status Banner -->
+    <div id="statusBanner" class="status-card mb-6">
+      <div class="flex items-center gap-3 mb-2">
+        <div id="statusIcon" class="w-10 h-10 rounded-full flex items-center justify-center text-lg"></div>
+        <div>
+          <p class="font-semibold text-gray-800" id="statusTitle">–</p>
+          <p class="text-sm text-gray-500" id="statusDesc">–</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking Details -->
+    <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+      <h3 class="font-heading text-xl text-forest font-medium mb-4">Booking Details</h3>
+      <div class="space-y-3">
+        <div class="flex justify-between text-sm"><span class="text-gray-400">Reference</span><span class="font-mono font-bold text-forest" id="d_ref">–</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-400">Guest</span><span class="font-medium" id="d_name">–</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-400">Room</span><span id="d_room">–</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-400">Check-in</span><span id="d_checkin">–</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-400">Check-out</span><span id="d_checkout">–</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-400">Guests</span><span id="d_guests">–</span></div>
+        <div class="border-t border-gray-100 pt-3">
+          <div class="flex justify-between text-sm mb-1"><span class="text-gray-400">Total Amount</span><span class="font-semibold" id="d_total">–</span></div>
+          <div class="flex justify-between text-sm mb-1"><span class="text-gray-400">Deposit Paid</span><span class="text-forest font-semibold" id="d_deposit">–</span></div>
+          <div class="flex justify-between text-sm"><span class="text-gray-400">Balance Due on Arrival</span><span class="font-semibold" id="d_balance">–</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Timeline -->
+    <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+      <h3 class="font-heading text-xl text-forest font-medium mb-4">Booking Progress</h3>
+      <div id="timeline" class="space-y-1"></div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="actionBtns" class="space-y-3"></div>
+
+  </div>
+
+  <!-- Error -->
+  <div id="errorMsg" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl p-5 text-sm text-center">
+    <i class="fas fa-exclamation-circle text-xl mb-2 block"></i>
+    <p id="errorText">Booking not found.</p>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-forest-dark py-6 text-center mt-auto">
+  <p class="text-white/40 text-xs">© 2026 Balay Maysa Resort · <a href="tel:09175657918" class="hover:text-white/70 transition-colors">0917 565 7918</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  const STATUS_CONFIG = {
+    'pending_payment_verification': {
+      class: 'status-pending', icon: '⏳', iconBg: 'bg-yellow-100',
+      title: 'Payment Verification Pending',
+      desc: 'We\'ve received your booking and payment proof. Verification usually takes a few hours.',
+      progress: 2,
+    },
+    'deposit_paid_waiting_confirmation': {
+      class: 'status-pending', icon: '💰', iconBg: 'bg-blue-100',
+      title: 'Deposit Verified – Awaiting Confirmation',
+      desc: 'Your deposit has been verified. Admin will confirm your booking shortly.',
+      progress: 3,
+    },
+    'confirmed': {
+      class: 'status-confirmed', icon: '✅', iconBg: 'bg-green-100',
+      title: 'Booking Confirmed!',
+      desc: 'Your booking is confirmed. Please settle the remaining balance on arrival.',
+      progress: 4,
+    },
+    'confirmed_balance_due': {
+      class: 'status-confirmed', icon: '✅', iconBg: 'bg-green-100',
+      title: 'Confirmed – Balance Due',
+      desc: 'Confirmed! Please prepare your remaining balance for check-in.',
+      progress: 4,
+    },
+    'fully_paid': {
+      class: 'status-paid', icon: '🎉', iconBg: 'bg-green-100',
+      title: 'Fully Paid & Confirmed',
+      desc: 'You\'re all set! We look forward to welcoming you.',
+      progress: 5,
+    },
+    'cancelled': {
+      class: 'status-declined', icon: '❌', iconBg: 'bg-red-100',
+      title: 'Booking Cancelled',
+      desc: 'This booking has been cancelled. Contact us to rebook.',
+      progress: 0,
+    },
+    'declined': {
+      class: 'status-declined', icon: '❌', iconBg: 'bg-red-100',
+      title: 'Booking Not Approved',
+      desc: 'We couldn\'t accommodate this booking for the requested dates. Please contact us.',
+      progress: 0,
+    },
+    'completed_stayed': {
+      class: 'status-completed', icon: '🏡', iconBg: 'bg-purple-100',
+      title: 'Stay Completed',
+      desc: 'Thank you for staying at Balay Maysa! We hope to welcome you again.',
+      progress: 6,
+    },
+  };
+
+  const TIMELINE_STEPS = [
+    { label: 'Booking Submitted', desc: 'We received your request' },
+    { label: 'Payment Proof Uploaded', desc: 'Receipt under review' },
+    { label: 'Payment Verified', desc: 'Deposit confirmed' },
+    { label: 'Booking Confirmed', desc: 'Your stay is reserved' },
+    { label: 'Ready for Check-in', desc: 'Balance payable on arrival' },
+  ];
+
+  async function lookup() {
+    const ref   = document.getElementById('refInput').value.trim().toUpperCase();
+    const email = document.getElementById('emailInput').value.trim().toLowerCase();
+
+    if (!ref) { alert('Please enter your booking reference.'); return; }
+    if (!email) { alert('Please enter your email address.'); return; }
+
+    document.getElementById('lookupText').textContent = 'Searching...';
+    document.getElementById('lookupSpinner').classList.remove('hidden');
+    document.getElementById('lookupBtn').disabled = true;
+    document.getElementById('result').classList.add('hidden');
+    document.getElementById('errorMsg').classList.add('hidden');
+
+    try {
+      const { data, error } = await sb.from('bookings')
+        .select('*')
+        .ilike('booking_ref', ref)
+        .ilike('guest_email', email)
+        .limit(1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        document.getElementById('errorText').textContent = 'No booking found with that reference and email. Please double-check and try again.';
+        document.getElementById('errorMsg').classList.remove('hidden');
+        return;
+      }
+
+      displayResult(data[0]);
+    } catch(err) {
+      console.error(err);
+      document.getElementById('errorText').textContent = 'Something went wrong. Please try again or contact us directly.';
+      document.getElementById('errorMsg').classList.remove('hidden');
+    } finally {
+      document.getElementById('lookupText').textContent = 'Check Status';
+      document.getElementById('lookupSpinner').classList.add('hidden');
+      document.getElementById('lookupBtn').disabled = false;
+    }
+  }
+
+  function displayResult(b) {
+    const cfg = STATUS_CONFIG[b.status] || {
+      class: 'status-pending', icon: '❓', iconBg: 'bg-gray-100',
+      title: b.status, desc: 'Status unknown.', progress: 1,
+    };
+
+    // Status banner
+    const banner = document.getElementById('statusBanner');
+    banner.className = 'status-card mb-6 ' + cfg.class;
+    document.getElementById('statusIcon').className = `w-10 h-10 rounded-full flex items-center justify-center text-lg ${cfg.iconBg}`;
+    document.getElementById('statusIcon').textContent = cfg.icon;
+    document.getElementById('statusTitle').textContent = cfg.title;
+    document.getElementById('statusDesc').textContent = cfg.desc;
+
+    // Details
+    document.getElementById('d_ref').textContent     = b.booking_ref;
+    document.getElementById('d_name').textContent    = b.guest_name;
+    document.getElementById('d_room').textContent    = b.room_type;
+    document.getElementById('d_checkin').textContent = fmtDate(b.check_in_date);
+    document.getElementById('d_checkout').textContent = fmtDate(b.check_out_date);
+    document.getElementById('d_guests').textContent  = `${b.adults} adult${b.adults>1?'s':''}, ${b.children||0} child${(b.children||0)!==1?'ren':''}`;
+    document.getElementById('d_total').textContent   = b.total_amount ? '₱' + b.total_amount.toLocaleString() : '—';
+    document.getElementById('d_deposit').textContent = b.deposit_amount ? '₱' + b.deposit_amount.toLocaleString() : '—';
+    const balText = (b.remaining_balance || 0) > 0 ? '₱' + b.remaining_balance.toLocaleString() : 'Fully Paid ✅';
+    document.getElementById('d_balance').textContent = balText;
+    document.getElementById('d_balance').className = (b.remaining_balance||0) > 0 ? 'font-semibold text-red-600' : 'font-semibold text-forest';
+
+    // Timeline
+    const tl = document.getElementById('timeline');
+    tl.innerHTML = TIMELINE_STEPS.map((step, i) => {
+      const stepNum = i + 1;
+      const isDone  = cfg.progress > stepNum;
+      const isCurr  = cfg.progress === stepNum;
+      const isPend  = cfg.progress < stepNum;
+      return `
+        <div class="timeline-step">
+          <div class="flex flex-col items-center">
+            <div class="timeline-dot ${isDone ? 'dot-done' : isCurr ? 'dot-active' : 'dot-pending'}">
+              ${isDone ? '<i class="fas fa-check" style="font-size:9px"></i>' : stepNum}
+            </div>
+            ${i < TIMELINE_STEPS.length - 1 ? `<div class="timeline-line ${isDone ? 'line-done' : ''}" style="flex:1;min-height:28px;"></div>` : ''}
+          </div>
+          <div class="pb-4 flex-1">
+            <p class="text-sm font-medium ${isDone || isCurr ? 'text-gray-800' : 'text-gray-400'}">${step.label}</p>
+            <p class="text-xs ${isDone || isCurr ? 'text-gray-500' : 'text-gray-300'} mt-0.5">${step.desc}</p>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Action buttons
+    const actions = document.getElementById('actionBtns');
+    let btns = '';
+    if (b.status === 'confirmed' || b.status === 'confirmed_balance_due' || b.status === 'fully_paid') {
+      const calStart = b.check_in_date.replace(/-/g,'');
+      const calEnd   = b.check_out_date.replace(/-/g,'');
+      const calUrl   = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Balay Maysa ' + b.booking_ref)}&dates=${calStart}/${calEnd}&location=${encodeURIComponent('Blk 8 Lot 12 M.Cuenco St., Caloocan North')}`;
+      btns += `<a href="${calUrl}" target="_blank" class="block w-full bg-forest text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">📅 Add to Google Calendar</a>`;
+    }
+    if (['declined', 'cancelled', 'completed_stayed'].includes(b.status)) {
+      btns += `<a href="index.html#booking" class="block w-full bg-gold text-white text-center py-3 rounded-xl text-sm font-medium hover:bg-yellow-500 transition-colors">Book Again</a>`;
+    }
+    btns += `<div class="bg-white rounded-xl p-4 text-center border border-gray-100"><p class="text-xs text-gray-400 mb-2">Need help? Contact us directly</p><div class="flex gap-3 justify-center"><a href="tel:09175657918" class="text-forest text-sm font-medium hover:underline"><i class="fas fa-phone mr-1"></i>0917 565 7918</a><span class="text-gray-200">|</span><a href="mailto:balaymaysa@gmail.com" class="text-forest text-sm font-medium hover:underline"><i class="fas fa-envelope mr-1"></i>Email Us</a></div></div>`;
+    actions.innerHTML = btns;
+
+    document.getElementById('result').classList.remove('hidden');
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  // Pre-fill from URL params
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('ref')) document.getElementById('refInput').value = params.get('ref');
+  if (params.get('email')) document.getElementById('emailInput').value = params.get('email');
+  if (params.get('ref') && params.get('email')) lookup();
+</script>
+</body>
+</html>
