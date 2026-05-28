@@ -35,14 +35,12 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; background: #faf8f5; color: #1a1a1a; }
 
-    /* NAV */
     #navbar { transition: background 0.4s, box-shadow 0.4s; }
     #navbar.scrolled { background: white !important; box-shadow: 0 2px 24px rgba(0,0,0,0.08); }
     #navbar.scrolled .nav-link { color: #2d5a3b !important; }
     #navbar.scrolled .nav-logo { color: #2d5a3b !important; }
     #navbar.scrolled .nav-cta { background: #2d5a3b !important; color: white !important; }
 
-    /* HERO */
     .hero-bg {
       background: linear-gradient(135deg, rgba(30,61,40,0.7) 0%, rgba(45,90,59,0.5) 50%, rgba(201,160,61,0.2) 100%),
         url('https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1800&q=80') center/cover no-repeat;
@@ -50,11 +48,10 @@
     }
     .hero-text-glow { text-shadow: 0 2px 40px rgba(0,0,0,0.4); }
 
-    /* ROOM CARDS */
-    .room-card { transition: transform 0.3s, box-shadow 0.3s; }
+    .room-card { transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; }
     .room-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(45,90,59,0.15); }
+    .room-card.selected { ring: 2px solid #2d5a3b; box-shadow: 0 0 0 3px #2d5a3b, 0 20px 60px rgba(45,90,59,0.2); }
 
-    /* FORM */
     .form-input {
       width: 100%; border: 1.5px solid #d4d0ca; border-radius: 10px;
       padding: 12px 16px; font-size: 15px; font-family: 'Inter', sans-serif;
@@ -64,7 +61,6 @@
     .form-input:focus { border-color: #2d5a3b; box-shadow: 0 0 0 3px rgba(45,90,59,0.1); }
     .form-label { display: block; font-size: 13px; font-weight: 500; color: #444; margin-bottom: 6px; }
 
-    /* TOAST - FIXED */
     #toast {
       position: fixed; bottom: 30px; right: 30px; z-index: 9999;
       padding: 16px 24px; border-radius: 12px; font-size: 14px; font-weight: 500;
@@ -75,72 +71,103 @@
     #toast.success { background: #2d5a3b; color: white; }
     #toast.error { background: #c0392b; color: white; }
 
-    /* LOADER */
     .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* WAVE DIVIDER */
-    .wave { display: block; width: 100%; }
-
-    /* ORNAMENT LINE */
     .ornament { display: flex; align-items: center; gap: 16px; }
     .ornament::before, .ornament::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, transparent, #c9a03d, transparent); }
+
+    /* Booking Steps */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    .step-indicator { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 32px; }
+    .step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: all 0.3s; flex-shrink: 0; }
+    .step-dot.done { background: #2d5a3b; color: white; }
+    .step-dot.active { background: #c9a03d; color: white; }
+    .step-dot.pending { background: #e5e3df; color: #999; }
+    .step-line { width: 40px; height: 2px; background: #e5e3df; flex-shrink: 0; }
+    .step-line.done { background: #2d5a3b; }
+
+    /* Price box */
+    .price-box { background: linear-gradient(135deg, #1e3d28 0%, #2d5a3b 100%); border-radius: 16px; padding: 24px; color: white; }
+
+    /* Upload area */
+    .upload-area { border: 2px dashed #d4d0ca; border-radius: 12px; padding: 32px; text-align: center; transition: all 0.2s; cursor: pointer; }
+    .upload-area:hover, .upload-area.drag-over { border-color: #2d5a3b; background: rgba(45,90,59,0.05); }
+    .upload-area.uploaded { border-color: #2d5a3b; background: #f0fdf4; }
+
+    /* QR tabs */
+    .qr-tab { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1.5px solid #d4d0ca; color: #666; }
+    .qr-tab.active { background: #2d5a3b; color: white; border-color: #2d5a3b; }
+
+    /* Room selection card in step 1 */
+    .room-select-card { border: 2px solid #e5e3df; border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s; background: white; }
+    .room-select-card:hover { border-color: #c9a03d; }
+    .room-select-card.selected { border-color: #2d5a3b; background: #f0fdf4; }
+    .room-select-card.recommended { position: relative; }
+    .room-select-card.recommended::before { content: '⭐ Best Match'; position: absolute; top: -10px; left: 16px; background: #c9a03d; color: white; font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 999px; }
+
+    /* Add-ons */
+    .addon-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1.5px solid #e5e3df; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+    .addon-item:hover { border-color: #c9a03d; }
+    .addon-item.selected { border-color: #2d5a3b; background: #f0fdf4; }
+
+    /* Progress bar */
+    .progress-bar-fill { transition: width 0.4s ease; }
+
+    /* Status badge */
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-confirmed { background: #d1fae5; color: #065f46; }
+    .status-declined { background: #fee2e2; color: #991b1b; }
   </style>
 </head>
 <body>
 
-<!-- ===================== NAVBAR ===================== -->
+<!-- NAVBAR -->
 <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 px-6 py-4" style="background: transparent;">
   <div class="max-w-6xl mx-auto flex items-center justify-between">
     <a href="#" class="nav-logo font-heading text-2xl font-semibold text-white tracking-wide">Balay Maysa</a>
     <div class="hidden md:flex items-center gap-8">
       <a href="#rooms" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rooms</a>
       <a href="#booking" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Book Now</a>
+      <a href="lookup.html" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">My Booking</a>
       <a href="#contact" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Contact</a>
       <a href="#booking" class="nav-cta bg-gold text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-gold-light transition-colors">Reserve a Room</a>
     </div>
     <button id="mobileMenuBtn" class="md:hidden text-white text-xl"><i class="fas fa-bars"></i></button>
   </div>
-  <!-- Mobile menu -->
   <div id="mobileMenu" class="hidden md:hidden mt-4 bg-white rounded-xl shadow-xl p-4">
     <a href="#rooms" class="block py-2 text-forest font-medium text-sm">Rooms</a>
     <a href="#booking" class="block py-2 text-forest font-medium text-sm">Book Now</a>
+    <a href="lookup.html" class="block py-2 text-forest font-medium text-sm">My Booking</a>
     <a href="#contact" class="block py-2 text-forest font-medium text-sm">Contact</a>
   </div>
 </nav>
 
-<!-- ===================== HERO ===================== -->
+<!-- HERO -->
 <section class="hero-bg flex flex-col items-center justify-center text-center px-6 relative">
   <div class="max-w-4xl mx-auto py-40">
     <p class="text-gold font-body text-sm tracking-widest uppercase mb-4 opacity-90">Private Resort · Caloocan, Philippines</p>
-    <h1 class="font-heading text-6xl md:text-8xl text-white hero-text-glow font-light mb-6 leading-tight">
-      Balay Maysa
-    </h1>
+    <h1 class="font-heading text-6xl md:text-8xl text-white hero-text-glow font-light mb-6 leading-tight">Balay Maysa</h1>
     <p class="text-white/80 text-lg md:text-xl max-w-xl mx-auto mb-10 font-light leading-relaxed">
       A hidden tropical sanctuary where lush gardens, private pools, and warm Filipino hospitality await your family.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <a href="#booking" class="bg-gold hover:bg-gold-light text-white font-medium px-8 py-4 rounded-full transition-all duration-300 text-sm tracking-wide shadow-lg">
-        Book Your Stay
-      </a>
-      <a href="#rooms" class="border border-white/60 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all duration-300 text-sm tracking-wide">
-        Explore Rooms
-      </a>
+      <a href="#booking" class="bg-gold hover:bg-gold-light text-white font-medium px-8 py-4 rounded-full transition-all duration-300 text-sm tracking-wide shadow-lg">Book Your Stay</a>
+      <a href="#rooms" class="border border-white/60 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all duration-300 text-sm tracking-wide">Explore Rooms</a>
     </div>
   </div>
-  <!-- Scroll indicator -->
   <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/60 animate-bounce">
     <i class="fas fa-chevron-down text-xl"></i>
   </div>
 </section>
 
-<!-- ===================== INTRO ===================== -->
+<!-- INTRO -->
 <section class="py-20 bg-cream">
   <div class="max-w-4xl mx-auto px-6 text-center">
     <p class="ornament text-gold/60 text-xs tracking-widest uppercase mb-8">Welcome</p>
-    <h2 class="font-heading text-5xl md:text-6xl text-forest font-light mb-6">
-      Your Private <em>Paradise</em>
-    </h2>
+    <h2 class="font-heading text-5xl md:text-6xl text-forest font-light mb-6">Your Private <em>Paradise</em></h2>
     <p class="text-text-muted leading-relaxed text-lg max-w-2xl mx-auto">
       Nestled in Congress Village, Caloocan North, Balay Maysa is a haven of tranquility. Whether you're celebrating with family or escaping with friends, our resort offers intimate spaces designed for unforgettable memories.
     </p>
@@ -161,7 +188,7 @@
   </div>
 </section>
 
-<!-- ===================== ROOMS ===================== -->
+<!-- ROOMS -->
 <section id="rooms" class="py-20 bg-white">
   <div class="max-w-6xl mx-auto px-6">
     <div class="text-center mb-14">
@@ -169,17 +196,13 @@
       <h2 class="font-heading text-5xl text-forest font-light">Our Rooms</h2>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
       <!-- Silayan -->
       <div class="room-card bg-cream rounded-2xl overflow-hidden shadow-md">
         <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1540518614846-7eded433c457?w=700&q=80')"></div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div>
-              <h3 class="font-heading text-3xl text-forest font-medium">Silayan</h3>
-              <p class="text-text-muted text-sm mt-1">Pool View Suite</p>
-            </div>
-            <span class="bg-forest/10 text-forest text-xs px-3 py-1 rounded-full font-medium mt-1">Pool View</span>
+            <div><h3 class="font-heading text-3xl text-forest font-medium">Silayan</h3><p class="text-text-muted text-sm mt-1">Pool View Suite</p></div>
+            <div class="text-right"><span class="bg-forest/10 text-forest text-xs px-3 py-1 rounded-full font-medium">Pool View</span><p class="text-forest font-semibold mt-2 text-sm">₱10,000 / night</p></div>
           </div>
           <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i> 1 Queen Bed</div>
@@ -189,20 +212,16 @@
             <div class="flex items-center gap-2"><i class="fas fa-swimming-pool text-gold"></i> Pool Access</div>
             <div class="flex items-center gap-2"><i class="fas fa-snowflake text-gold"></i> Air Conditioned</div>
           </div>
-          <a href="#booking" onclick="document.getElementById('room_type').value='Silayan'" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Select Room</a>
+          <a href="#booking" onclick="preSelectRoom('Silayan')" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Select Room</a>
         </div>
       </div>
-
       <!-- Sinta -->
       <div class="room-card bg-cream rounded-2xl overflow-hidden shadow-md">
         <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1505693314120-0d443867891c?w=700&q=80')"></div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div>
-              <h3 class="font-heading text-3xl text-forest font-medium">Sinta</h3>
-              <p class="text-text-muted text-sm mt-1">2nd Floor Retreat</p>
-            </div>
-            <span class="bg-gold/10 text-gold-600 text-xs px-3 py-1 rounded-full font-medium mt-1 text-yellow-700">2nd Floor</span>
+            <div><h3 class="font-heading text-3xl text-forest font-medium">Sinta</h3><p class="text-text-muted text-sm mt-1">2nd Floor Retreat</p></div>
+            <div class="text-right"><span class="bg-gold/10 text-yellow-700 text-xs px-3 py-1 rounded-full font-medium">2nd Floor</span><p class="text-forest font-semibold mt-2 text-sm">₱10,000 / night</p></div>
           </div>
           <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i> 1 Queen Bed</div>
@@ -212,20 +231,16 @@
             <div class="flex items-center gap-2"><i class="fas fa-stairs text-gold"></i> Upper Floor</div>
             <div class="flex items-center gap-2"><i class="fas fa-wifi text-gold"></i> Free WiFi</div>
           </div>
-          <a href="#booking" onclick="document.getElementById('room_type').value='Sinta'" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Select Room</a>
+          <a href="#booking" onclick="preSelectRoom('Sinta')" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Select Room</a>
         </div>
       </div>
-
       <!-- Tahanan -->
       <div class="room-card bg-cream rounded-2xl overflow-hidden shadow-md">
         <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=700&q=80')"></div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div>
-              <h3 class="font-heading text-3xl text-forest font-medium">Tahanan</h3>
-              <p class="text-text-muted text-sm mt-1">Family Suite</p>
-            </div>
-            <span class="bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full font-medium mt-1">Family</span>
+            <div><h3 class="font-heading text-3xl text-forest font-medium">Tahanan</h3><p class="text-text-muted text-sm mt-1">Family Suite</p></div>
+            <div class="text-right"><span class="bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full font-medium">Family</span><p class="text-forest font-semibold mt-2 text-sm">₱12,000 / night</p></div>
           </div>
           <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i> 2 Queen Beds</div>
@@ -235,20 +250,16 @@
             <div class="flex items-center gap-2"><i class="fas fa-snowflake text-gold"></i> Air Conditioned</div>
             <div class="flex items-center gap-2"><i class="fas fa-wifi text-gold"></i> Free WiFi</div>
           </div>
-          <a href="#booking" onclick="document.getElementById('room_type').value='Tahanan'" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Select Room</a>
+          <a href="#booking" onclick="preSelectRoom('Tahanan')" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Select Room</a>
         </div>
       </div>
-
       <!-- Barkada -->
       <div class="room-card bg-cream rounded-2xl overflow-hidden shadow-md">
         <div class="h-56 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1596436889106-be35e843f974?w=700&q=80')"></div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div>
-              <h3 class="font-heading text-3xl text-forest font-medium">Barkada</h3>
-              <p class="text-text-muted text-sm mt-1">Group Escape</p>
-            </div>
-            <span class="bg-purple-50 text-purple-600 text-xs px-3 py-1 rounded-full font-medium mt-1">Group</span>
+            <div><h3 class="font-heading text-3xl text-forest font-medium">Barkada</h3><p class="text-text-muted text-sm mt-1">Group Escape</p></div>
+            <div class="text-right"><span class="bg-purple-50 text-purple-600 text-xs px-3 py-1 rounded-full font-medium">Group</span><p class="text-forest font-semibold mt-2 text-sm">₱15,000 / night</p></div>
           </div>
           <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i> 2 Queen + 2 Single</div>
@@ -258,7 +269,321 @@
             <div class="flex items-center gap-2"><i class="fas fa-wifi text-gold"></i> Free WiFi</div>
             <div class="flex items-center gap-2"><i class="fas fa-door-open text-gold"></i> Spacious</div>
           </div>
-          <a href="#booking" onclick="document.getElementById('room_type').value='Barkada'" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Select Room</a>
+          <a href="#booking" onclick="preSelectRoom('Barkada')" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Select Room</a>
+        </div>
+      </div>
+    </div>
+    <!-- Whole Resort CTA -->
+    <div class="mt-8 bg-gradient-to-r from-forest-dark to-forest rounded-2xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+      <div>
+        <p class="text-gold text-xs uppercase tracking-widest mb-1">Exclusive Offer</p>
+        <h3 class="font-heading text-3xl font-light">Entire Balay Maysa</h3>
+        <p class="text-white/70 text-sm mt-1">Private resort buyout · Up to 22 guests · All 4 rooms</p>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <div class="text-3xl font-heading font-light">₱45,000<span class="text-white/60 text-lg"> / night</span></div>
+        <a href="#booking" onclick="preSelectRoom('Whole Resort')" class="mt-3 inline-block bg-gold hover:bg-gold-light text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors">Book Full Resort</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING SECTION -->
+<section id="booking" class="py-24 bg-cream">
+  <div class="max-w-2xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <p class="text-gold text-xs tracking-widest uppercase mb-3">Reservations</p>
+      <h2 class="font-heading text-5xl text-forest font-light mb-3">Book Your Stay</h2>
+      <p class="text-text-muted text-sm">Secure your dates with a 50% deposit. No full payment required today.</p>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot-1">1</div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step-dot pending" id="dot-2">2</div>
+      <div class="step-line" id="line-2"></div>
+      <div class="step-dot pending" id="dot-3">3</div>
+      <div class="step-line" id="line-3"></div>
+      <div class="step-dot pending" id="dot-4">4</div>
+    </div>
+    <div class="flex justify-between text-xs text-text-muted mb-8 -mt-2 px-2">
+      <span>Details</span><span class="ml-4">Room & Dates</span><span>Payment</span><span>Done</span>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-xl p-8 md:p-10">
+
+      <!-- STEP 1: Guest Info -->
+      <div class="step active" id="step-1">
+        <h3 class="font-heading text-2xl text-forest mb-6">Your Information</h3>
+        <div class="mb-5">
+          <label class="form-label">Full Name <span class="text-red-500">*</span></label>
+          <input type="text" id="guest_name" class="form-input" placeholder="Juan dela Cruz" />
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div>
+            <label class="form-label">Email Address <span class="text-red-500">*</span></label>
+            <input type="email" id="guest_email" class="form-input" placeholder="juan@email.com" />
+          </div>
+          <div>
+            <label class="form-label">Phone Number <span class="text-red-500">*</span></label>
+            <input type="tel" id="guest_phone" class="form-input" placeholder="09XX XXX XXXX" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-5 mb-8">
+          <div>
+            <label class="form-label">Adults <span class="text-red-500">*</span></label>
+            <select id="adults" class="form-input" onchange="suggestRoom()">
+              <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+              <option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Children</label>
+            <select id="children" class="form-input">
+              <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="goStep(2)" class="w-full bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl transition-all text-sm tracking-wide">
+          Continue to Room Selection →
+        </button>
+      </div>
+
+      <!-- STEP 2: Room, Dates & Add-ons -->
+      <div class="step hidden" id="step-2">
+        <h3 class="font-heading text-2xl text-forest mb-2">Choose Your Room & Dates</h3>
+        <p id="suggestionMsg" class="text-sm text-text-muted mb-6"></p>
+
+        <!-- Room Cards -->
+        <div class="space-y-3 mb-6" id="roomCards">
+          <div class="room-select-card" onclick="selectRoom('Silayan')" id="rc-Silayan" data-price="10000" data-maxadults="3">
+            <div class="flex justify-between items-start">
+              <div><p class="font-semibold text-gray-800">Silayan – Pool View Suite</p><p class="text-xs text-text-muted mt-0.5">1 Queen Bed · Up to 3 Adults + 1 Child</p></div>
+              <p class="font-semibold text-forest text-sm flex-shrink-0 ml-4">₱10,000</p>
+            </div>
+          </div>
+          <div class="room-select-card" onclick="selectRoom('Sinta')" id="rc-Sinta" data-price="10000" data-maxadults="3">
+            <div class="flex justify-between items-start">
+              <div><p class="font-semibold text-gray-800">Sinta – 2nd Floor Retreat</p><p class="text-xs text-text-muted mt-0.5">1 Queen Bed · Up to 3 Adults + 1 Child</p></div>
+              <p class="font-semibold text-forest text-sm flex-shrink-0 ml-4">₱10,000</p>
+            </div>
+          </div>
+          <div class="room-select-card" onclick="selectRoom('Tahanan')" id="rc-Tahanan" data-price="12000" data-maxadults="6">
+            <div class="flex justify-between items-start">
+              <div><p class="font-semibold text-gray-800">Tahanan – Family Suite</p><p class="text-xs text-text-muted mt-0.5">2 Queen Beds · Up to 6 Adults + 1 Child</p></div>
+              <p class="font-semibold text-forest text-sm flex-shrink-0 ml-4">₱12,000</p>
+            </div>
+          </div>
+          <div class="room-select-card" onclick="selectRoom('Barkada')" id="rc-Barkada" data-price="15000" data-maxadults="10">
+            <div class="flex justify-between items-start">
+              <div><p class="font-semibold text-gray-800">Barkada – Group Escape</p><p class="text-xs text-text-muted mt-0.5">2 Queen + 2 Single · Up to 10 Adults + 2 Children</p></div>
+              <p class="font-semibold text-forest text-sm flex-shrink-0 ml-4">₱15,000</p>
+            </div>
+          </div>
+          <div class="room-select-card" onclick="selectRoom('Whole Resort')" id="rc-Whole Resort" data-price="45000" data-maxadults="22">
+            <div class="flex justify-between items-start">
+              <div><p class="font-semibold text-gray-800">🏡 Entire Balay Maysa</p><p class="text-xs text-text-muted mt-0.5">All 4 rooms · Up to 22 guests · Private buyout</p></div>
+              <p class="font-semibold text-forest text-sm flex-shrink-0 ml-4">₱45,000</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div>
+            <label class="form-label">Check-in Date <span class="text-red-500">*</span></label>
+            <input type="date" id="check_in" class="form-input" onchange="onDateChange()" />
+          </div>
+          <div>
+            <label class="form-label">Check-out Date <span class="text-red-500">*</span></label>
+            <input type="date" id="check_out" class="form-input" onchange="onDateChange()" />
+          </div>
+        </div>
+
+        <!-- Availability message -->
+        <div id="availabilityMsg" class="hidden mb-4 p-4 rounded-xl text-sm font-medium"></div>
+
+        <!-- Add-ons -->
+        <div class="mb-6">
+          <label class="form-label mb-3">Add-ons <span class="text-xs text-text-muted font-normal">(optional)</span></label>
+          <div class="space-y-2">
+            <div class="addon-item" onclick="toggleAddon(this, 'griller', 500)" data-addon="griller" data-price="500">
+              <input type="checkbox" class="addon-check w-4 h-4 accent-forest pointer-events-none" />
+              <div class="flex-1"><p class="text-sm font-medium text-gray-800">🔥 Griller</p><p class="text-xs text-text-muted">Charcoal grill setup</p></div>
+              <span class="text-sm font-semibold text-forest">+₱500</span>
+            </div>
+            <div class="addon-item" onclick="toggleAddon(this, 'fur_baby', 300)" data-addon="fur_baby" data-price="300">
+              <input type="checkbox" class="addon-check w-4 h-4 accent-forest pointer-events-none" />
+              <div class="flex-1"><p class="text-sm font-medium text-gray-800">🐾 Fur Baby</p><p class="text-xs text-text-muted">Pet-friendly accommodation</p></div>
+              <span class="text-sm font-semibold text-forest">+₱300</span>
+            </div>
+            <div class="addon-item" onclick="toggleAddon(this, 'extra_mattress', 500)" data-addon="extra_mattress" data-price="500">
+              <input type="checkbox" class="addon-check w-4 h-4 accent-forest pointer-events-none" />
+              <div class="flex-1"><p class="text-sm font-medium text-gray-800">🛏️ Extra Mattress</p><p class="text-xs text-text-muted">Floor mattress for extra guest</p></div>
+              <span class="text-sm font-semibold text-forest">+₱500</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Summary -->
+        <div id="priceSummary" class="hidden price-box mb-6">
+          <p class="text-white/60 text-xs uppercase tracking-widest mb-3">Price Breakdown</p>
+          <div id="priceLines" class="space-y-2 text-sm mb-3"></div>
+          <div class="border-t border-white/20 pt-3 mt-3 flex justify-between items-center">
+            <span class="text-white/80 text-sm">Total Amount</span>
+            <span id="totalAmount" class="text-xl font-semibold">₱0</span>
+          </div>
+          <div class="flex justify-between items-center mt-1">
+            <span class="text-white/60 text-xs">50% Deposit Required Now</span>
+            <span id="depositAmount" class="text-gold font-semibold">₱0</span>
+          </div>
+          <div class="flex justify-between items-center mt-1">
+            <span class="text-white/60 text-xs">Remaining Balance (on arrival)</span>
+            <span id="balanceAmount" class="text-white/70 text-sm">₱0</span>
+          </div>
+        </div>
+
+        <!-- Extra pax notice -->
+        <div id="extraPaxNotice" class="hidden mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs">
+          <i class="fas fa-info-circle mr-1"></i> <span id="extraPaxMsg"></span>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="goStep(1)" class="px-6 py-4 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">← Back</button>
+          <button onclick="goStep(3)" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl transition-all text-sm tracking-wide">Continue to Payment →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Payment -->
+      <div class="step hidden" id="step-3">
+        <h3 class="font-heading text-2xl text-forest mb-2">Send Your Deposit</h3>
+        <p class="text-text-muted text-sm mb-6">Your booking is reserved for <strong>24 hours</strong>. Please send your deposit and upload proof below.</p>
+
+        <!-- Deposit Summary -->
+        <div class="bg-cream rounded-xl p-5 mb-6 border border-gray-100">
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-text-muted">Booking for</span>
+            <span class="font-medium" id="summaryRoom">–</span>
+          </div>
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-text-muted">Dates</span>
+            <span class="font-medium" id="summaryDates">–</span>
+          </div>
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-text-muted">Guests</span>
+            <span class="font-medium" id="summaryGuests">–</span>
+          </div>
+          <div class="border-t border-gray-200 pt-3 mt-3 flex justify-between">
+            <span class="text-text-muted text-sm">Deposit to Send (50%)</span>
+            <span class="text-forest font-bold text-lg" id="summaryDeposit">₱0</span>
+          </div>
+        </div>
+
+        <!-- Payment Method Tabs -->
+        <div class="flex gap-2 mb-6">
+          <button class="qr-tab active" onclick="showPayMethod('gcash', this)">GCash</button>
+          <button class="qr-tab" onclick="showPayMethod('maya', this)">Maya</button>
+          <button class="qr-tab" onclick="showPayMethod('bank', this)">Bank Transfer</button>
+        </div>
+
+        <!-- GCash -->
+        <div id="pay-gcash" class="pay-method">
+          <div class="flex items-center gap-6 p-5 bg-blue-50 rounded-xl border border-blue-100 mb-4">
+            <div class="flex-shrink-0 w-24 h-24 bg-white rounded-xl flex items-center justify-center shadow-sm overflow-hidden">
+              <img id="gcash-qr" src="" alt="GCash QR" class="w-full h-full object-contain" onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400 text-center p-2\'>QR Code<br>Coming Soon</span>'" />
+            </div>
+            <div>
+              <p class="font-semibold text-blue-700 mb-1">GCash Payment</p>
+              <p class="text-sm text-blue-600">Account Name: <strong>Balay Maysa Resort</strong></p>
+              <p class="text-sm text-blue-600">Number: <strong>0917 565 7918</strong></p>
+              <p class="text-xs text-blue-500 mt-2">Send exactly <strong id="gcash-amount">₱0</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Maya -->
+        <div id="pay-maya" class="pay-method hidden">
+          <div class="flex items-center gap-6 p-5 bg-green-50 rounded-xl border border-green-100 mb-4">
+            <div class="flex-shrink-0 w-24 h-24 bg-white rounded-xl flex items-center justify-center shadow-sm overflow-hidden">
+              <img id="maya-qr" src="" alt="Maya QR" class="w-full h-full object-contain" onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400 text-center p-2\'>QR Code<br>Coming Soon</span>'" />
+            </div>
+            <div>
+              <p class="font-semibold text-green-700 mb-1">Maya Payment</p>
+              <p class="text-sm text-green-600">Account Name: <strong>Balay Maysa Resort</strong></p>
+              <p class="text-sm text-green-600">Number: <strong>0917 565 7918</strong></p>
+              <p class="text-xs text-green-500 mt-2">Send exactly <strong id="maya-amount">₱0</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bank -->
+        <div id="pay-bank" class="pay-method hidden">
+          <div class="p-5 bg-gray-50 rounded-xl border border-gray-200 mb-4">
+            <p class="font-semibold text-gray-700 mb-3">BDO Bank Transfer</p>
+            <div class="space-y-1 text-sm text-gray-600">
+              <p>Bank: <strong>BDO Unibank</strong></p>
+              <p>Account Name: <strong>Balay Maysa Resort</strong></p>
+              <p>Account Number: <strong>INSERT_ACCOUNT_NUMBER</strong></p>
+              <p class="text-xs text-gray-400 mt-2">Use your booking reference as the reference number</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reference Number -->
+        <div class="mb-5">
+          <label class="form-label">Payment Reference / Transaction Number <span class="text-red-500">*</span></label>
+          <input type="text" id="payment_ref" class="form-input" placeholder="e.g. GCash ref 12345678" />
+        </div>
+
+        <!-- Upload Proof -->
+        <div class="mb-6">
+          <label class="form-label">Upload Payment Screenshot <span class="text-red-500">*</span></label>
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('proofFile').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+            <input type="file" id="proofFile" class="hidden" accept="image/*,application/pdf" onchange="handleFileSelect(event)" />
+            <div id="uploadPlaceholder">
+              <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-3"></i>
+              <p class="text-sm text-gray-500 font-medium">Click to upload or drag & drop</p>
+              <p class="text-xs text-gray-400 mt-1">PNG, JPG, or PDF up to 5MB</p>
+            </div>
+            <div id="uploadPreview" class="hidden">
+              <i class="fas fa-check-circle text-2xl text-forest mb-2"></i>
+              <p class="text-sm text-forest font-medium" id="uploadFileName">File uploaded</p>
+              <p class="text-xs text-gray-400 mt-1">Click to change</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="goStep(2)" class="px-6 py-4 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">← Back</button>
+          <button onclick="submitBooking()" id="submitBtn" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm tracking-wide">
+            <span id="submitText">Submit Booking & Upload Proof</span>
+            <div id="submitSpinner" class="spinner hidden"></div>
+          </button>
+        </div>
+        <p class="text-center text-text-muted text-xs mt-4">Your booking will be confirmed within 24 hours after payment verification.</p>
+      </div>
+
+      <!-- STEP 4: Confirmation -->
+      <div class="step hidden" id="step-4">
+        <div class="text-center py-6">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-2xl text-green-600"></i>
+          </div>
+          <h3 class="font-heading text-3xl text-forest mb-2">Booking Submitted!</h3>
+          <p class="text-text-muted text-sm mb-6">We've received your payment proof and will confirm within 24 hours.</p>
+
+          <div class="bg-cream rounded-xl p-5 text-left mb-6">
+            <p class="text-xs text-text-muted uppercase tracking-wide mb-3">Your Booking Reference</p>
+            <p class="font-mono text-2xl font-bold text-forest" id="confirmRef">–</p>
+            <p class="text-xs text-text-muted mt-2">Save this reference to check your booking status anytime.</p>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <a href="lookup.html" class="block bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Check Booking Status</a>
+            <button onclick="resetForm()" class="block w-full border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">Make Another Booking</button>
+          </div>
         </div>
       </div>
 
@@ -266,121 +591,24 @@
   </div>
 </section>
 
-<!-- ===================== BOOKING FORM ===================== -->
-<section id="booking" class="py-24 bg-cream">
-  <div class="max-w-2xl mx-auto px-6">
-    <div class="text-center mb-12">
-      <p class="text-gold text-xs tracking-widest uppercase mb-3">Reservations</p>
-      <h2 class="font-heading text-5xl text-forest font-light mb-3">Book Your Stay</h2>
-      <p class="text-text-muted text-sm">Fill out the form below and we'll confirm within 24 hours.</p>
-    </div>
-
-    <div class="bg-white rounded-3xl shadow-xl p-8 md:p-10">
-      <form id="bookingForm" novalidate>
-
-        <div class="mb-5">
-          <label class="form-label">Full Name <span class="text-red-500">*</span></label>
-          <input type="text" id="guest_name" class="form-input" placeholder="Juan dela Cruz" required />
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-          <div>
-            <label class="form-label">Email Address <span class="text-red-500">*</span></label>
-            <input type="email" id="guest_email" class="form-input" placeholder="juan@email.com" required />
-          </div>
-          <div>
-            <label class="form-label">Phone Number</label>
-            <input type="tel" id="guest_phone" class="form-input" placeholder="09XX XXX XXXX" />
-          </div>
-        </div>
-
-        <div class="mb-5">
-          <label class="form-label">Room Type <span class="text-red-500">*</span></label>
-          <select id="room_type" class="form-input" required>
-            <option value="">— Select a Room —</option>
-            <option value="Silayan">Silayan – Pool View Suite (2–3 Adults)</option>
-            <option value="Sinta">Sinta – 2nd Floor Retreat (2–3 Adults)</option>
-            <option value="Tahanan">Tahanan – Family Suite (4–6 Adults)</option>
-            <option value="Barkada">Barkada – Group Escape (8–10 Adults)</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-          <div>
-            <label class="form-label">Check-in Date <span class="text-red-500">*</span></label>
-            <input type="date" id="check_in" class="form-input" required />
-          </div>
-          <div>
-            <label class="form-label">Check-out Date <span class="text-red-500">*</span></label>
-            <input type="date" id="check_out" class="form-input" required />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-5 mb-8">
-          <div>
-            <label class="form-label">Adults <span class="text-red-500">*</span></label>
-            <select id="adults" class="form-input">
-              <option value="1">1</option>
-              <option value="2" selected>2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">Children</label>
-            <select id="children" class="form-input">
-              <option value="0" selected>0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Availability notice -->
-        <div id="availabilityMsg" class="hidden mb-5 p-4 rounded-xl text-sm font-medium"></div>
-
-        <button type="submit" id="submitBtn" class="w-full bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm tracking-wide">
-          <span id="submitText">Send Booking Request</span>
-          <div id="submitSpinner" class="spinner hidden"></div>
-        </button>
-        <p class="text-center text-text-muted text-xs mt-4">No payment required at this stage. We'll confirm within 24 hours.</p>
-      </form>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== CONTACT ===================== -->
+<!-- CONTACT -->
 <section id="contact" class="py-20 bg-forest">
   <div class="max-w-4xl mx-auto px-6 text-center">
     <p class="text-gold text-xs tracking-widest uppercase mb-3">Get in Touch</p>
     <h2 class="font-heading text-5xl text-white font-light mb-10">Contact Us</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div class="text-white/80">
-        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
-          <i class="fas fa-map-marker-alt text-gold"></i>
-        </div>
+        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4"><i class="fas fa-map-marker-alt text-gold"></i></div>
         <h4 class="font-medium text-white mb-2">Address</h4>
         <p class="text-sm leading-relaxed">Blk 8 Lot 12 M.Cuenco St.,<br/>Congress Village,<br/>Caloocan North, Philippines</p>
       </div>
       <div class="text-white/80">
-        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
-          <i class="fas fa-phone text-gold"></i>
-        </div>
+        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4"><i class="fas fa-phone text-gold"></i></div>
         <h4 class="font-medium text-white mb-2">Phone</h4>
         <a href="tel:09175657918" class="text-sm hover:text-gold transition-colors">0917 565 7918</a>
       </div>
       <div class="text-white/80">
-        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
-          <i class="fas fa-envelope text-gold"></i>
-        </div>
+        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4"><i class="fas fa-envelope text-gold"></i></div>
         <h4 class="font-medium text-white mb-2">Email</h4>
         <a href="mailto:balaymaysa@gmail.com" class="text-sm hover:text-gold transition-colors">balaymaysa@gmail.com</a>
       </div>
@@ -388,260 +616,458 @@
   </div>
 </section>
 
-<!-- ===================== FOOTER ===================== -->
+<!-- FOOTER -->
 <footer class="bg-forest-dark py-8 text-center">
+  <div class="flex items-center justify-center gap-6 mb-4">
+    <a href="lookup.html" class="text-white/50 text-xs hover:text-white/80 transition-colors">Check Booking Status</a>
+    <span class="text-white/20">·</span>
+    <a href="mailto:balaymaysa@gmail.com" class="text-white/50 text-xs hover:text-white/80 transition-colors">balaymaysa@gmail.com</a>
+  </div>
   <p class="text-white/40 text-xs">© 2026 Balay Maysa Resort. All rights reserved.</p>
 </footer>
 
-<!-- ===================== TOAST ===================== -->
+<!-- TOAST -->
 <div id="toast" class="hidden">
   <i id="toastIcon" class="fas fa-check-circle"></i>
   <span id="toastMsg">Message here</span>
 </div>
 
-<!-- ===================== SCRIPTS ===================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-  // ─── CONFIG ───────────────────────────────────────────────
-  const SUPABASE_URL   = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
-  const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
-  const EMAILJS_PK     = 'yupgCoqLB4unb0OAz';
-  const EMAILJS_SID    = 'service_t13ealt';
-  const EMAILJS_TEMPLATE = 'template_s17clcj';
-  const ADMIN_EMAIL    = 'balaymaysa@gmail.com';
+  emailjs.init('yupgCoqLB4unb0OAz');
 
-  // Initialize EmailJS
-  emailjs.init(EMAILJS_PK);
+  const SUPABASE_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
+  const EMAILJS_SID   = 'service_t13ealt';
+  const EMAILJS_TMPL  = 'template_s17clcj';
+  const ADMIN_EMAIL   = 'balaymaysa@gmail.com';
 
-  // FIXED: Renamed to 'sb' to avoid conflict with window.supabase
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  // ─── NAVBAR SCROLL ────────────────────────────────────────
+  const ROOM_CONFIG = {
+    'Silayan':      { price: 10000, maxAdults: 3, stdOccupancy: 3 },
+    'Sinta':        { price: 10000, maxAdults: 3, stdOccupancy: 3 },
+    'Tahanan':      { price: 12000, maxAdults: 6, stdOccupancy: 6 },
+    'Barkada':      { price: 15000, maxAdults: 10, stdOccupancy: 10 },
+    'Whole Resort': { price: 45000, maxAdults: 22, stdOccupancy: 22 },
+  };
+  const EXTRA_PAX_FEE = 500;
+  const ADDON_PRICES = { griller: 500, fur_baby: 300, extra_mattress: 500 };
+
+  let selectedRoom = null;
+  let selectedAddons = {};
+  let nights = 0;
+  let uploadedFile = null;
+  let currentBookingRef = null;
+
+  // Navbar scroll
   window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
   });
-
-  // Mobile menu
   document.getElementById('mobileMenuBtn').addEventListener('click', () => {
     document.getElementById('mobileMenu').classList.toggle('hidden');
   });
 
-  // ─── DATE SETUP ───────────────────────────────────────────
+  // Date setup
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('check_in').min = today;
   document.getElementById('check_out').min = today;
 
-  document.getElementById('check_in').addEventListener('change', function () {
-    const ci = new Date(this.value);
-    ci.setDate(ci.getDate() + 1);
-    document.getElementById('check_out').min = ci.toISOString().split('T')[0];
-    if (document.getElementById('check_out').value <= this.value) {
-      document.getElementById('check_out').value = '';
+  function preSelectRoom(room) {
+    setTimeout(() => {
+      selectRoom(room);
+      document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }
+
+  function suggestRoom() {
+    if (document.getElementById('step-2').classList.contains('active') || !document.getElementById('step-2').classList.contains('hidden')) {
+      updateRoomSuggestion();
     }
+  }
+
+  function updateRoomSuggestion() {
+    const adults = parseInt(document.getElementById('adults').value);
+    document.querySelectorAll('.room-select-card').forEach(card => card.classList.remove('recommended'));
+    let suggested = null;
+    if (adults <= 3) suggested = 'Silayan';
+    else if (adults <= 6) suggested = 'Tahanan';
+    else if (adults <= 10) suggested = 'Barkada';
+    else suggested = 'Whole Resort';
+    if (suggested) {
+      const el = document.getElementById('rc-' + suggested);
+      if (el) el.classList.add('recommended');
+      document.getElementById('suggestionMsg').textContent = `Based on ${adults} adults, we suggest the ${suggested} room.`;
+    }
+  }
+
+  function selectRoom(room) {
+    selectedRoom = room;
+    document.querySelectorAll('.room-select-card').forEach(c => c.classList.remove('selected'));
+    const el = document.getElementById('rc-' + room);
+    if (el) el.classList.add('selected');
+    updatePriceDisplay();
     checkAvailability();
-  });
-  document.getElementById('check_out').addEventListener('change', checkAvailability);
-  document.getElementById('room_type').addEventListener('change', checkAvailability);
+  }
+
+  function toggleAddon(el, key, price) {
+    const chk = el.querySelector('.addon-check');
+    if (selectedAddons[key]) {
+      delete selectedAddons[key];
+      el.classList.remove('selected');
+      chk.checked = false;
+    } else {
+      selectedAddons[key] = price;
+      el.classList.add('selected');
+      chk.checked = true;
+    }
+    updatePriceDisplay();
+  }
+
+  function onDateChange() {
+    const ci = document.getElementById('check_in').value;
+    const co = document.getElementById('check_out').value;
+    if (ci) {
+      const next = new Date(ci); next.setDate(next.getDate() + 1);
+      document.getElementById('check_out').min = next.toISOString().split('T')[0];
+      if (co && co <= ci) document.getElementById('check_out').value = '';
+    }
+    updatePriceDisplay();
+    checkAvailability();
+  }
+
+  function calcNights() {
+    const ci = document.getElementById('check_in').value;
+    const co = document.getElementById('check_out').value;
+    if (!ci || !co) return 0;
+    const diff = (new Date(co) - new Date(ci)) / (1000 * 60 * 60 * 24);
+    return diff > 0 ? diff : 0;
+  }
+
+  function calcPrices() {
+    nights = calcNights();
+    if (!selectedRoom || nights === 0) return null;
+    const cfg = ROOM_CONFIG[selectedRoom];
+    const adults = parseInt(document.getElementById('adults').value);
+    const basePrice = cfg.price * nights;
+    const extraPax = Math.max(0, adults - cfg.stdOccupancy);
+    const extraPaxFee = extraPax * EXTRA_PAX_FEE * nights;
+    const addonTotal = Object.values(selectedAddons).reduce((s, v) => s + v, 0);
+    const total = basePrice + extraPaxFee + addonTotal;
+    const deposit = Math.ceil(total * 0.5);
+    return { basePrice, extraPax, extraPaxFee, addonTotal, total, deposit, balance: total - deposit, nights };
+  }
+
+  function updatePriceDisplay() {
+    const prices = calcPrices();
+    const box = document.getElementById('priceSummary');
+    const extraNotice = document.getElementById('extraPaxNotice');
+    if (!prices) { box.classList.add('hidden'); extraNotice.classList.add('hidden'); return; }
+    box.classList.remove('hidden');
+
+    let lines = `
+      <div class="flex justify-between text-white/80"><span>${selectedRoom} × ${prices.nights} night${prices.nights>1?'s':''}</span><span>₱${prices.basePrice.toLocaleString()}</span></div>`;
+    if (prices.extraPaxFee > 0) {
+      lines += `<div class="flex justify-between text-yellow-300"><span>Extra pax fee (${prices.extraPax} person${prices.extraPax>1?'s':''})</span><span>+₱${prices.extraPaxFee.toLocaleString()}</span></div>`;
+      extraNotice.classList.remove('hidden');
+      document.getElementById('extraPaxMsg').textContent = `${prices.extraPax} extra guest${prices.extraPax>1?'s':''} beyond standard occupancy · ₱${EXTRA_PAX_FEE}/person/night`;
+    } else {
+      extraNotice.classList.add('hidden');
+    }
+    Object.entries(selectedAddons).forEach(([key, val]) => {
+      const label = key === 'griller' ? '🔥 Griller' : key === 'fur_baby' ? '🐾 Fur Baby' : '🛏️ Extra Mattress';
+      lines += `<div class="flex justify-between text-white/80"><span>${label}</span><span>+₱${val.toLocaleString()}</span></div>`;
+    });
+    document.getElementById('priceLines').innerHTML = lines;
+    document.getElementById('totalAmount').textContent = '₱' + prices.total.toLocaleString();
+    document.getElementById('depositAmount').textContent = '₱' + prices.deposit.toLocaleString();
+    document.getElementById('balanceAmount').textContent = '₱' + prices.balance.toLocaleString();
+
+    // Update payment step amounts
+    document.getElementById('gcash-amount').textContent = '₱' + prices.deposit.toLocaleString();
+    document.getElementById('maya-amount').textContent = '₱' + prices.deposit.toLocaleString();
+
+    // Generate QR codes
+    const qrData = encodeURIComponent(`GCash/Maya Transfer to 09175657918 - ₱${prices.deposit}`);
+    document.getElementById('gcash-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${qrData}`;
+    document.getElementById('maya-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${qrData}`;
+  }
 
   async function checkAvailability() {
     const ci = document.getElementById('check_in').value;
     const co = document.getElementById('check_out').value;
-    const room = document.getElementById('room_type').value;
     const msg = document.getElementById('availabilityMsg');
-    if (!ci || !co || !room) { msg.classList.add('hidden'); return; }
-
+    if (!ci || !co || !selectedRoom) { msg.classList.add('hidden'); return; }
     try {
-      const { data, error } = await sb
-        .from('bookings')
-        .select('id')
-        .eq('room_type', room)
-        .in('status', ['confirmed'])
-        .lt('check_in_date', co)
-        .gt('check_out_date', ci);
-
-      if (error) throw error;
-
-      const { data: blocked } = await sb
-        .from('blocked_dates')
-        .select('block_date')
-        .gte('block_date', ci)
-        .lte('block_date', co);
-
+      const { data } = await sb.from('bookings').select('id')
+        .eq('room_type', selectedRoom).in('status', ['confirmed', 'deposit_paid_waiting_confirmation', 'confirmed_balance_due', 'fully_paid'])
+        .lt('check_in_date', co).gt('check_out_date', ci);
       msg.classList.remove('hidden');
-      if (data.length > 0 || (blocked && blocked.length > 0)) {
-        msg.className = 'mb-5 p-4 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+      if (data && data.length > 0) {
+        msg.className = 'mb-4 p-4 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200';
         msg.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>This room may not be available for the selected dates. You can still submit — we\'ll verify and confirm.';
       } else {
-        msg.className = 'mb-5 p-4 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200';
-        msg.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Looks available! Proceed with your booking request.';
+        msg.className = 'mb-4 p-4 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200';
+        msg.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Looks available! Proceed with your booking.';
       }
-    } catch (e) {
-      console.error('Availability check failed:', e);
-    }
+    } catch(e) { console.error(e); }
   }
 
-  // ─── BOOKING REF ──────────────────────────────────────────
+  // Step navigation
+  function goStep(n) {
+    const steps = [1, 2, 3, 4];
+    // Validation
+    if (n === 2) {
+      const name  = document.getElementById('guest_name').value.trim();
+      const email = document.getElementById('guest_email').value.trim();
+      const phone = document.getElementById('guest_phone').value.trim();
+      if (!name) { showToast('Please enter your full name.', 'error'); return; }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email.', 'error'); return; }
+      if (!phone) { showToast('Please enter your phone number.', 'error'); return; }
+      updateRoomSuggestion();
+    }
+    if (n === 3) {
+      if (!selectedRoom) { showToast('Please select a room.', 'error'); return; }
+      if (!document.getElementById('check_in').value) { showToast('Please select a check-in date.', 'error'); return; }
+      if (!document.getElementById('check_out').value) { showToast('Please select a check-out date.', 'error'); return; }
+      const prices = calcPrices();
+      if (!prices) { showToast('Please check your dates.', 'error'); return; }
+      // Populate summary
+      const ci = document.getElementById('check_in').value;
+      const co = document.getElementById('check_out').value;
+      document.getElementById('summaryRoom').textContent = selectedRoom;
+      document.getElementById('summaryDates').textContent = `${fmtDate(ci)} → ${fmtDate(co)}`;
+      const adults = document.getElementById('adults').value;
+      const kids   = document.getElementById('children').value;
+      document.getElementById('summaryGuests').textContent = `${adults} adult${adults>1?'s':''}, ${kids} child${kids!=1?'ren':''}`;
+      document.getElementById('summaryDeposit').textContent = '₱' + prices.deposit.toLocaleString();
+    }
+    steps.forEach(s => {
+      const el = document.getElementById('step-' + s);
+      el.classList.remove('active');
+      el.classList.add('hidden');
+    });
+    document.getElementById('step-' + n).classList.remove('hidden');
+    document.getElementById('step-' + n).classList.add('active');
+    updateStepIndicator(n);
+    document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function updateStepIndicator(current) {
+    [1, 2, 3, 4].forEach(n => {
+      const dot = document.getElementById('dot-' + n);
+      if (n < current) { dot.className = 'step-dot done'; dot.innerHTML = '<i class="fas fa-check text-xs"></i>'; }
+      else if (n === current) { dot.className = 'step-dot active'; dot.textContent = n; }
+      else { dot.className = 'step-dot pending'; dot.textContent = n; }
+      if (n < 4) {
+        const line = document.getElementById('line-' + n);
+        line.className = n < current ? 'step-line done' : 'step-line';
+      }
+    });
+  }
+
+  // File upload
+  function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadArea').classList.add('drag-over'); }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadArea').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+  function handleFileSelect(e) { const file = e.target.files[0]; if (file) processFile(file); }
+  function processFile(file) {
+    if (file.size > 5 * 1024 * 1024) { showToast('File too large. Max 5MB.', 'error'); return; }
+    uploadedFile = file;
+    document.getElementById('uploadPlaceholder').classList.add('hidden');
+    document.getElementById('uploadPreview').classList.remove('hidden');
+    document.getElementById('uploadFileName').textContent = file.name;
+    document.getElementById('uploadArea').classList.add('uploaded');
+  }
+
+  function showPayMethod(method, btn) {
+    document.querySelectorAll('.pay-method').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.qr-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('pay-' + method).classList.remove('hidden');
+    btn.classList.add('active');
+  }
+
   function generateRef() {
     const d = new Date();
-    const date = d.getFullYear().toString() +
-      String(d.getMonth() + 1).padStart(2, '0') +
-      String(d.getDate()).padStart(2, '0');
-    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const date = d.getFullYear().toString() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+    const rand = Math.random().toString(36).substring(2,6).toUpperCase();
     return `BM-${date}-${rand}`;
   }
 
-  // ─── FORMAT DATE ──────────────────────────────────────────
   function fmtDate(d) {
     return new Date(d + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  // ─── TOAST - FIXED ────────────────────────────────────────
-  function showToast(msg, type = 'success') {
-    const toast = document.getElementById('toast');
-    const icon = document.getElementById('toastIcon');
-    const msgSpan = document.getElementById('toastMsg');
-    
-    toast.classList.remove('success', 'error', 'hidden');
-    toast.classList.add(type);
-    msgSpan.textContent = msg;
-    icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
-    
-    setTimeout(() => {
-      toast.classList.add('hidden');
-    }, 5000);
-  }
-
-  // ─── EMAILJS - FIXED ──────────────────────────────────────
-  async function sendEmail(to, subject, html) {
+  async function uploadProofToSupabase(file, ref) {
     try {
-      const templateParams = {
-        to_email: to,
-        subject: subject,
-        message_html: html,
-        to_name: to.split('@')[0]
-      };
-      
-      const response = emailjs.send(EMAILJS_SID, 'template_s17clcj', templateParams);
-      console.log('Email sent:', response);
-      return true;
-    } catch (e) {
-      console.error('EmailJS error:', e);
-      return false;
+      const ext = file.name.split('.').pop();
+      const path = `proofs/${ref}-${Date.now()}.${ext}`;
+      const { data, error } = await sb.storage.from('payment-proofs').upload(path, file, { cacheControl: '3600', upsert: false });
+      if (error) throw error;
+      const { data: urlData } = sb.storage.from('payment-proofs').getPublicUrl(path);
+      return urlData.publicUrl;
+    } catch(e) {
+      console.error('Upload error:', e);
+      return null;
     }
   }
 
-  // ─── FORM SUBMIT - FIXED ──────────────────────────────────
-  document.getElementById('bookingForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
+  async function submitBooking() {
+    const payRef = document.getElementById('payment_ref').value.trim();
+    if (!payRef) { showToast('Please enter your payment reference number.', 'error'); return; }
+    if (!uploadedFile) { showToast('Please upload your payment screenshot.', 'error'); return; }
 
     const name   = document.getElementById('guest_name').value.trim();
     const email  = document.getElementById('guest_email').value.trim();
     const phone  = document.getElementById('guest_phone').value.trim();
-    const room   = document.getElementById('room_type').value;
     const ci     = document.getElementById('check_in').value;
     const co     = document.getElementById('check_out').value;
     const adults = parseInt(document.getElementById('adults').value);
     const kids   = parseInt(document.getElementById('children').value);
+    const prices = calcPrices();
 
-    // Validation
-    if (!name) { showToast('Please enter your full name.', 'error'); return; }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email.', 'error'); return; }
-    if (!room) { showToast('Please select a room type.', 'error'); return; }
-    if (!ci) { showToast('Please select a check-in date.', 'error'); return; }
-    if (!co) { showToast('Please select a check-out date.', 'error'); return; }
-    if (co <= ci) { showToast('Check-out must be after check-in.', 'error'); return; }
+    const ref = generateRef();
+    currentBookingRef = ref;
 
-    // Loading state
-    document.getElementById('submitText').textContent = 'Submitting...';
+    document.getElementById('submitText').textContent = 'Uploading proof...';
     document.getElementById('submitSpinner').classList.remove('hidden');
     document.getElementById('submitBtn').disabled = true;
 
-    const ref = generateRef();
-
     try {
-      // 1. Save to Supabase
+      // Upload proof
+      const proofUrl = await uploadProofToSupabase(uploadedFile, ref);
+
+      // Deposit deadline = 24 hours from now
+      const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      // Save booking
       const { error: dbErr } = await sb.from('bookings').insert({
         booking_ref: ref,
         guest_name: name,
         guest_email: email,
-        guest_phone: phone || null,
-        room_type: room,
+        guest_phone: phone,
+        room_type: selectedRoom,
         check_in_date: ci,
         check_out_date: co,
         adults: adults,
         children: kids,
-        status: 'pending_approval',
+        status: 'pending_payment_verification',
+        total_amount: prices.total,
+        deposit_amount: prices.deposit,
+        remaining_balance: prices.balance,
+        payment_status: 'proof_uploaded',
+        payment_proof_url: proofUrl,
+        payment_ref_number: payRef,
+        extra_pax: prices.extraPax,
+        extra_pax_fee: prices.extraPaxFee,
+        addons: JSON.stringify(selectedAddons),
+        booking_type: 'online',
+        deposit_deadline: deadline,
+        edit_log: JSON.stringify([{ action: 'created', at: new Date().toISOString(), by: 'guest' }]),
       });
-      
       if (dbErr) throw dbErr;
 
-      console.log('✅ Booking saved:', ref);
+      // Guest email
+      const guestHtml = buildGuestEmail(name, ref, selectedRoom, ci, co, adults, kids, prices, payRef);
+      await sendEmail(email, `Balay Maysa – Booking Received (${ref})`, guestHtml);
 
-      // 2. Guest email
-      const guestHtml = `
-<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
+      // Admin email
+      const adminHtml = buildAdminEmail(name, email, phone, ref, selectedRoom, ci, co, adults, kids, prices, payRef, proofUrl);
+      await sendEmail(ADMIN_EMAIL, `🏡 New Booking w/ Payment Proof – ${ref} – ${name}`, adminHtml);
+
+      document.getElementById('confirmRef').textContent = ref;
+      goStep(4);
+      showToast('Booking submitted! We\'ll confirm within 24 hours.', 'success');
+
+    } catch(err) {
+      console.error('Submit error:', err);
+      showToast('Something went wrong. Please try again or contact us directly.', 'error');
+    } finally {
+      document.getElementById('submitText').textContent = 'Submit Booking & Upload Proof';
+      document.getElementById('submitSpinner').classList.add('hidden');
+      document.getElementById('submitBtn').disabled = false;
+    }
+  }
+
+  function buildGuestEmail(name, ref, room, ci, co, adults, kids, prices, payRef) {
+    return `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
   <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
     <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1>
-    <p style="color:rgba(255,255,255,0.7);font-size:13px;margin:8px 0 0;">Booking Request Received</p>
+    <p style="color:rgba(255,255,255,0.7);font-size:13px;margin:8px 0 0;">Booking Request Received ✅</p>
   </div>
   <div style="padding:40px;">
     <p style="color:#1a1a1a;font-size:16px;">Hello <strong>${name}</strong>,</p>
-    <p style="color:#666;line-height:1.7;">Your booking request has been received and is <strong>pending admin approval</strong>. We will confirm within 24 hours.</p>
+    <p style="color:#666;line-height:1.7;">We've received your booking request and payment proof. Our team will verify your deposit and confirm your booking within <strong>24 hours</strong>.</p>
     <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
       <h3 style="margin:0 0 16px;color:#2d5a3b;font-family:Georgia,serif;font-weight:400;font-size:18px;">Booking Details</h3>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="padding:8px 0;color:#666;width:140px;">Reference</td><td style="color:#1a1a1a;font-weight:600;">${ref}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Room</td><td style="color:#1a1a1a;">${room}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Check-in</td><td style="color:#1a1a1a;">${fmtDate(ci)}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Check-out</td><td style="color:#1a1a1a;">${fmtDate(co)}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Guests</td><td style="color:#1a1a1a;">${adults} adult${adults>1?'s':''}, ${kids} child${kids!==1?'ren':''}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="color:#1a1a1a;font-weight:700;font-family:monospace;">${ref}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Room</td><td style="color:#1a1a1a;">${room}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Check-in</td><td style="color:#1a1a1a;">${fmtDate(ci)}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Check-out</td><td style="color:#1a1a1a;">${fmtDate(co)}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Guests</td><td style="color:#1a1a1a;">${adults} adult${adults>1?'s':''}, ${kids} child${kids!=1?'ren':''}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Total Amount</td><td style="color:#1a1a1a;font-weight:600;">₱${prices.total.toLocaleString()}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Deposit Sent</td><td style="color:#2d5a3b;font-weight:600;">₱${prices.deposit.toLocaleString()}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Remaining Balance</td><td style="color:#666;">₱${prices.balance.toLocaleString()} (payable on arrival)</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Payment Ref</td><td style="color:#1a1a1a;">${payRef}</td></tr>
       </table>
     </div>
-    <p style="color:#666;font-size:13px;">If you have questions, contact us at <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a> or <a href="mailto:balaymaysa@gmail.com" style="color:#2d5a3b;">balaymaysa@gmail.com</a>.</p>
+    <p style="color:#666;font-size:13px;">Track your booking anytime at <a href="https://balay-maysaa.vercel.app/lookup.html" style="color:#2d5a3b;">balay-maysaa.vercel.app/lookup.html</a> using your reference number.</p>
+    <p style="color:#666;font-size:13px;margin-top:8px;">Questions? Call us at <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a> or email <a href="mailto:balaymaysa@gmail.com" style="color:#2d5a3b;">balaymaysa@gmail.com</a></p>
   </div>
   <div style="background:#2d5a3b;padding:20px;text-align:center;">
     <p style="color:rgba(255,255,255,0.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p>
   </div>
 </div>`;
+  }
 
-      await sendEmail(email, `Balay Maysa Booking Request Received – ${ref}`, guestHtml);
-
-      // 3. Admin email
-      const adminHtml = `
-<div style="font-family:Inter,sans-serif;max-width:500px;margin:0 auto;">
+  function buildAdminEmail(name, email, phone, ref, room, ci, co, adults, kids, prices, payRef, proofUrl) {
+    return `<div style="font-family:Inter,sans-serif;max-width:500px;margin:0 auto;">
   <div style="background:#1e3d28;padding:24px 32px;">
-    <h2 style="color:white;font-size:20px;margin:0;">🏡 New Booking Request</h2>
+    <h2 style="color:white;font-size:20px;margin:0;">🏡 New Booking + Payment Proof</h2>
   </div>
   <div style="background:#f9f9f9;padding:32px;">
+    <p><strong>Reference:</strong> ${ref}</p>
     <p><strong>Guest:</strong> ${name}</p>
     <p><strong>Email:</strong> ${email}</p>
-    <p><strong>Phone:</strong> ${phone || '—'}</p>
+    <p><strong>Phone:</strong> ${phone}</p>
     <p><strong>Room:</strong> ${room}</p>
     <p><strong>Dates:</strong> ${fmtDate(ci)} → ${fmtDate(co)}</p>
-    <p><strong>Reference:</strong> ${ref}</p>
     <p><strong>Adults:</strong> ${adults} | <strong>Children:</strong> ${kids}</p>
-    <p style="margin-top:24px;"><a href="https://balay-maysaa.vercel.app/admin.html" style="background:#2d5a3b;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;">Go to Admin Panel</a></p>
+    <p><strong>Total:</strong> ₱${prices.total.toLocaleString()} | <strong>Deposit:</strong> ₱${prices.deposit.toLocaleString()} | <strong>Balance:</strong> ₱${prices.balance.toLocaleString()}</p>
+    <p><strong>Payment Ref:</strong> ${payRef}</p>
+    ${proofUrl ? `<p><strong>Payment Proof:</strong> <a href="${proofUrl}">View Screenshot</a></p>` : ''}
+    <p style="margin-top:24px;"><a href="https://balay-maysaa.vercel.app/admin.html" style="background:#2d5a3b;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;">Open Admin Panel →</a></p>
   </div>
 </div>`;
+  }
 
-      await sendEmail(ADMIN_EMAIL, `New Booking Request – ${ref} – ${name}`, adminHtml);
+  async function sendEmail(to, subject, html) {
+    try {
+      await emailjs.send(EMAILJS_SID, EMAILJS_TMPL, { to_email: to, subject, message_html: html, to_name: to.split('@')[0] });
+      return true;
+    } catch(e) { console.error('Email error:', e); return false; }
+  }
 
-      // 4. Success
-      showToast(`✅ Booking submitted! Reference: ${ref}. We'll contact you within 24 hours.`);
-      document.getElementById('bookingForm').reset();
-      document.getElementById('availabilityMsg').classList.add('hidden');
-      window.scrollTo({ top: document.getElementById('booking').offsetTop - 80, behavior: 'smooth' });
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.classList.remove('success', 'error', 'hidden');
+    toast.classList.add(type);
+    document.getElementById('toastMsg').textContent = msg;
+    document.getElementById('toastIcon').className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    setTimeout(() => toast.classList.add('hidden'), 6000);
+  }
 
-    } catch (err) {
-      console.error('Booking error:', err);
-      showToast('❌ Something went wrong. Please try again or contact us directly.', 'error');
-    } finally {
-      document.getElementById('submitText').textContent = 'Send Booking Request';
-      document.getElementById('submitSpinner').classList.add('hidden');
-      document.getElementById('submitBtn').disabled = false;
-    }
-  });
+  function resetForm() {
+    selectedRoom = null; selectedAddons = {}; nights = 0; uploadedFile = null;
+    document.getElementById('bookingForm') && document.getElementById('bookingForm').reset();
+    goStep(1);
+  }
 </script>
-
+<form id="bookingForm" style="display:none;"></form>
 </body>
 </html>
