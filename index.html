@@ -1,3 +1,5 @@
+
+cat > /home/claude/balay-maysa/index.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,111 +15,190 @@
     tailwind.config = {
       theme: {
         extend: {
-          colors: { forest:'#2d5a3b','forest-dark':'#1e3d28',gold:'#c9a03d','gold-light':'#e4c06e',cream:'#faf8f5','text-dark':'#1a1a1a','text-muted':'#666666' },
-          fontFamily: { heading:['"Cormorant Garamond"','serif'], body:['Inter','sans-serif'] },
+          colors: {
+            forest: '#2d5a3b', 'forest-dark': '#1e3d28',
+            gold: '#c9a03d', 'gold-light': '#e4c06e',
+            cream: '#faf8f5', 'text-dark': '#1a1a1a', 'text-muted': '#666666'
+          },
+          fontFamily: { heading: ['"Cormorant Garamond"', 'serif'], body: ['Inter', 'sans-serif'] },
         },
       },
     };
   </script>
   <style>
-    *{box-sizing:border-box;}html{scroll-behavior:smooth;}
-    body{font-family:'Inter',sans-serif;background:#faf8f5;color:#1a1a1a;}
-    #navbar{transition:background .4s,box-shadow .4s;}
-    #navbar.scrolled{background:white!important;box-shadow:0 2px 24px rgba(0,0,0,.08);}
-    #navbar.scrolled .nav-link{color:#2d5a3b!important;}
-    #navbar.scrolled .nav-logo{color:#2d5a3b!important;}
-    #navbar.scrolled .nav-cta{background:#2d5a3b!important;color:white!important;}
-    .hero-bg{background:linear-gradient(135deg,rgba(30,61,40,.7) 0%,rgba(45,90,59,.5) 50%,rgba(201,160,61,.2) 100%),url('https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1800&q=80') center/cover no-repeat;min-height:100vh;}
-    .hero-text-glow{text-shadow:0 2px 40px rgba(0,0,0,.4);}
-    .room-card{transition:transform .3s,box-shadow .3s;}
-    .room-card:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(45,90,59,.15);}
-    .fi{width:100%;border:1.5px solid #d4d0ca;border-radius:10px;padding:12px 16px;font-size:15px;font-family:'Inter',sans-serif;background:white;color:#1a1a1a;transition:border-color .2s;outline:none;}
-    .fi:focus{border-color:#2d5a3b;box-shadow:0 0 0 3px rgba(45,90,59,.1);}
-    .fi-label{display:block;font-size:13px;font-weight:500;color:#444;margin-bottom:6px;}
-    #toast{position:fixed;bottom:30px;right:30px;z-index:9999;padding:16px 24px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.18);display:flex;align-items:center;gap:10px;max-width:380px;}
-    #toast.hidden{display:none!important;}
-    #toast.success{background:#2d5a3b;color:white;}
-    #toast.error{background:#c0392b;color:white;}
-    .spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
-    @keyframes spin{to{transform:rotate(360deg);}}
-    .ornament{display:flex;align-items:center;gap:16px;}
-    .ornament::before,.ornament::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,#c9a03d,transparent);}
-    .step{display:none;}.step.active{display:block;}
-    .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;transition:all .3s;flex-shrink:0;}
-    .step-dot.done{background:#2d5a3b;color:white;}
-    .step-dot.active{background:#c9a03d;color:white;}
-    .step-dot.pending{background:#e5e3df;color:#999;}
-    .step-line{width:40px;height:2px;background:#e5e3df;flex-shrink:0;}
-    .step-line.done{background:#2d5a3b;}
-    .price-box{background:linear-gradient(135deg,#1e3d28 0%,#2d5a3b 100%);border-radius:16px;padding:24px;color:white;}
-    .upload-area{border:2px dashed #d4d0ca;border-radius:12px;padding:32px;text-align:center;transition:all .2s;cursor:pointer;}
-    .upload-area:hover,.upload-area.drag-over{border-color:#2d5a3b;background:rgba(45,90,59,.05);}
-    .upload-area.uploaded{border-color:#2d5a3b;background:#f0fdf4;}
-    .qr-tab{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border:1.5px solid #d4d0ca;color:#666;}
-    .qr-tab.active{background:#2d5a3b;color:white;border-color:#2d5a3b;}
-    .room-sel{border:2px solid #e5e3df;border-radius:14px;padding:16px 18px;cursor:pointer;transition:all .2s;background:white;}
-    .room-sel:hover{border-color:#c9a03d;}
-    .room-sel.selected{border-color:#2d5a3b;background:#f0fdf4;}
-    .room-sel.recommended{position:relative;}
-    .room-sel.recommended::before{content:'⭐ Best Match';position:absolute;top:-10px;left:14px;background:#c9a03d;color:white;font-size:10px;font-weight:600;padding:2px 10px;border-radius:999px;}
-    .addon-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1.5px solid #e5e3df;border-radius:10px;cursor:pointer;transition:all .2s;}
-    .addon-item:hover{border-color:#c9a03d;}
-    .addon-item.selected{border-color:#2d5a3b;background:#f0fdf4;}
-    .package-card{border:2px solid #e5e3df;border-radius:16px;padding:18px;cursor:pointer;transition:all .2s;background:white;}
-    .package-card:hover{border-color:#c9a03d;box-shadow:0 4px 20px rgba(45,90,59,.1);}
-    .package-card.selected{border-color:#2d5a3b;background:#f0fdf4;}
-    .package-card.recommended::before{content:'⭐ Recommended';position:absolute;top:-10px;left:14px;background:#c9a03d;color:white;font-size:10px;font-weight:600;padding:2px 10px;border-radius:999px;}
-    .package-card{position:relative;}
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-    .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:500;cursor:default;}
-    .cal-day.booked{background:#fee2e2;color:#991b1b;cursor:not-allowed;}
-    .cal-day.today{background:#2d5a3b;color:white;}
-    .cal-day.other-month{opacity:.3;}
-    .cal-day:not(.booked):not(.today){background:#f0fdf4;color:#2d5a3b;}
-    .voucher-valid{background:#d1fae5;border:1px solid #34d399;color:#065f46;}
-    .voucher-invalid{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;}
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: #faf8f5; color: #1a1a1a; margin: 0; }
+
+    /* ── Navbar ──────────────────────────────────────────────── */
+    #navbar { transition: background .4s, box-shadow .4s; }
+    #navbar.scrolled { background: white !important; box-shadow: 0 2px 24px rgba(0,0,0,.08); }
+    #navbar.scrolled .nav-link { color: #2d5a3b !important; }
+    #navbar.scrolled .nav-logo { color: #2d5a3b !important; }
+    #navbar.scrolled .nav-cta { background: #2d5a3b !important; color: white !important; }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+    .hero-bg {
+      background: linear-gradient(135deg, rgba(30,61,40,.72) 0%, rgba(45,90,59,.52) 50%, rgba(201,160,61,.18) 100%),
+        url('https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1800&q=80') center/cover no-repeat;
+      min-height: 100vh;
+    }
+    .hero-text-glow { text-shadow: 0 2px 40px rgba(0,0,0,.4); }
+
+    /* ── Room Card Slider ────────────────────────────────────── */
+    .room-card { transition: transform .3s, box-shadow .3s; }
+    .room-card:hover { transform: translateY(-5px); box-shadow: 0 20px 60px rgba(45,90,59,.15); }
+    .room-slider { position: relative; overflow: hidden; height: 220px; }
+    .room-slides { display: flex; height: 100%; transition: transform .5s ease; }
+    .room-slide { flex-shrink: 0; width: 100%; height: 100%; background-size: cover; background-position: center; }
+    .slider-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,.4); color: white; border: none; width: 32px; height: 32px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 12px; z-index: 5; transition: background .2s;
+    }
+    .slider-btn:hover { background: rgba(0,0,0,.7); }
+    .slider-btn.prev { left: 8px; }
+    .slider-btn.next { right: 8px; }
+    .slider-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+    .slider-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.5); cursor: pointer; transition: background .2s; }
+    .slider-dot.active { background: white; }
+
+    /* ── Form inputs ─────────────────────────────────────────── */
+    .fi {
+      width: 100%; border: 1.5px solid #d4d0ca; border-radius: 10px;
+      padding: 11px 16px; font-size: 15px; font-family: 'Inter', sans-serif;
+      background: white; color: #1a1a1a; transition: border-color .2s; outline: none;
+    }
+    .fi:focus { border-color: #2d5a3b; box-shadow: 0 0 0 3px rgba(45,90,59,.1); }
+    .fi-label { display: block; font-size: 13px; font-weight: 500; color: #444; margin-bottom: 6px; }
+    .fi-err { border-color: #ef4444 !important; }
+    .err-msg { font-size: 11px; color: #ef4444; margin-top: 4px; display: none; }
+    .err-msg.show { display: block; }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      padding: 15px 22px; border-radius: 12px; font-size: 14px; font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,.2); display: flex; align-items: center;
+      gap: 10px; max-width: 380px; transition: opacity .3s;
+    }
+    #toast.hidden { display: none !important; }
+    #toast.success { background: #2d5a3b; color: white; }
+    #toast.error   { background: #c0392b; color: white; }
+    #toast.info    { background: #1d4ed8; color: white; }
+
+    /* ── Spinner ─────────────────────────────────────────────── */
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Ornament ────────────────────────────────────────────── */
+    .ornament { display: flex; align-items: center; gap: 16px; }
+    .ornament::before, .ornament::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, transparent, #c9a03d, transparent); }
+
+    /* ── Booking Steps ───────────────────────────────────────── */
+    .step { display: none; }
+    .step.active { display: block; }
+    .step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; transition: all .3s; flex-shrink: 0; }
+    .step-dot.done   { background: #2d5a3b; color: white; }
+    .step-dot.active { background: #c9a03d; color: white; }
+    .step-dot.pending{ background: #e5e3df; color: #999; }
+    .step-line { width: 40px; height: 2px; background: #e5e3df; flex-shrink: 0; }
+    .step-line.done  { background: #2d5a3b; }
+
+    /* ── Price box ───────────────────────────────────────────── */
+    .price-box { background: linear-gradient(135deg, #1e3d28 0%, #2d5a3b 100%); border-radius: 16px; padding: 22px; color: white; }
+
+    /* ── Upload area ─────────────────────────────────────────── */
+    .upload-area { border: 2px dashed #d4d0ca; border-radius: 12px; padding: 30px; text-align: center; transition: all .2s; cursor: pointer; }
+    .upload-area:hover, .upload-area.drag-over { border-color: #2d5a3b; background: rgba(45,90,59,.04); }
+    .upload-area.uploaded { border-color: #2d5a3b; background: #f0fdf4; }
+
+    /* ── Payment method tabs ─────────────────────────────────── */
+    .qr-tab { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; border: 1.5px solid #d4d0ca; color: #666; }
+    .qr-tab.active { background: #2d5a3b; color: white; border-color: #2d5a3b; }
+
+    /* ── Package cards ───────────────────────────────────────── */
+    .package-card { border: 2px solid #e5e3df; border-radius: 16px; padding: 18px; cursor: pointer; transition: all .2s; background: white; position: relative; }
+    .package-card:hover { border-color: #c9a03d; box-shadow: 0 4px 20px rgba(45,90,59,.1); }
+    .package-card.selected { border-color: #2d5a3b; background: #f0fdf4; }
+    .package-card.recommended::before { content: '⭐ Recommended'; position: absolute; top: -11px; left: 14px; background: #c9a03d; color: white; font-size: 10px; font-weight: 600; padding: 2px 10px; border-radius: 999px; }
+
+    /* ── Room selector ───────────────────────────────────────── */
+    .room-sel { border: 2px solid #e5e3df; border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all .2s; background: white; }
+    .room-sel:hover { border-color: #c9a03d; }
+    .room-sel.selected { border-color: #2d5a3b; background: #f0fdf4; }
+
+    /* ── Add-on items ────────────────────────────────────────── */
+    .addon-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 15px; border: 1.5px solid #e5e3df; border-radius: 10px; cursor: pointer; transition: all .2s; }
+    .addon-item:hover { border-color: #c9a03d; }
+    .addon-item.selected { border-color: #2d5a3b; background: #f0fdf4; }
+
+    /* ── Calendar ────────────────────────────────────────────── */
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: default; transition: all .15s; }
+    .cal-day.past    { background: #f3f4f6; color: #c0c0c0; }
+    .cal-day.booked  { background: #fee2e2; color: #991b1b; cursor: not-allowed; }
+    .cal-day.today   { background: #2d5a3b; color: white; font-weight: 700; }
+    .cal-day.avail   { background: #f0fdf4; color: #2d5a3b; }
+    .cal-day.filler  { background: transparent; }
+
+    /* ── Voucher status ──────────────────────────────────────── */
+    .voucher-ok  { background: #d1fae5; border: 1px solid #34d399; color: #065f46; }
+    .voucher-err { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+
+    /* ── Terms modal ─────────────────────────────────────────── */
+    .terms-modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 800; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .terms-modal.hidden { display: none !important; }
+    .terms-box { background: white; border-radius: 20px; max-width: 640px; width: 100%; max-height: 80vh; overflow-y: auto; }
   </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
-<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 px-6 py-4" style="background:transparent;">
-  <div class="max-w-6xl mx-auto flex items-center justify-between">
-    <a href="#" class="nav-logo font-heading text-2xl font-semibold text-white tracking-wide" id="siteTitle">Balay Maysa</a>
-    <div class="hidden md:flex items-center gap-8">
-      <a href="#rooms" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rooms</a>
-      <a href="#booking" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Book Now</a>
-      <a href="lookup.html" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">My Booking</a>
-      <a href="#contact" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Contact</a>
-      <a href="#booking" class="nav-cta bg-gold text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-gold-light transition-colors">Reserve a Room</a>
-    </div>
-    <button id="mobileMenuBtn" class="md:hidden text-white text-xl"><i class="fas fa-bars"></i></button>
-  </div>
-  <div id="mobileMenu" class="hidden md:hidden mt-4 bg-white rounded-xl shadow-xl p-4">
-    <a href="#rooms" class="block py-2 text-forest font-medium text-sm">Rooms</a>
-    <a href="#booking" class="block py-2 text-forest font-medium text-sm">Book Now</a>
-    <a href="lookup.html" class="block py-2 text-forest font-medium text-sm">My Booking</a>
-    <a href="#contact" class="block py-2 text-forest font-medium text-sm">Contact</a>
-  </div>
-</nav>
-
-<!-- PROMO BANNER (hidden by default, shown if active in site_settings) -->
-<div id="promoBanner" class="hidden fixed top-0 left-0 right-0 z-40 bg-gold text-white text-center py-2 text-sm font-medium" style="margin-top:64px;">
+<!-- PROMO BANNER -->
+<div id="promoBanner" class="hidden fixed top-0 left-0 right-0 z-50 bg-gold text-white text-center py-2 text-sm font-medium">
   <span id="promoBannerText"></span>
 </div>
 
+<!-- NAVBAR -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-40 px-6 py-4" style="background: transparent;">
+  <div class="max-w-6xl mx-auto flex items-center justify-between">
+    <a href="#" class="nav-logo font-heading text-2xl font-semibold text-white tracking-wide" id="siteTitle">Balay Maysa</a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#rooms"   class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rooms</a>
+      <a href="#pricing" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rates</a>
+      <a href="#booking" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Book Now</a>
+      <a href="lookup.html" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">My Booking</a>
+      <a href="#contact" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Contact</a>
+      <a href="#booking" class="nav-cta bg-gold text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-gold-light transition-colors">Reserve</a>
+    </div>
+    <button id="mobileMenuBtn" class="md:hidden text-white text-xl"><i class="fas fa-bars"></i></button>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden mt-3 bg-white rounded-xl shadow-xl p-4 space-y-1">
+    <a href="#rooms"      class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Rooms</a>
+    <a href="#pricing"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Rates</a>
+    <a href="#booking"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Book Now</a>
+    <a href="lookup.html" class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">My Booking</a>
+    <a href="#contact"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Contact</a>
+  </div>
+</nav>
+
 <!-- HERO -->
-<section class="hero-bg flex flex-col items-center justify-center text-center px-6 relative">
-  <div class="max-w-4xl mx-auto py-40">
+<section class="hero-bg flex flex-col items-center justify-center text-center px-6 relative" id="heroSection">
+  <div class="max-w-4xl mx-auto py-44">
     <p class="text-gold font-body text-sm tracking-widest uppercase mb-4 opacity-90" id="heroTagline">Private Resort · Caloocan, Philippines</p>
     <h1 class="font-heading text-6xl md:text-8xl text-white hero-text-glow font-light mb-6 leading-tight" id="heroTitle">Balay Maysa</h1>
-    <p class="text-white/80 text-lg md:text-xl max-w-xl mx-auto mb-10 font-light leading-relaxed" id="heroSubtitle">A hidden tropical sanctuary where lush gardens, private pools, and warm Filipino hospitality await your family.</p>
+    <p class="text-white/80 text-lg md:text-xl max-w-xl mx-auto mb-10 font-light leading-relaxed" id="heroSubtitle">
+      A hidden tropical sanctuary where lush gardens, private pools, and warm Filipino hospitality await your family.
+    </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <a href="#booking" class="bg-gold hover:bg-gold-light text-white font-medium px-8 py-4 rounded-full transition-all duration-300 text-sm tracking-wide shadow-lg">Book Your Stay</a>
-      <a href="#rooms" class="border border-white/60 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all duration-300 text-sm tracking-wide">Explore Rooms</a>
+      <a href="#booking" class="bg-gold hover:bg-gold-light text-white font-medium px-8 py-4 rounded-full transition-all text-sm tracking-wide shadow-lg">Book Your Stay</a>
+      <a href="#rooms"   class="border border-white/60 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all text-sm tracking-wide">Explore Rooms</a>
     </div>
   </div>
-  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/60 animate-bounce"><i class="fas fa-chevron-down text-xl"></i></div>
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/60 animate-bounce">
+    <i class="fas fa-chevron-down text-xl"></i>
+  </div>
 </section>
 
 <!-- INTRO -->
@@ -125,7 +206,9 @@
   <div class="max-w-4xl mx-auto px-6 text-center">
     <p class="ornament text-gold/60 text-xs tracking-widest uppercase mb-8">Welcome</p>
     <h2 class="font-heading text-5xl md:text-6xl text-forest font-light mb-6">Your Private <em>Paradise</em></h2>
-    <p class="text-text-muted leading-relaxed text-lg max-w-2xl mx-auto" id="aboutText">Nestled in Congress Village, Caloocan North, Balay Maysa is a haven of tranquility. Whether you're celebrating with family or escaping with friends, our resort offers intimate spaces designed for unforgettable memories.</p>
+    <p class="text-text-muted leading-relaxed text-lg max-w-2xl mx-auto" id="aboutText">
+      Nestled in Congress Village, Caloocan North, Balay Maysa is a haven of tranquility. Whether you're celebrating with family or escaping with friends, our resort offers intimate spaces designed for unforgettable memories.
+    </p>
     <div class="grid grid-cols-3 gap-8 mt-16 max-w-lg mx-auto">
       <div class="text-center"><div class="text-3xl font-heading text-forest font-semibold">4</div><div class="text-xs text-text-muted mt-1 uppercase tracking-wide">Unique Rooms</div></div>
       <div class="text-center border-x border-gold/30"><div class="text-3xl font-heading text-forest font-semibold">100%</div><div class="text-xs text-text-muted mt-1 uppercase tracking-wide">Private</div></div>
@@ -135,7 +218,7 @@
 </section>
 
 <!-- AVAILABILITY CALENDAR -->
-<section class="py-16 bg-white">
+<section class="py-14 bg-white">
   <div class="max-w-2xl mx-auto px-6">
     <div class="text-center mb-8">
       <p class="text-gold text-xs tracking-widest uppercase mb-2">Live Availability</p>
@@ -143,17 +226,28 @@
     </div>
     <div class="bg-cream rounded-2xl p-6 shadow-sm">
       <div class="flex items-center justify-between mb-4">
-        <button id="calPrev" class="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-forest hover:bg-forest hover:text-white transition-colors"><i class="fas fa-chevron-left text-xs"></i></button>
+        <button id="calPrev" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-forest hover:bg-forest hover:text-white transition-colors">
+          <i class="fas fa-chevron-left text-xs"></i>
+        </button>
         <span id="calLabel" class="font-heading text-xl text-forest font-medium"></span>
-        <button id="calNext" class="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-forest hover:bg-forest hover:text-white transition-colors"><i class="fas fa-chevron-right text-xs"></i></button>
+        <button id="calNext" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-forest hover:bg-forest hover:text-white transition-colors">
+          <i class="fas fa-chevron-right text-xs"></i>
+        </button>
       </div>
       <div class="grid grid-cols-7 gap-1 mb-2 text-center">
-        <div class="text-xs font-semibold text-gray-400">SUN</div><div class="text-xs font-semibold text-gray-400">MON</div><div class="text-xs font-semibold text-gray-400">TUE</div><div class="text-xs font-semibold text-gray-400">WED</div><div class="text-xs font-semibold text-gray-400">THU</div><div class="text-xs font-semibold text-gray-400">FRI</div><div class="text-xs font-semibold text-gray-400">SAT</div>
+        <div class="text-xs font-semibold text-gray-400 py-1">SUN</div>
+        <div class="text-xs font-semibold text-gray-400 py-1">MON</div>
+        <div class="text-xs font-semibold text-gray-400 py-1">TUE</div>
+        <div class="text-xs font-semibold text-gray-400 py-1">WED</div>
+        <div class="text-xs font-semibold text-gray-400 py-1">THU</div>
+        <div class="text-xs font-semibold text-gray-400 py-1">FRI</div>
+        <div class="text-xs font-semibold text-gray-400 py-1">SAT</div>
       </div>
       <div id="calGrid" class="cal-grid"></div>
-      <div class="flex gap-4 mt-4 text-xs justify-center">
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-100 inline-block border border-green-400"></span> Available</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-100 inline-block border border-red-300"></span> Booked</div>
+      <div class="flex gap-5 mt-5 text-xs justify-center flex-wrap">
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-100 border border-green-400 inline-block"></span> Available</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block"></span> Booked</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-gray-200 inline-block"></span> Past</div>
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-forest inline-block"></span> Today</div>
       </div>
     </div>
@@ -168,14 +262,25 @@
       <h2 class="font-heading text-5xl text-forest font-light">Our Rooms</h2>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <!-- Silayan -->
       <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md">
-        <div class="h-56 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1540518614846-7eded433c457?w=700&q=80')"></div>
+        <div class="room-slider" id="slider-silayan">
+          <div class="room-slides" id="slides-silayan">
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80')"></div>
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&q=80')"></div>
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&q=80')"></div>
+          </div>
+          <button class="slider-btn prev" onclick="slideRoom('silayan',-1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="slider-btn next" onclick="slideRoom('silayan', 1)"><i class="fas fa-chevron-right"></i></button>
+          <div class="slider-dots" id="dots-silayan"></div>
+        </div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div><h3 class="font-heading text-3xl text-forest font-medium">Silayan</h3><p class="text-text-muted text-sm mt-1">Pool View Suite</p></div>
+            <div><h3 class="font-heading text-3xl text-forest font-medium" id="room-name-silayan">Silayan</h3><p class="text-text-muted text-sm mt-0.5">Pool View Suite</p></div>
             <span class="bg-forest/10 text-forest text-xs px-3 py-1 rounded-full font-medium mt-1">Pool View</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
+          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted" id="room-feats-silayan">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i> 1 Queen Bed</div>
             <div class="flex items-center gap-2"><i class="fas fa-bath text-gold"></i> Bathtub</div>
             <div class="flex items-center gap-2"><i class="fas fa-users text-gold"></i> 2–3 Adults</div>
@@ -184,14 +289,25 @@
           <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Book This Room</a>
         </div>
       </div>
+
+      <!-- Sinta -->
       <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md">
-        <div class="h-56 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1505693314120-0d443867891c?w=700&q=80')"></div>
+        <div class="room-slider" id="slider-sinta">
+          <div class="room-slides" id="slides-sinta">
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1505693314120-0d443867891c?w=800&q=80')"></div>
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80')"></div>
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&q=80')"></div>
+          </div>
+          <button class="slider-btn prev" onclick="slideRoom('sinta',-1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="slider-btn next" onclick="slideRoom('sinta', 1)"><i class="fas fa-chevron-right"></i></button>
+          <div class="slider-dots" id="dots-sinta"></div>
+        </div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div><h3 class="font-heading text-3xl text-forest font-medium">Sinta</h3><p class="text-text-muted text-sm mt-1">2nd Floor Retreat</p></div>
+            <div><h3 class="font-heading text-3xl text-forest font-medium" id="room-name-sinta">Sinta</h3><p class="text-text-muted text-sm mt-0.5">2nd Floor Retreat</p></div>
             <span class="bg-gold/10 text-yellow-700 text-xs px-3 py-1 rounded-full font-medium mt-1">2nd Floor</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
+          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted" id="room-feats-sinta">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i> 1 Queen Bed</div>
             <div class="flex items-center gap-2"><i class="fas fa-snowflake text-gold"></i> AC + Fan</div>
             <div class="flex items-center gap-2"><i class="fas fa-users text-gold"></i> 2–3 Adults</div>
@@ -200,14 +316,25 @@
           <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Book This Room</a>
         </div>
       </div>
+
+      <!-- Tahanan -->
       <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md">
-        <div class="h-56 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=700&q=80')"></div>
+        <div class="room-slider" id="slider-tahanan">
+          <div class="room-slides" id="slides-tahanan">
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80')"></div>
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&q=80')"></div>
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&q=80')"></div>
+          </div>
+          <button class="slider-btn prev" onclick="slideRoom('tahanan',-1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="slider-btn next" onclick="slideRoom('tahanan', 1)"><i class="fas fa-chevron-right"></i></button>
+          <div class="slider-dots" id="dots-tahanan"></div>
+        </div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div><h3 class="font-heading text-3xl text-forest font-medium">Tahanan</h3><p class="text-text-muted text-sm mt-1">Family Suite</p></div>
+            <div><h3 class="font-heading text-3xl text-forest font-medium" id="room-name-tahanan">Tahanan</h3><p class="text-text-muted text-sm mt-0.5">Family Suite</p></div>
             <span class="bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full font-medium mt-1">Family</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
+          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted" id="room-feats-tahanan">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i> 2 Queen Beds</div>
             <div class="flex items-center gap-2"><i class="fas fa-home text-gold"></i> Suite Style</div>
             <div class="flex items-center gap-2"><i class="fas fa-users text-gold"></i> 4–6 Adults</div>
@@ -216,14 +343,25 @@
           <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Book This Room</a>
         </div>
       </div>
+
+      <!-- Barkada -->
       <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md">
-        <div class="h-56 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1596436889106-be35e843f974?w=700&q=80')"></div>
+        <div class="room-slider" id="slider-barkada">
+          <div class="room-slides" id="slides-barkada">
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&q=80')"></div>
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&q=80')"></div>
+            <div class="room-slide" style="background-image:url('https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&q=80')"></div>
+          </div>
+          <button class="slider-btn prev" onclick="slideRoom('barkada',-1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="slider-btn next" onclick="slideRoom('barkada', 1)"><i class="fas fa-chevron-right"></i></button>
+          <div class="slider-dots" id="dots-barkada"></div>
+        </div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div><h3 class="font-heading text-3xl text-forest font-medium">Barkada</h3><p class="text-text-muted text-sm mt-1">Group Escape</p></div>
+            <div><h3 class="font-heading text-3xl text-forest font-medium" id="room-name-barkada">Barkada</h3><p class="text-text-muted text-sm mt-0.5">Group Escape</p></div>
             <span class="bg-purple-50 text-purple-600 text-xs px-3 py-1 rounded-full font-medium mt-1">Group</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
+          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted" id="room-feats-barkada">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i> 2 Queen + 2 Single</div>
             <div class="flex items-center gap-2"><i class="fas fa-users text-gold"></i> 8–10 Adults</div>
             <div class="flex items-center gap-2"><i class="fas fa-snowflake text-gold"></i> Air Conditioned</div>
@@ -232,258 +370,396 @@
           <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Book This Room</a>
         </div>
       </div>
+
     </div>
-    <!-- Pricing Summary Table -->
-    <div class="mt-12 bg-white rounded-2xl shadow-md overflow-hidden">
-      <div class="bg-forest px-6 py-4"><h3 class="font-heading text-2xl text-white font-light">Group Pricing Guide</h3><p class="text-white/60 text-xs mt-1">Weekdays = Sun–Thu (with 1 hr free pool spa) · Weekends = Fri–Sat</p></div>
+  </div>
+</section>
+
+<!-- PRICING TABLE -->
+<section id="pricing" class="py-16 bg-white">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="text-center mb-10">
+      <p class="text-gold text-xs tracking-widest uppercase mb-3">Group Rates</p>
+      <h2 class="font-heading text-5xl text-forest font-light">Pricing Guide</h2>
+      <p class="text-text-muted text-sm mt-2" id="pricingSubtitle">Weekdays (Sun–Thu) include <strong>1 hour free pool spa</strong>. Weekends = Fri–Sat.</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
+      <div class="bg-forest px-6 py-4 flex items-center justify-between">
+        <div>
+          <h3 class="font-heading text-2xl text-white font-light">Group Pricing</h3>
+          <p class="text-white/60 text-xs mt-0.5">All rates are per night. Pool spa included on weekdays.</p>
+        </div>
+        <div class="flex gap-4 text-xs">
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-400 inline-block"></span><span class="text-white/70">Weekday (Sun–Thu)</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-gold inline-block"></span><span class="text-white/70">Weekend (Fri–Sat)</span></div>
+        </div>
+      </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead><tr class="bg-cream border-b border-gray-100">
-            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Pax</th>
-            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Rooms</th>
-            <th class="text-center px-5 py-3 text-xs font-semibold text-forest uppercase tracking-wide">Weekday</th>
-            <th class="text-center px-5 py-3 text-xs font-semibold text-gold uppercase tracking-wide">Weekend</th>
-            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Inclusions</th>
-          </tr></thead>
+          <thead>
+            <tr class="bg-cream border-b border-gray-100">
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Pax</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Rooms</th>
+              <th class="text-center px-5 py-3 text-xs font-semibold text-forest uppercase tracking-wide">Weekday</th>
+              <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wide" style="color:#b8860b">Weekend</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Inclusions</th>
+            </tr>
+          </thead>
           <tbody id="pricingTableBody">
-            <tr><td colspan="5" class="text-center py-6 text-gray-300 text-sm">Loading pricing...</td></tr>
+            <tr><td colspan="5" class="text-center py-8 text-gray-300">Loading rates…</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="px-6 py-4 bg-cream border-t border-gray-100">
-        <p class="text-xs text-text-muted font-medium mb-2">Add-ons:</p>
-        <div id="addonsDisplay" class="flex flex-wrap gap-2 text-xs text-text-muted">Loading add-ons...</div>
+      <!-- Add-ons summary -->
+      <div class="px-6 py-5 bg-cream border-t border-gray-100">
+        <p class="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Add-ons</p>
+        <div id="addonsDisplay" class="flex flex-wrap gap-2 text-xs">Loading…</div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- BOOKING SECTION -->
-<section id="booking" class="py-24 bg-white">
+<section id="booking" class="py-24 bg-cream">
   <div class="max-w-2xl mx-auto px-6">
     <div class="text-center mb-10">
       <p class="text-gold text-xs tracking-widest uppercase mb-3">Reservations</p>
-      <h2 class="font-heading text-5xl text-forest font-light mb-3">Book Your Stay</h2>
+      <h2 class="font-heading text-5xl text-forest font-light mb-2">Book Your Stay</h2>
       <p class="text-text-muted text-sm">Secure your dates with a 50% downpayment, or pay in full.</p>
     </div>
-    <!-- Step indicator -->
-    <div class="flex items-center justify-center gap-0 mb-2">
+
+    <!-- Step indicators -->
+    <div class="flex items-center justify-center mb-2">
       <div class="step-dot active" id="dot-1">1</div>
-      <div class="step-line" id="line-1"></div>
+      <div class="step-line"       id="line-1"></div>
       <div class="step-dot pending" id="dot-2">2</div>
-      <div class="step-line" id="line-2"></div>
+      <div class="step-line"       id="line-2"></div>
       <div class="step-dot pending" id="dot-3">3</div>
-      <div class="step-line" id="line-3"></div>
+      <div class="step-line"       id="line-3"></div>
       <div class="step-dot pending" id="dot-4">4</div>
     </div>
-    <div class="flex justify-between text-xs text-text-muted mb-8 px-2">
+    <div class="flex justify-between text-xs text-text-muted mb-8 px-1">
       <span>Guest Info</span><span>Package & Add-ons</span><span>Payment</span><span>Done</span>
     </div>
 
-    <div class="bg-cream rounded-3xl shadow-xl p-8 md:p-10">
+    <div class="bg-white rounded-3xl shadow-xl p-8 md:p-10">
 
-      <!-- STEP 1: Guest Info + Dates + Pax -->
+      <!-- ══ STEP 1 ══ -->
       <div class="step active" id="step-1">
         <h3 class="font-heading text-2xl text-forest mb-6">Your Information</h3>
-        <div class="mb-5"><label class="fi-label">Full Name <span class="text-red-500">*</span></label><input type="text" id="guest_name" class="fi" placeholder="Juan dela Cruz" /></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-          <div><label class="fi-label">Email <span class="text-red-500">*</span></label><input type="email" id="guest_email" class="fi" placeholder="juan@email.com" /></div>
-          <div><label class="fi-label">Phone <span class="text-red-500">*</span></label><input type="tel" id="guest_phone" class="fi" placeholder="09XX XXX XXXX" /></div>
+
+        <div class="mb-5">
+          <label class="fi-label">Full Name <span class="text-red-500">*</span></label>
+          <input type="text" id="guest_name" class="fi" placeholder="Juan dela Cruz" />
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-          <div><label class="fi-label">Check-in Date <span class="text-red-500">*</span></label><input type="date" id="check_in" class="fi" onchange="onDateChange()" /></div>
-          <div><label class="fi-label">Check-out Date <span class="text-red-500">*</span></label><input type="date" id="check_out" class="fi" onchange="onDateChange()" /></div>
+          <div>
+            <label class="fi-label">Email Address <span class="text-red-500">*</span></label>
+            <input type="email" id="guest_email" class="fi" placeholder="juan@email.com" />
+          </div>
+          <div>
+            <label class="fi-label">Phone Number <span class="text-red-500">*</span></label>
+            <input type="tel" id="guest_phone" class="fi" placeholder="09XX XXX XXXX" />
+            <p class="err-msg" id="err-phone">Please enter a valid PH mobile number (e.g. 09171234567)</p>
+          </div>
         </div>
-        <!-- Pax counts -->
-        <div class="bg-white rounded-xl p-5 mb-5 border border-gray-100">
-          <p class="text-sm font-medium text-gray-700 mb-3">Number of Guests</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div>
+            <label class="fi-label">Check-in Date <span class="text-red-500">*</span></label>
+            <input type="date" id="check_in" class="fi" onchange="onDateChange()" />
+          </div>
+          <div>
+            <label class="fi-label">Check-out Date <span class="text-red-500">*</span></label>
+            <input type="date" id="check_out" class="fi" onchange="onDateChange()" />
+          </div>
+        </div>
+
+        <!-- Pax -->
+        <div class="bg-cream rounded-xl p-5 mb-5 border border-gray-100">
+          <p class="text-sm font-semibold text-gray-700 mb-3">Number of Guests</p>
           <div class="grid grid-cols-3 gap-4">
-            <div><label class="fi-label text-xs">Adults <span class="text-red-500">*</span></label><input type="number" id="adults" class="fi" value="2" min="1" max="30" oninput="calcTotalPax()" /></div>
-            <div><label class="fi-label text-xs">Children (3+ yrs)</label><input type="number" id="children_above" class="fi" value="0" min="0" oninput="calcTotalPax()" /></div>
-            <div><label class="fi-label text-xs">Infants (below 3)</label><input type="number" id="children_below" class="fi" value="0" min="0" oninput="calcTotalPax()" /></div>
+            <div>
+              <label class="fi-label text-xs">Adults <span class="text-red-500">*</span></label>
+              <input type="number" id="adults" class="fi" value="2" min="1" max="50" oninput="calcTotalPax()" />
+            </div>
+            <div>
+              <label class="fi-label text-xs">Children (3+ yrs)</label>
+              <input type="number" id="children_above" class="fi" value="0" min="0" oninput="calcTotalPax()" />
+            </div>
+            <div>
+              <label class="fi-label text-xs">Infants (&lt;3 yrs)</label>
+              <input type="number" id="children_below" class="fi" value="0" min="0" />
+            </div>
           </div>
           <div class="mt-3 p-3 bg-forest/5 rounded-lg flex items-center justify-between">
-            <span class="text-sm text-gray-600">Total Pax (billed)</span>
+            <span class="text-sm text-gray-600">Total Billable Pax</span>
             <span class="font-bold text-forest text-lg" id="totalPaxDisplay">2</span>
           </div>
-          <p class="text-xs text-text-muted mt-2">* Infants (below 3) are not counted in total pax.</p>
+          <p class="text-xs text-text-muted mt-2">* Infants below 3 years are not counted for billing.</p>
         </div>
+
         <div id="dayTypeNotice" class="hidden mb-4 p-3 rounded-lg text-xs font-medium"></div>
-        <button onclick="goStep(2)" class="w-full bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl transition-all text-sm">Continue to Package Selection →</button>
+
+        <button onclick="goStep(2)" class="w-full bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl transition-all text-sm tracking-wide">
+          Continue to Package Selection →
+        </button>
       </div>
 
-      <!-- STEP 2: Package + Room + Add-ons -->
+      <!-- ══ STEP 2 ══ -->
       <div class="step hidden" id="step-2">
-        <h3 class="font-heading text-2xl text-forest mb-2">Choose Your Package</h3>
-        <p class="text-text-muted text-sm mb-5" id="step2SubMsg">Based on your guest count, here's your recommended package:</p>
-        <!-- Package cards -->
+        <h3 class="font-heading text-2xl text-forest mb-1">Choose Your Package</h3>
+        <p class="text-text-muted text-sm mb-5" id="step2Msg">Recommended package based on your guest count:</p>
+
         <div id="packageCards" class="space-y-3 mb-6"></div>
-        <!-- Room selector (shown for packages that allow choice) -->
+
+        <!-- Room picker -->
         <div id="roomSelectorArea" class="hidden mb-6">
-          <p class="fi-label mb-3">Select Your Room(s) <span class="text-red-500">*</span></p>
+          <p class="fi-label mb-3" id="roomPickerLabel">Select Room(s) <span class="text-red-500">*</span></p>
           <div id="roomSelectorCards" class="space-y-2"></div>
         </div>
+
         <!-- Add-ons -->
-        <div class="mb-6">
-          <p class="fi-label mb-3">Add-ons <span class="text-xs text-text-muted font-normal">(optional)</span></p>
+        <div class="mb-5">
+          <p class="fi-label mb-3">Optional Add-ons</p>
           <div id="addonCards" class="space-y-2"></div>
         </div>
-        <!-- Pet count -->
+
+        <!-- Pet qty -->
         <div id="petCountArea" class="hidden mb-4">
           <label class="fi-label">Number of Pets</label>
-          <input type="number" id="pet_count" class="fi w-24" value="1" min="1" max="10" oninput="recalcTotal()" />
+          <input type="number" id="pet_count" class="fi w-28" value="1" min="1" max="10" oninput="recalcTotal()" />
         </div>
-        <!-- Pool spa hours -->
+        <!-- Pool spa hrs -->
         <div id="poolSpaArea" class="hidden mb-4">
-          <label class="fi-label">Pool Spa Hours</label>
-          <input type="number" id="pool_spa_hours" class="fi w-24" value="1" min="1" max="24" oninput="recalcTotal()" />
+          <label class="fi-label">Extra Pool Spa Hours (₱350/hr)</label>
+          <input type="number" id="pool_spa_hours" class="fi w-28" value="1" min="1" max="24" oninput="recalcTotal()" />
         </div>
-        <!-- Extra pax -->
+        <!-- Extra pax notice -->
         <div id="extraPaxArea" class="hidden mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-xs text-yellow-800">
           <i class="fas fa-info-circle mr-1"></i><span id="extraPaxMsg"></span>
         </div>
-        <!-- Price box -->
+
+        <!-- Price breakdown -->
         <div id="priceBox" class="hidden price-box mb-6">
           <p class="text-white/60 text-xs uppercase tracking-widest mb-3">Price Breakdown</p>
           <div id="priceLines" class="space-y-2 text-sm mb-3"></div>
           <div class="border-t border-white/20 pt-3 flex justify-between items-center">
-            <span class="text-white/80 text-sm">Total</span><span id="totalDisplay" class="text-xl font-bold">₱0</span>
+            <span class="text-white/80 text-sm">Total</span>
+            <span id="totalDisplay" class="text-xl font-bold">₱0</span>
           </div>
           <div class="flex justify-between mt-1">
-            <span class="text-white/60 text-xs">50% Downpayment</span><span id="depositDisplay" class="text-gold font-semibold">₱0</span>
+            <span class="text-white/60 text-xs">50% Downpayment</span>
+            <span id="depositDisplay" class="text-gold font-semibold">₱0</span>
           </div>
         </div>
+
         <div class="flex gap-3">
           <button onclick="goStep(1)" class="px-6 py-4 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">← Back</button>
-          <button onclick="goStep(3)" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl text-sm">Continue to Payment →</button>
+          <button onclick="goStep(3)" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl text-sm tracking-wide">Continue to Payment →</button>
         </div>
       </div>
 
-      <!-- STEP 3: Payment -->
+      <!-- ══ STEP 3 ══ -->
       <div class="step hidden" id="step-3">
         <h3 class="font-heading text-2xl text-forest mb-2">Send Your Payment</h3>
-        <p class="text-text-muted text-sm mb-5">Your booking hold expires in 24 hours. Please send payment and upload proof.</p>
+        <p class="text-text-muted text-sm mb-5">Your booking hold lasts 24 hours. Send payment and upload proof below.</p>
+
         <!-- Summary -->
-        <div class="bg-white rounded-xl p-5 mb-5 border border-gray-100 text-sm space-y-2">
+        <div class="bg-cream rounded-xl p-5 mb-5 border border-gray-100 text-sm space-y-2">
           <div class="flex justify-between"><span class="text-text-muted">Package</span><span class="font-medium" id="sumPackage">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Dates</span><span class="font-medium" id="sumDates">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Pax</span><span class="font-medium" id="sumPax">–</span></div>
-          <div class="flex justify-between"><span class="text-text-muted">Rooms</span><span class="font-medium" id="sumRooms">–</span></div>
-          <div class="border-t pt-2 flex justify-between font-semibold"><span>Total Amount</span><span class="text-forest" id="sumTotal">₱0</span></div>
+          <div class="flex justify-between"><span class="text-text-muted">Room(s)</span><span class="font-medium" id="sumRooms">–</span></div>
+          <div class="border-t border-gray-200 pt-2 flex justify-between font-semibold">
+            <span>Total Amount</span><span class="text-forest" id="sumTotal">₱0</span>
+          </div>
         </div>
-        <!-- Payment type -->
+
+        <!-- Payment option -->
         <div class="mb-5">
-          <label class="fi-label">Payment Amount</label>
+          <label class="fi-label">How much are you paying now?</label>
           <div class="grid grid-cols-2 gap-3">
-            <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-forest transition-colors" id="payHalfLabel">
+            <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-forest transition-colors">
               <input type="radio" name="payType" value="downpayment" id="payHalf" class="accent-forest" checked onchange="updatePayAmount()" />
               <div><p class="font-medium text-sm">50% Downpayment</p><p class="text-xs text-text-muted" id="halfAmt">₱0</p></div>
             </label>
-            <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-forest transition-colors" id="payFullLabel">
+            <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-forest transition-colors">
               <input type="radio" name="payType" value="full" id="payFull" class="accent-forest" onchange="updatePayAmount()" />
               <div><p class="font-medium text-sm">Full Payment</p><p class="text-xs text-text-muted" id="fullAmt">₱0</p></div>
             </label>
           </div>
         </div>
-        <!-- QR / Payment details -->
-        <div class="flex gap-2 mb-4">
-          <button class="qr-tab active" onclick="showPayMethod('gcash',this)">GCash</button>
-          <button class="qr-tab" onclick="showPayMethod('maya',this)">Maya</button>
-          <button class="qr-tab" onclick="showPayMethod('bank',this)">Bank</button>
+
+        <!-- Payment method tabs -->
+        <div class="flex gap-2 mb-4 flex-wrap">
+          <button class="qr-tab active" onclick="showPayMethod('gcash', this)">GCash</button>
+          <button class="qr-tab" onclick="showPayMethod('maya', this)">Maya</button>
+          <button class="qr-tab" onclick="showPayMethod('bank', this)">Bank Transfer</button>
         </div>
-        <div id="pay-gcash" class="pay-method">
-          <div class="flex items-center gap-5 p-4 bg-blue-50 rounded-xl border border-blue-100 mb-4">
-            <img id="gcash-qr" src="" alt="GCash QR" class="w-24 h-24 rounded-xl bg-white object-contain" onerror="this.parentElement.innerHTML='<div class=\'w-24 h-24 rounded-xl bg-white flex items-center justify-center text-xs text-gray-400 text-center p-2\'>QR Coming Soon</div>'" />
+
+        <!-- GCash -->
+        <div id="pay-gcash" class="pay-method mb-4">
+          <div class="flex items-center gap-5 p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <img id="gcash-qr" src="" alt="GCash QR" class="w-24 h-24 rounded-xl bg-white object-contain border" onerror="this.parentElement.querySelector('.qr-fallback').classList.remove('hidden');this.classList.add('hidden')" />
+            <div class="qr-fallback hidden w-24 h-24 rounded-xl bg-white border flex items-center justify-center text-xs text-gray-400 text-center p-2">QR Code coming soon</div>
             <div>
               <p class="font-semibold text-blue-700 mb-1">GCash</p>
-              <p class="text-sm text-blue-600">Name: <strong id="gcash_name">Balay Maysa Resort</strong></p>
+              <p class="text-sm text-blue-600">Name: <strong>Balay Maysa Resort</strong></p>
               <p class="text-sm text-blue-600">Number: <strong id="contact_phone_gcash">0917 565 7918</strong></p>
-              <p class="text-xs text-blue-500 mt-1">Send: <strong id="gcash-amount">₱0</strong></p>
+              <p class="text-xs text-blue-500 mt-1">Send exactly: <strong id="gcash-amount">₱0</strong></p>
             </div>
           </div>
         </div>
-        <div id="pay-maya" class="pay-method hidden">
-          <div class="flex items-center gap-5 p-4 bg-green-50 rounded-xl border border-green-100 mb-4">
-            <img id="maya-qr" src="" alt="Maya QR" class="w-24 h-24 rounded-xl bg-white object-contain" onerror="this.parentElement.innerHTML='<div class=\'w-24 h-24 rounded-xl bg-white flex items-center justify-center text-xs text-gray-400 text-center p-2\'>QR Coming Soon</div>'" />
+        <!-- Maya -->
+        <div id="pay-maya" class="pay-method hidden mb-4">
+          <div class="flex items-center gap-5 p-4 bg-green-50 rounded-xl border border-green-100">
+            <img id="maya-qr" src="" alt="Maya QR" class="w-24 h-24 rounded-xl bg-white object-contain border" onerror="this.parentElement.querySelector('.qr-fallback').classList.remove('hidden');this.classList.add('hidden')" />
+            <div class="qr-fallback hidden w-24 h-24 rounded-xl bg-white border flex items-center justify-center text-xs text-gray-400 text-center p-2">QR Code coming soon</div>
             <div>
               <p class="font-semibold text-green-700 mb-1">Maya</p>
               <p class="text-sm text-green-600">Name: <strong>Balay Maysa Resort</strong></p>
               <p class="text-sm text-green-600">Number: <strong id="contact_phone_maya">0917 565 7918</strong></p>
-              <p class="text-xs text-green-500 mt-1">Send: <strong id="maya-amount">₱0</strong></p>
+              <p class="text-xs text-green-500 mt-1">Send exactly: <strong id="maya-amount">₱0</strong></p>
             </div>
           </div>
         </div>
-        <div id="pay-bank" class="pay-method hidden">
-          <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
+        <!-- Bank -->
+        <div id="pay-bank" class="pay-method hidden mb-4">
+          <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
             <p class="font-semibold text-gray-700 mb-2">Bank Transfer – BDO</p>
-            <p class="text-sm text-gray-600">Account Name: <strong>Balay Maysa Resort</strong></p>
-            <p class="text-sm text-gray-600">Account Number: <strong>INSERT_ACCOUNT_NUMBER</strong></p>
-            <p class="text-xs text-gray-400 mt-2">Use your booking reference as reference</p>
+            <p class="text-sm text-gray-600">Account Name: <strong id="bankAccountName">Balay Maysa Resort</strong></p>
+            <p class="text-sm text-gray-600">Account No.: <strong id="bankAccountNumber">—</strong></p>
+            <p class="text-xs text-gray-400 mt-2">Use your booking reference as the sender note.</p>
           </div>
         </div>
-        <!-- Payment ref -->
-        <div class="mb-4"><label class="fi-label">GCash/Maya Reference No. <span class="text-red-500">*</span></label><input type="text" id="payment_ref" class="fi" placeholder="e.g. 12345678" /></div>
-        <!-- Upload -->
+
+        <!-- Payment reference -->
+        <div class="mb-4">
+          <label class="fi-label">Transaction Reference No. <span class="text-red-500">*</span></label>
+          <input type="text" id="payment_ref" class="fi" placeholder="e.g. 12345678901" />
+          <p class="text-xs text-text-muted mt-1">Found in your GCash / Maya transaction history.</p>
+        </div>
+
+        <!-- Upload proof -->
         <div class="mb-4">
           <label class="fi-label">Upload Payment Screenshot <span class="text-red-500">*</span></label>
-          <div class="upload-area" id="uploadArea" onclick="document.getElementById('proofFile').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+          <div class="upload-area" id="uploadArea"
+               onclick="document.getElementById('proofFile').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleDrop(event)">
             <input type="file" id="proofFile" class="hidden" accept="image/*,application/pdf" onchange="handleFile(event)" />
-            <div id="uploadPlaceholder"><i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-2"></i><p class="text-sm text-gray-500 font-medium">Click or drag to upload</p><p class="text-xs text-gray-400 mt-1">PNG, JPG, PDF up to 5MB</p></div>
-            <div id="uploadPreview" class="hidden"><i class="fas fa-check-circle text-2xl text-forest mb-1"></i><p class="text-sm text-forest font-medium" id="uploadFileName">File uploaded</p><p class="text-xs text-gray-400">Click to change</p></div>
+            <div id="uploadPlaceholder">
+              <i class="fas fa-cloud-upload-alt text-4xl text-gray-300 mb-2"></i>
+              <p class="text-sm text-gray-500 font-medium">Click or drag & drop here</p>
+              <p class="text-xs text-gray-400 mt-1">PNG, JPG, PDF — max 5 MB</p>
+            </div>
+            <div id="uploadPreview" class="hidden">
+              <i class="fas fa-check-circle text-3xl text-forest mb-1"></i>
+              <p class="text-sm text-forest font-medium" id="uploadFileName">file.jpg</p>
+              <p class="text-xs text-gray-400 mt-1">Click to change</p>
+            </div>
           </div>
         </div>
+
         <!-- Voucher -->
         <div class="mb-4">
           <label class="fi-label">Voucher Code <span class="text-xs text-text-muted font-normal">(optional)</span></label>
           <div class="flex gap-2">
-            <input type="text" id="voucher_code" class="fi" placeholder="Enter voucher code" style="text-transform:uppercase;" />
-            <button onclick="applyVoucher()" class="px-4 py-3 bg-gold text-white rounded-xl text-sm font-medium hover:bg-gold-light transition-colors whitespace-nowrap">Apply</button>
+            <input type="text" id="voucher_code" class="fi" placeholder="Enter code" style="text-transform:uppercase" />
+            <button onclick="applyVoucher()" class="px-4 py-3 bg-gold text-white rounded-xl text-sm font-medium hover:bg-gold-light whitespace-nowrap transition-colors">Apply</button>
           </div>
           <div id="voucherStatus" class="hidden mt-2 p-3 rounded-lg text-xs font-medium"></div>
         </div>
+
         <!-- Special requests -->
-        <div class="mb-6"><label class="fi-label">Special Requests / Notes</label><textarea id="special_requests" class="fi" rows="3" placeholder="Dietary restrictions, early check-in request, celebration setup, etc."></textarea></div>
+        <div class="mb-5">
+          <label class="fi-label">Special Requests / Notes <span class="text-xs text-text-muted font-normal">(optional)</span></label>
+          <textarea id="special_requests" class="fi" rows="3" placeholder="Dietary needs, early check-in, decoration setup, etc."></textarea>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div class="mb-6 p-4 bg-cream rounded-xl border border-gray-100">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="agreeTerms" class="w-4 h-4 accent-forest mt-0.5 flex-shrink-0" />
+            <span class="text-xs text-gray-600 leading-relaxed">
+              I have read and agree to the
+              <button type="button" onclick="openTerms()" class="text-forest underline font-medium">Terms & Conditions</button>
+              and House Rules of Balay Maysa Resort. I understand the
+              <span class="font-medium">downpayment is non-refundable</span> and rebooking requires 48 hours notice.
+            </span>
+          </label>
+        </div>
+
         <div class="flex gap-3">
           <button onclick="goStep(2)" class="px-6 py-4 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">← Back</button>
-          <button onclick="submitBooking()" id="submitBtn" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
-            <span id="submitText">Submit Booking</span><div id="submitSpinner" class="spinner hidden"></div>
+          <button onclick="submitBooking()" id="submitBtn" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm tracking-wide">
+            <span id="submitText">Submit Booking</span>
+            <div id="submitSpinner" class="spinner hidden"></div>
           </button>
         </div>
-        <p class="text-center text-text-muted text-xs mt-3">We'll verify your payment and confirm within 24 hours.</p>
+        <p class="text-center text-text-muted text-xs mt-3">We'll verify your payment within 24 hours and send you a confirmation email.</p>
       </div>
 
-      <!-- STEP 4: Confirmed -->
+      <!-- ══ STEP 4 ══ -->
       <div class="step hidden" id="step-4">
         <div class="text-center py-4">
-          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl text-green-600"></i></div>
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <i class="fas fa-check text-2xl text-green-600"></i>
+          </div>
           <h3 class="font-heading text-3xl text-forest mb-2">Booking Submitted!</h3>
-          <p class="text-text-muted text-sm mb-6">Your payment proof is under review. We'll confirm within 24 hours.</p>
-          <div class="bg-white rounded-xl p-5 text-left mb-6 border border-gray-100">
+          <p class="text-text-muted text-sm mb-6">Your payment proof is under review. We'll send a confirmation email within 24 hours.</p>
+
+          <div class="bg-cream rounded-xl p-5 text-left mb-6 border border-gray-100">
             <p class="text-xs text-text-muted uppercase tracking-wide mb-2">Your Booking Reference</p>
-            <p class="font-mono text-2xl font-bold text-forest mb-2" id="confirmRef">–</p>
-            <p class="text-xs text-text-muted">Save this to track your booking at <a href="lookup.html" class="text-forest underline">lookup.html</a></p>
+            <p class="font-mono text-2xl font-bold text-forest mb-1" id="confirmRef">–</p>
+            <p class="text-xs text-text-muted">Track your booking anytime at <a href="lookup.html" class="text-forest underline">lookup.html</a></p>
           </div>
-          <div class="space-y-3">
-            <a href="lookup.html" class="block bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark">Track Booking Status</a>
-            <button onclick="resetForm()" class="block w-full border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-medium hover:bg-gray-50">Make Another Booking</button>
+          <div class="space-y-3 mb-8">
+            <a href="lookup.html" class="block bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Track Booking Status</a>
+            <button onclick="resetForm()" class="block w-full border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">Make Another Booking</button>
           </div>
+
           <!-- Small Gatherings Inquiry -->
-          <div class="mt-8 p-6 bg-gold/10 rounded-2xl border border-gold/30 text-left">
-            <p class="font-heading text-xl text-forest mb-1">Small Gathering?</p>
-            <p class="text-sm text-text-muted mb-4">For intimate gatherings or custom packages, send us an inquiry or call <strong id="contactPhoneInquiry">0917 565 7918</strong>.</p>
+          <div class="p-6 bg-gold/10 rounded-2xl border border-gold/30 text-left">
+            <p class="font-heading text-xl text-forest font-medium mb-1">📩 Small Gathering?</p>
+            <p class="text-sm text-text-muted mb-4">
+              For smaller or custom packages, send us an inquiry or call us at
+              <a id="inquiryPhone" href="tel:09175657918" class="font-semibold text-forest hover:underline">0917 565 7918</a>.
+              We'll get back to you personally.
+            </p>
             <div class="space-y-3">
-              <div class="grid grid-cols-2 gap-3">
-                <div><label class="fi-label text-xs">Full Name</label><input type="text" id="inq_name" class="fi text-sm" placeholder="Your name" /></div>
-                <div><label class="fi-label text-xs">Phone</label><input type="tel" id="inq_phone" class="fi text-sm" placeholder="09XX XXX XXXX" /></div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="fi-label text-xs">Full Name <span class="text-red-500">*</span></label>
+                  <input type="text" id="inq_name" class="fi text-sm" placeholder="Your name" />
+                </div>
+                <div>
+                  <label class="fi-label text-xs">Phone Number <span class="text-red-500">*</span></label>
+                  <input type="tel" id="inq_phone" class="fi text-sm" placeholder="09XX XXX XXXX" />
+                </div>
               </div>
-              <div><label class="fi-label text-xs">Email</label><input type="email" id="inq_email" class="fi text-sm" placeholder="your@email.com" /></div>
-              <div class="grid grid-cols-2 gap-3">
-                <div><label class="fi-label text-xs">Adults</label><input type="number" id="inq_adults" class="fi text-sm" value="2" min="1" /></div>
-                <div><label class="fi-label text-xs">Children</label><input type="number" id="inq_children" class="fi text-sm" value="0" min="0" /></div>
+              <div>
+                <label class="fi-label text-xs">Email Address</label>
+                <input type="email" id="inq_email" class="fi text-sm" placeholder="your@email.com" />
               </div>
-              <div><label class="fi-label text-xs">Message</label><textarea id="inq_message" class="fi text-sm" rows="3" placeholder="Tell us about your gathering, preferred dates, and any special needs..."></textarea></div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="fi-label text-xs">Adults</label>
+                  <input type="number" id="inq_adults" class="fi text-sm" value="2" min="1" />
+                </div>
+                <div>
+                  <label class="fi-label text-xs">Children</label>
+                  <input type="number" id="inq_children" class="fi text-sm" value="0" min="0" />
+                </div>
+              </div>
+              <div>
+                <label class="fi-label text-xs">Message / Preferred Dates</label>
+                <textarea id="inq_message" class="fi text-sm" rows="3" placeholder="Tell us your preferred dates, type of event, and any special requests…"></textarea>
+              </div>
               <button onclick="submitInquiry()" id="inqBtn" class="w-full bg-gold hover:bg-gold-light text-white py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                <span id="inqText">Send Inquiry</span><div id="inqSpinner" class="spinner hidden"></div>
+                <span id="inqText">Send Inquiry</span>
+                <div id="inqSpinner" class="spinner hidden"></div>
               </button>
             </div>
           </div>
@@ -503,20 +779,19 @@
       <div class="text-white/80">
         <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4"><i class="fas fa-map-marker-alt text-gold"></i></div>
         <h4 class="font-medium text-white mb-2">Address</h4>
-        <p class="text-sm leading-relaxed" id="contactAddress">Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North</p>
+        <p class="text-sm leading-relaxed" id="contactAddress">Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North, Philippines</p>
       </div>
       <div class="text-white/80">
         <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4"><i class="fas fa-phone text-gold"></i></div>
         <h4 class="font-medium text-white mb-2">Phone</h4>
-        <a id="contactPhoneLink" href="tel:09175657918" class="text-sm hover:text-gold">0917 565 7918</a>
+        <a id="contactPhoneLink" href="tel:09175657918" class="text-sm hover:text-gold transition-colors">0917 565 7918</a>
       </div>
       <div class="text-white/80">
         <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4"><i class="fas fa-envelope text-gold"></i></div>
         <h4 class="font-medium text-white mb-2">Email</h4>
-        <a id="contactEmailLink" href="mailto:balaymaysa@gmail.com" class="text-sm hover:text-gold">balaymaysa@gmail.com</a>
+        <a id="contactEmailLink" href="mailto:balaymaysa@gmail.com" class="text-sm hover:text-gold transition-colors">balaymaysa@gmail.com</a>
       </div>
     </div>
-    <!-- Policies -->
     <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
       <div class="bg-white/5 rounded-xl p-5">
         <p class="text-gold text-xs uppercase tracking-wide mb-2">Check-in / Check-out</p>
@@ -524,11 +799,11 @@
       </div>
       <div class="bg-white/5 rounded-xl p-5">
         <p class="text-gold text-xs uppercase tracking-wide mb-2">House Rules</p>
-        <p class="text-white/80 text-sm" id="houseRulesText">No outside liquor. Quiet hours from 10PM. No illegal activities.</p>
+        <p class="text-white/80 text-sm" id="houseRulesText">No outside liquor. Quiet hours 10 PM. No illegal activities.</p>
       </div>
       <div class="bg-white/5 rounded-xl p-5">
         <p class="text-gold text-xs uppercase tracking-wide mb-2">Cancellation</p>
-        <p class="text-white/80 text-sm" id="cancelPolicyText">Deposits are non-refundable. Rebooking with 48 hrs notice.</p>
+        <p class="text-white/80 text-sm" id="cancelPolicyText">Downpayment non-refundable. Rebooking: 48 hrs notice.</p>
       </div>
     </div>
   </div>
@@ -536,94 +811,217 @@
 
 <!-- FOOTER -->
 <footer class="bg-forest-dark py-8 text-center">
-  <div class="flex items-center justify-center gap-6 mb-4">
-    <a href="lookup.html" class="text-white/50 text-xs hover:text-white/80">Check Booking Status</a>
+  <div class="flex items-center justify-center gap-6 mb-3 flex-wrap">
+    <a href="lookup.html" class="text-white/50 text-xs hover:text-white/80 transition-colors">Check Booking Status</a>
     <span class="text-white/20">·</span>
-    <a id="footerEmail" href="mailto:balaymaysa@gmail.com" class="text-white/50 text-xs hover:text-white/80">balaymaysa@gmail.com</a>
+    <a id="footerEmail" href="mailto:balaymaysa@gmail.com" class="text-white/50 text-xs hover:text-white/80 transition-colors">balaymaysa@gmail.com</a>
+    <span class="text-white/20">·</span>
+    <button onclick="openTerms()" class="text-white/50 text-xs hover:text-white/80 transition-colors">Terms & Conditions</button>
   </div>
-  <p class="text-white/40 text-xs">© 2026 Balay Maysa Resort. All rights reserved.</p>
+  <p class="text-white/40 text-xs" id="footerCopy">© 2026 Balay Maysa Resort. All rights reserved.</p>
 </footer>
 
-<div id="toast" class="hidden"><i id="toastIcon" class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
+<!-- TOAST -->
+<div id="toast" class="hidden">
+  <i id="toastIcon" class="fas fa-check-circle"></i>
+  <span id="toastMsg"></span>
+</div>
+
+<!-- TERMS MODAL -->
+<div id="termsModal" class="terms-modal hidden">
+  <div class="terms-box">
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white rounded-t-2xl">
+      <h3 class="font-heading text-2xl text-forest font-light">Terms & Conditions</h3>
+      <button onclick="closeTerms()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500 text-sm"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-6 text-sm text-gray-600 space-y-4" id="termsContent">
+      <h4 class="font-semibold text-gray-800">1. Booking & Reservations</h4>
+      <p>All bookings are subject to availability and management approval. A booking is only confirmed upon receipt and verification of the required downpayment or full payment.</p>
+
+      <h4 class="font-semibold text-gray-800">2. Payment Policy</h4>
+      <p>A 50% non-refundable downpayment is required to secure your booking. Full payment must be settled on or before check-in. Walk-in guests must pay in full upon arrival.</p>
+
+      <h4 class="font-semibold text-gray-800">3. Cancellation & Rebooking</h4>
+      <p>Downpayments are strictly non-refundable. Rebooking is allowed with at least 48 hours advance notice, subject to availability. No-shows forfeit all payments made.</p>
+
+      <h4 class="font-semibold text-gray-800">4. Check-in & Check-out</h4>
+      <p id="termsCheckin">Standard check-in time is 2:00 PM and check-out is 12:00 NN. Early check-in or late check-out is subject to availability and may incur additional charges.</p>
+
+      <h4 class="font-semibold text-gray-800">5. House Rules</h4>
+      <ul class="list-disc pl-4 space-y-1" id="termsHouseRules">
+        <li>No bringing of outside liquor inside the resort premises.</li>
+        <li>Quiet hours are strictly observed from 10:00 PM onwards.</li>
+        <li>No illegal activities of any kind are tolerated.</li>
+        <li>Guests are responsible for any damage to resort property during their stay.</li>
+        <li>Pets must be declared upon booking and are subject to a pet fee.</li>
+        <li>The resort is a private property — non-registered guests are not allowed without prior approval.</li>
+      </ul>
+
+      <h4 class="font-semibold text-gray-800">6. Guest Count & Pax Limits</h4>
+      <p>The total number of guests must not exceed the capacity of the booked package. Additional guests beyond 24 pax are subject to an extra person fee of ₱500 per person.</p>
+
+      <h4 class="font-semibold text-gray-800">7. Security Deposit</h4>
+      <p>A refundable security deposit may be collected upon check-in. This will be returned in full upon checkout, after inspection of the property, provided no damages are found.</p>
+
+      <h4 class="font-semibold text-gray-800">8. Privacy</h4>
+      <p>Your personal information is collected solely for the purpose of processing your reservation. We do not share your data with third parties.</p>
+
+      <h4 class="font-semibold text-gray-800">9. Management Rights</h4>
+      <p>Balay Maysa Resort management reserves the right to refuse or terminate any booking in case of violations of house rules or misconduct, without refund.</p>
+
+      <p class="text-xs text-gray-400 pt-2">These terms may be updated by management at any time. By submitting a booking, you agree to the current version of these Terms & Conditions.</p>
+    </div>
+    <div class="p-6 border-t border-gray-100">
+      <button onclick="closeTerms()" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">I Understand & Accept</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════════════════════
 emailjs.init('yupgCoqLB4unb0OAz');
-const SB_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
-const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
-const EMAILJS_SID  = 'service_t13ealt';
-const EMAILJS_TMPL = 'template_s17clcj';
-const SA_EMAIL     = 'balaymaysa@gmail.com';
+const SB_URL   = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
+const SB_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
+const EJS_SID  = 'service_t13ealt';
+const EJS_TMPL = 'template_s17clcj';
+const SA_EMAIL = 'balaymaysa@gmail.com';
 const db = window.supabase.createClient(SB_URL, SB_ANON);
 
-// ── State ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════════
 let siteSettings = {}, groupPricing = [], addonPricing = [], bookedDates = [];
 let selectedPackage = null, selectedRooms = [], selectedAddons = {}, addonQtys = {};
 let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 let uploadedFile = null, appliedVoucher = null;
 let totalAmount = 0, depositAmount = 0;
 
-// ── Boot ──────────────────────────────────────────────────────────────────────
+// slider state: { [roomId]: { current: 0, total: N } }
+const sliderState = {};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════════════════════
 async function boot() {
   await Promise.all([loadSettings(), loadGroupPricing(), loadAddonPricing(), loadBookedDates()]);
+  initSliders();
   renderCalendar();
   renderPricingTable();
   renderAddonsDisplay();
-  setDates();
+  setDateConstraints();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// SETTINGS FROM SUPER ADMIN
+// ═══════════════════════════════════════════════════════════════════════════════
 async function loadSettings() {
   try {
     const { data } = await db.from('site_settings').select('*');
-    siteSettings = Object.fromEntries((data||[]).map(s => [s.setting_key, s.setting_value]));
+    siteSettings = Object.fromEntries((data || []).map(s => [s.setting_key, s.setting_value]));
     applySettings();
-  } catch(e) { console.error('Settings load failed:', e); }
+  } catch(e) { console.warn('Settings fallback:', e); }
 }
 
 function applySettings() {
   const s = siteSettings;
-  if (s.hero_tagline)         document.getElementById('heroTagline').textContent     = s.hero_tagline;
-  if (s.hero_title)           document.getElementById('heroTitle').textContent       = s.hero_title;
-  if (s.hero_subtitle)        document.getElementById('heroSubtitle').textContent    = s.hero_subtitle;
-  if (s.about_text)           document.getElementById('aboutText').textContent       = s.about_text;
+  setText('heroTagline',      s.hero_tagline);
+  setText('heroTitle',        s.hero_title);
+  setText('heroSubtitle',     s.hero_subtitle);
+  setText('aboutText',        s.about_text);
+  setText('checkInOutTimes',  s.checkin_time && s.checkout_time ? `Check-in: ${s.checkin_time} · Check-out: ${s.checkout_time}` : null);
+  setText('houseRulesText',   s.house_rules);
+  setText('cancelPolicyText', s.cancellation_policy);
+  setText('contactAddress',   s.contact_address);
+  // Phone links
   if (s.contact_phone) {
-    const p = s.contact_phone;
-    document.getElementById('contact_phone_gcash').textContent  = p;
-    document.getElementById('contact_phone_maya').textContent   = p;
-    document.getElementById('contactPhoneInquiry').textContent  = p;
-    document.getElementById('contactPhoneLink').textContent     = p;
-    document.getElementById('contactPhoneLink').href            = 'tel:' + p.replace(/\s/g,'');
+    const ph = s.contact_phone;
+    const tel = 'tel:' + ph.replace(/\s/g, '');
+    setText('contact_phone_gcash', ph);
+    setText('contact_phone_maya', ph);
+    const pl = document.getElementById('contactPhoneLink');
+    if (pl) { pl.textContent = ph; pl.href = tel; }
+    const il = document.getElementById('inquiryPhone');
+    if (il) { il.textContent = ph; il.href = tel; }
   }
+  // Email links
   if (s.contact_email) {
-    document.getElementById('contactEmailLink').textContent = s.contact_email;
-    document.getElementById('contactEmailLink').href        = 'mailto:' + s.contact_email;
-    document.getElementById('footerEmail').textContent      = s.contact_email;
-    document.getElementById('footerEmail').href             = 'mailto:' + s.contact_email;
+    const em = s.contact_email;
+    const cl = document.getElementById('contactEmailLink'); if (cl) { cl.textContent = em; cl.href = 'mailto:' + em; }
+    const fl = document.getElementById('footerEmail'); if (fl) { fl.textContent = em; fl.href = 'mailto:' + em; }
   }
-  if (s.contact_address) document.getElementById('contactAddress').textContent = s.contact_address;
-  if (s.checkin_time || s.checkout_time)
-    document.getElementById('checkInOutTimes').textContent = `Check-in: ${s.checkin_time||'2:00 PM'} · Check-out: ${s.checkout_time||'12:00 NN'}`;
-  if (s.house_rules)           document.getElementById('houseRulesText').textContent  = s.house_rules;
-  if (s.cancellation_policy)   document.getElementById('cancelPolicyText').textContent = s.cancellation_policy;
+  // Bank details
+  if (s.bank_account_name)   setText('bankAccountName', s.bank_account_name);
+  if (s.bank_account_number) setText('bankAccountNumber', s.bank_account_number);
+  // Promo banner
   if (s.promo_banner_active === 'true' && s.promo_banner_text) {
-    document.getElementById('promoBannerText').textContent = s.promo_banner_text;
+    setText('promoBannerText', s.promo_banner_text);
     document.getElementById('promoBanner').classList.remove('hidden');
-    document.querySelector('.hero-bg').style.paddingTop = '40px';
+    document.getElementById('navbar').style.top = '38px';
   }
+  // Terms content from CMS
+  if (s.house_rules) {
+    const ul = document.getElementById('termsHouseRules');
+    if (ul) {
+      const items = s.house_rules.split('.').map(r => r.trim()).filter(Boolean);
+      ul.innerHTML = items.map(i => `<li>${i}.</li>`).join('');
+    }
+  }
+  if (s.checkin_time || s.checkout_time) {
+    const tc = document.getElementById('termsCheckin');
+    if (tc) tc.textContent = `Standard check-in time is ${s.checkin_time || '2:00 PM'} and check-out is ${s.checkout_time || '12:00 NN'}.`;
+  }
+}
+
+function setText(id, val) {
+  if (!val) return;
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
 }
 
 async function loadGroupPricing() {
   try {
     const { data } = await db.from('group_pricing').select('*').eq('is_active', true).order('pax_min');
     groupPricing = data || [];
-  } catch(e) { console.error(e); }
+  } catch(e) { console.warn('Group pricing fallback:', e); applyFallbackPricing(); }
+}
+
+function applyFallbackPricing() {
+  // Hardcoded fallback in case DB is unavailable
+  groupPricing = [
+    { id:'wd1', day_type:'weekday', pax_min:1,  pax_max:10, rooms_included:1, price:12000, free_pool_spa_hours:1, free_ac_living:false, free_extra_mattresses:0, description:'1 room of your choice', is_active:true },
+    { id:'wd2', day_type:'weekday', pax_min:11, pax_max:12, rooms_included:2, price:15000, free_pool_spa_hours:1, free_ac_living:false, free_extra_mattresses:0, description:'Barkada + 1 room', is_active:true },
+    { id:'wd3', day_type:'weekday', pax_min:13, pax_max:14, rooms_included:3, price:18000, free_pool_spa_hours:1, free_ac_living:false, free_extra_mattresses:0, description:'Barkada + 2 rooms', is_active:true },
+    { id:'wd4', day_type:'weekday', pax_min:15, pax_max:18, rooms_included:4, price:21000, free_pool_spa_hours:1, free_ac_living:true,  free_extra_mattresses:0, description:'All 4 rooms + free AC', is_active:true },
+    { id:'wd5', day_type:'weekday', pax_min:19, pax_max:24, rooms_included:4, price:24000, free_pool_spa_hours:1, free_ac_living:true,  free_extra_mattresses:6, description:'All 4 rooms + free AC + 6 mattresses', is_active:true },
+    { id:'we1', day_type:'weekend', pax_min:1,  pax_max:10, rooms_included:1, price:12000, free_pool_spa_hours:1, free_ac_living:false, free_extra_mattresses:0, description:'1 room of your choice', is_active:true },
+    { id:'we2', day_type:'weekend', pax_min:11, pax_max:12, rooms_included:2, price:18000, free_pool_spa_hours:1, free_ac_living:false, free_extra_mattresses:0, description:'Barkada + 1 room', is_active:true },
+    { id:'we3', day_type:'weekend', pax_min:13, pax_max:14, rooms_included:3, price:21000, free_pool_spa_hours:1, free_ac_living:false, free_extra_mattresses:0, description:'Barkada + 2 rooms', is_active:true },
+    { id:'we4', day_type:'weekend', pax_min:15, pax_max:18, rooms_included:4, price:24000, free_pool_spa_hours:1, free_ac_living:true,  free_extra_mattresses:0, description:'All 4 rooms + free AC', is_active:true },
+    { id:'we5', day_type:'weekend', pax_min:19, pax_max:24, rooms_included:4, price:27000, free_pool_spa_hours:1, free_ac_living:true,  free_extra_mattresses:6, description:'All 4 rooms + free AC + 6 mattresses', is_active:true },
+  ];
 }
 
 async function loadAddonPricing() {
   try {
     const { data } = await db.from('addon_pricing').select('*').eq('is_active', true).order('label');
     addonPricing = data || [];
-  } catch(e) { console.error(e); }
+    if (!addonPricing.length) applyFallbackAddons();
+  } catch(e) { applyFallbackAddons(); }
+}
+
+function applyFallbackAddons() {
+  addonPricing = [
+    { key:'griller',        label:'Griller + 1 pack charcoal', description:'Charcoal grill setup',         price:500,  unit:'flat' },
+    { key:'stove',          label:'Stove',                     description:'Gas stove for cooking',          price:500,  unit:'flat' },
+    { key:'pet_fee',        label:'Pet fee',                   description:'Per pet',                        price:300,  unit:'per_unit' },
+    { key:'pool_spa',       label:'Pool Spa (extra hours)',    description:'Per hour beyond free inclusions', price:350,  unit:'per_hour' },
+    { key:'extra_pax',      label:'Extra pax (above 24)',      description:'Per person beyond max',           price:500,  unit:'per_unit' },
+    { key:'extra_mattress', label:'Extra mattress',            description:'Per mattress',                    price:500,  unit:'per_unit' },
+    { key:'ac_living',      label:'AC in living area',         description:'Aircon for common living space',  price:1000, unit:'flat' },
+  ];
 }
 
 async function loadBookedDates() {
@@ -631,90 +1029,151 @@ async function loadBookedDates() {
     const { data } = await db.from('bookings').select('check_in_date,check_out_date')
       .in('status', ['confirmed','confirmed_balance_due','fully_paid','pending_payment_verification','deposit_paid_waiting_confirmation']);
     bookedDates = data || [];
-  } catch(e) { console.error(e); }
+  } catch(e) { console.warn('Booked dates fallback:', e); }
 }
 
-// ── Calendar ──────────────────────────────────────────────────────────────────
-function setDates() {
-  const t = new Date().toISOString().split('T')[0];
-  document.getElementById('check_in').min = t;
-  document.getElementById('check_out').min = t;
+// ═══════════════════════════════════════════════════════════════════════════════
+// ROOM SLIDERS
+// ═══════════════════════════════════════════════════════════════════════════════
+const ROOM_IDS = ['silayan','sinta','tahanan','barkada'];
+
+function initSliders() {
+  ROOM_IDS.forEach(id => {
+    const slides = document.getElementById('slides-' + id);
+    const count = slides ? slides.children.length : 0;
+    sliderState[id] = { current: 0, total: count };
+    renderDots(id, count);
+  });
 }
 
-document.getElementById('calPrev').onclick = () => { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); };
-document.getElementById('calNext').onclick = () => { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); };
+function renderDots(id, count) {
+  const container = document.getElementById('dots-' + id);
+  if (!container) return;
+  container.innerHTML = Array.from({length: count}, (_, i) =>
+    `<div class="slider-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide('${id}', ${i})"></div>`
+  ).join('');
+}
+
+function slideRoom(id, dir) {
+  const s = sliderState[id];
+  s.current = (s.current + dir + s.total) % s.total;
+  updateSlider(id);
+}
+
+function goToSlide(id, idx) {
+  sliderState[id].current = idx;
+  updateSlider(id);
+}
+
+function updateSlider(id) {
+  const s = sliderState[id];
+  const slides = document.getElementById('slides-' + id);
+  if (slides) slides.style.transform = `translateX(-${s.current * 100}%)`;
+  const dots = document.querySelectorAll('#dots-' + id + ' .slider-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === s.current));
+}
+
+// Auto-advance sliders every 4 seconds
+setInterval(() => {
+  ROOM_IDS.forEach(id => {
+    if (sliderState[id] && sliderState[id].total > 1) slideRoom(id, 1);
+  });
+}, 4000);
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// AVAILABILITY CALENDAR
+// ═══════════════════════════════════════════════════════════════════════════════
+document.getElementById('calPrev').onclick = () => { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); };
+document.getElementById('calNext').onclick = () => { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); };
 
 function renderCalendar() {
-  const label = new Date(calYear, calMonth, 1).toLocaleDateString('en-PH', {month:'long',year:'numeric'});
+  const label = new Date(calYear, calMonth, 1).toLocaleDateString('en-PH', { month: 'long', year: 'numeric' });
   document.getElementById('calLabel').textContent = label;
-  const first = new Date(calYear, calMonth, 1).getDay();
-  const days  = new Date(calYear, calMonth+1, 0).getDate();
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
   const todayStr = new Date().toISOString().split('T')[0];
 
+  // Build booked set
   const bookedSet = new Set();
   bookedDates.forEach(b => {
     let cur = new Date(b.check_in_date + 'T00:00:00');
     const end = new Date(b.check_out_date + 'T00:00:00');
-    while (cur < end) {
-      bookedSet.add(cur.toISOString().split('T')[0]);
-      cur.setDate(cur.getDate()+1);
-    }
+    while (cur < end) { bookedSet.add(cur.toISOString().split('T')[0]); cur.setDate(cur.getDate() + 1); }
   });
 
   let html = '';
-  for (let i = 0; i < first; i++) html += `<div class="cal-day other-month"></div>`;
-  for (let d = 1; d <= days; d++) {
-    const ds = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isBooked = bookedSet.has(ds);
-    const isToday  = ds === todayStr;
-    html += `<div class="cal-day ${isBooked?'booked':''} ${isToday?'today':''}" title="${isBooked?'Booked':isToday?'Today':'Available'}">${d}</div>`;
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-day filler"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${calYear}-${String(calMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls = 'avail';
+    if (ds < todayStr) cls = 'past';
+    else if (ds === todayStr) cls = 'today';
+    else if (bookedSet.has(ds)) cls = 'booked';
+    const tip = cls === 'booked' ? 'Booked' : cls === 'past' ? 'Past' : cls === 'today' ? 'Today' : 'Available';
+    html += `<div class="cal-day ${cls}" title="${tip}">${d}</div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
 }
 
-// ── Pricing Table ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// PRICING TABLE (reads from DB / fallback)
+// ═══════════════════════════════════════════════════════════════════════════════
 function renderPricingTable() {
   const wdRows = groupPricing.filter(p => p.day_type === 'weekday');
   const weRows = groupPricing.filter(p => p.day_type === 'weekend');
-  const combined = wdRows.map((wd, i) => {
+  const html = wdRows.map((wd, i) => {
     const we = weRows[i] || {};
-    return `<tr class="border-b border-gray-50 hover:bg-gray-50">
-      <td class="px-5 py-3 font-medium text-gray-800">${wd.pax_min}–${wd.pax_max}</td>
-      <td class="px-5 py-3 text-gray-500 text-xs">${wd.description||''}</td>
-      <td class="px-5 py-3 text-center font-bold text-forest">₱${(wd.price||0).toLocaleString()}</td>
-      <td class="px-5 py-3 text-center font-bold text-gold-600" style="color:#b8860b">₱${(we.price||0).toLocaleString()}</td>
-      <td class="px-5 py-3 text-xs text-gray-500">${wd.free_pool_spa_hours>0?`<span class="text-blue-600">✓ ${wd.free_pool_spa_hours}hr pool spa</span> `:''}${wd.free_ac_living?'<span class="text-green-600">✓ Free AC</span> ':''}${wd.free_extra_mattresses>0?`<span class="text-purple-600">✓ ${wd.free_extra_mattresses} mattresses</span>`:''}</td>
+    const incl = [
+      wd.free_pool_spa_hours > 0 ? `<span class="text-blue-600">✓ ${wd.free_pool_spa_hours}hr pool spa</span>` : '',
+      wd.free_ac_living ? '<span class="text-green-600">✓ Free AC</span>' : '',
+      wd.free_extra_mattresses > 0 ? `<span class="text-purple-600">✓ ${wd.free_extra_mattresses} mattresses</span>` : '',
+    ].filter(Boolean).join(' ');
+    return `<tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+      <td class="px-5 py-3 font-semibold text-gray-800">${wd.pax_min}–${wd.pax_max}</td>
+      <td class="px-5 py-3 text-xs text-gray-500">${wd.description || ''}</td>
+      <td class="px-5 py-3 text-center font-bold text-forest">₱${(wd.price || 0).toLocaleString()}</td>
+      <td class="px-5 py-3 text-center font-bold" style="color:#b8860b">₱${(we.price || 0).toLocaleString()}</td>
+      <td class="px-5 py-3 text-xs">${incl || '—'}</td>
     </tr>`;
-  });
-  document.getElementById('pricingTableBody').innerHTML = combined.join('') || '<tr><td colspan="5" class="text-center py-6 text-gray-300">Loading...</td></tr>';
+  }).join('');
+  document.getElementById('pricingTableBody').innerHTML = html || '<tr><td colspan="5" class="text-center py-8 text-gray-300">No pricing configured.</td></tr>';
 }
 
 function renderAddonsDisplay() {
   document.getElementById('addonsDisplay').innerHTML = addonPricing.map(a =>
-    `<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">${a.label}: <strong>₱${a.price.toLocaleString()}</strong>${a.unit==='per_unit'?'/unit':a.unit==='per_hour'?'/hr':''}</span>`
-  ).join('') || 'Loading...';
+    `<span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full font-medium">${a.label}: <strong>₱${a.price.toLocaleString()}</strong>${a.unit === 'per_unit' ? '/unit' : a.unit === 'per_hour' ? '/hr' : ''}</span>`
+  ).join('') || 'No add-ons configured.';
 }
 
-// ── Pax Calculation ───────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAX & DAY TYPE
+// ═══════════════════════════════════════════════════════════════════════════════
 function calcTotalPax() {
-  const adults = parseInt(document.getElementById('adults').value)||0;
-  const above3 = parseInt(document.getElementById('children_above').value)||0;
-  const total  = adults + above3;
+  const a = parseInt(document.getElementById('adults').value) || 0;
+  const c = parseInt(document.getElementById('children_above').value) || 0;
+  const total = a + c;
   document.getElementById('totalPaxDisplay').textContent = total;
   return total;
 }
 
 function getDayType(dateStr) {
   if (!dateStr) return 'weekday';
-  const day = new Date(dateStr + 'T00:00:00').getDay(); // 0=Sun,5=Fri,6=Sat
+  const day = new Date(dateStr + 'T00:00:00').getDay();
   return (day === 5 || day === 6) ? 'weekend' : 'weekday';
+}
+
+function setDateConstraints() {
+  const t = new Date().toISOString().split('T')[0];
+  document.getElementById('check_in').min  = t;
+  document.getElementById('check_out').min = t;
 }
 
 function onDateChange() {
   const ci = document.getElementById('check_in').value;
   const co = document.getElementById('check_out').value;
   if (ci) {
-    const next = new Date(ci+'T00:00:00'); next.setDate(next.getDate()+1);
+    const next = new Date(ci + 'T00:00:00'); next.setDate(next.getDate() + 1);
     document.getElementById('check_out').min = next.toISOString().split('T')[0];
     if (co && co <= ci) document.getElementById('check_out').value = '';
   }
@@ -723,51 +1182,60 @@ function onDateChange() {
   if (ci) {
     notice.classList.remove('hidden');
     if (dt === 'weekend') {
-      notice.className = 'mb-4 p-3 rounded-lg text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200';
-      notice.innerHTML = '📅 <strong>Weekend rate applies</strong> – Check-in is on a Friday or Saturday.';
+      notice.className = 'mb-4 p-3 rounded-lg text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700';
+      notice.innerHTML = '📅 <strong>Weekend rate applies</strong> — check-in falls on Friday or Saturday.';
     } else {
-      notice.className = 'mb-4 p-3 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200';
-      notice.innerHTML = '📅 <strong>Weekday rate applies</strong> – Includes 1 hour free pool spa use!';
+      notice.className = 'mb-4 p-3 rounded-lg text-xs font-medium bg-blue-50 border border-blue-200 text-blue-700';
+      notice.innerHTML = '📅 <strong>Weekday rate applies</strong> — includes <strong>1 hour free pool spa</strong>!';
     }
   }
 }
 
-// ── Step 2: Package Selection ─────────────────────────────────────────────────
-function buildPackageCards() {
-  const pax    = calcTotalPax();
-  const ci     = document.getElementById('check_in').value;
-  const dt     = getDayType(ci);
-  const pkgs   = groupPricing.filter(p => p.day_type === dt);
-  const rec    = pkgs.find(p => pax >= p.pax_min && pax <= p.pax_max);
-  
-  document.getElementById('step2SubMsg').textContent =
-    `For ${pax} pax on a ${dt}, here's your recommended package. You can select any package.`;
+function calcNights() {
+  const ci = document.getElementById('check_in').value;
+  const co = document.getElementById('check_out').value;
+  if (!ci || !co) return 0;
+  return Math.max(0, (new Date(co) - new Date(ci)) / 86400000);
+}
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// STEP 2 — PACKAGE & ROOM SELECTION
+// ═══════════════════════════════════════════════════════════════════════════════
+function buildPackageCards() {
+  const pax = calcTotalPax();
+  const ci  = document.getElementById('check_in').value;
+  const dt  = getDayType(ci);
+  const pkgs = groupPricing.filter(p => p.day_type === dt);
+  const rec  = pkgs.find(p => pax >= p.pax_min && pax <= p.pax_max);
   const nights = calcNights();
+
+  document.getElementById('step2Msg').textContent =
+    `For ${pax} pax — ${dt === 'weekend' ? 'weekend (Fri–Sat)' : 'weekday (Sun–Thu)'} rates. Recommended package highlighted.`;
+
   document.getElementById('packageCards').innerHTML = pkgs.map(pkg => {
-    const isRec  = rec && pkg.id === rec.id;
-    const total  = pkg.price * nights;
-    const incl   = [
-      pkg.free_pool_spa_hours > 0 ? `${pkg.free_pool_spa_hours}hr free pool spa` : '',
-      pkg.free_ac_living ? 'Free AC in living area' : '',
-      pkg.free_extra_mattresses > 0 ? `${pkg.free_extra_mattresses} free extra mattresses` : '',
-    ].filter(Boolean);
-    return `<div class="package-card ${isRec?'recommended selected':''}" id="pkg-${pkg.id}" onclick="selectPackage(${JSON.stringify(pkg).replace(/"/g,'&quot;')})">
+    const isRec = rec && pkg.id === rec.id;
+    const inclBadges = [
+      pkg.free_pool_spa_hours > 0  ? `<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✓ ${pkg.free_pool_spa_hours}hr pool spa</span>` : '',
+      pkg.free_ac_living           ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>' : '',
+      pkg.free_extra_mattresses > 0? `<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${pkg.free_extra_mattresses} mattresses</span>` : '',
+    ].filter(Boolean).join(' ');
+    const nightTotal = nights > 0 ? `<p class="text-xs text-gray-400 mt-0.5">${nights} night${nights>1?'s':''} = ₱${(pkg.price * nights).toLocaleString()}</p>` : '';
+    return `<div class="package-card ${isRec ? 'recommended selected' : ''}" id="pkg-${pkg.id}" onclick='selectPackage(${JSON.stringify(pkg)})'>
       <div class="flex justify-between items-start">
-        <div>
-          <p class="font-semibold text-gray-800 text-sm">${pkg.pax_min}–${pkg.pax_max} pax · ${pkg.rooms_included} room${pkg.rooms_included>1?'s':''}</p>
-          <p class="text-xs text-text-muted mt-0.5">${pkg.description||''}</p>
-          ${incl.length ? `<div class="flex flex-wrap gap-1 mt-2">${incl.map(i=>`<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ ${i}</span>`).join('')}</div>` : ''}
+        <div class="flex-1 min-w-0 pr-4">
+          <p class="font-semibold text-gray-800 text-sm">${pkg.pax_min}–${pkg.pax_max} pax · ${pkg.rooms_included} room${pkg.rooms_included > 1 ? 's' : ''}</p>
+          <p class="text-xs text-text-muted mt-0.5">${pkg.description || ''}</p>
+          ${inclBadges ? `<div class="flex flex-wrap gap-1 mt-2">${inclBadges}</div>` : ''}
         </div>
-        <div class="text-right flex-shrink-0 ml-4">
+        <div class="text-right flex-shrink-0">
           <p class="font-bold text-forest">₱${pkg.price.toLocaleString()}/night</p>
-          ${nights > 0 ? `<p class="text-xs text-gray-400">${nights} night${nights>1?'s':''} = ₱${total.toLocaleString()}</p>` : ''}
+          ${nightTotal}
         </div>
       </div>
     </div>`;
   }).join('');
 
-  if (isRec) selectPackage(rec);
+  if (rec) selectPackage(rec);
 }
 
 function selectPackage(pkg) {
@@ -780,44 +1248,55 @@ function selectPackage(pkg) {
 }
 
 const ROOM_LIST = [
-  { id: 'Silayan',  label: 'Silayan – Pool View Suite', capacity: '2–3 adults' },
-  { id: 'Sinta',    label: 'Sinta – 2nd Floor Retreat',  capacity: '2–3 adults' },
-  { id: 'Tahanan',  label: 'Tahanan – Family Suite',      capacity: '4–6 adults' },
-  { id: 'Barkada',  label: 'Barkada – Group Escape',      capacity: '8–10 adults' },
+  { id: 'Silayan', label: 'Silayan – Pool View Suite', cap: 'Up to 3 adults' },
+  { id: 'Sinta',   label: 'Sinta – 2nd Floor Retreat', cap: 'Up to 3 adults' },
+  { id: 'Tahanan', label: 'Tahanan – Family Suite',     cap: 'Up to 6 adults' },
+  { id: 'Barkada', label: 'Barkada – Group Escape',     cap: 'Up to 10 adults' },
 ];
 
 function buildRoomSelector(pkg) {
   const area = document.getElementById('roomSelectorArea');
-  const cards = document.getElementById('roomSelectorCards');
-  // All rooms = no choice needed for 4-room packages
   if (pkg.rooms_included >= 4) {
-    selectedRooms = ['Silayan','Sinta','Tahanan','Barkada'];
+    selectedRooms = ['Silayan', 'Sinta', 'Tahanan', 'Barkada'];
     area.classList.add('hidden');
     return;
   }
-  // 1 room = pick any; 2 rooms = Barkada + 1; 3 rooms = Barkada + 2
   area.classList.remove('hidden');
-  const mandatory = pkg.rooms_included >= 2 ? ['Barkada'] : [];
+  const mandatory   = pkg.rooms_included >= 2 ? ['Barkada'] : [];
   const chooseCount = pkg.rooms_included - mandatory.length;
-  const choosable = ROOM_LIST.filter(r => !mandatory.includes(r.id));
+  const choosable   = ROOM_LIST.filter(r => !mandatory.includes(r.id));
   selectedRooms = [...mandatory];
-  cards.innerHTML = [
-    ...mandatory.map(r => `<div class="room-sel selected opacity-75"><div class="flex justify-between items-center"><p class="font-medium text-sm text-gray-800">${ROOM_LIST.find(x=>x.id===r).label}</p><span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Required</span></div></div>`),
-    ...choosable.map(r => `<div class="room-sel" id="rsel-${r.id}" onclick="toggleRoom('${r.id}',${chooseCount})"><div class="flex justify-between items-center"><p class="font-medium text-sm text-gray-800">${r.label}</p><p class="text-xs text-gray-400">${r.capacity}</p></div></div>`)
+
+  document.getElementById('roomPickerLabel').textContent =
+    `Select ${chooseCount} Room${chooseCount > 1 ? 's' : ''}${mandatory.length ? ' (Barkada already included)' : ''}:`;
+
+  document.getElementById('roomSelectorCards').innerHTML = [
+    ...mandatory.map(rid => {
+      const r = ROOM_LIST.find(x => x.id === rid);
+      return `<div class="room-sel selected opacity-80">
+        <div class="flex justify-between items-center">
+          <p class="font-medium text-sm text-gray-800">${r.label}</p>
+          <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Included</span>
+        </div>
+      </div>`;
+    }),
+    ...choosable.map(r => `<div class="room-sel" id="rsel-${r.id}" onclick="toggleRoom('${r.id}', ${chooseCount})">
+      <div class="flex justify-between items-center">
+        <p class="font-medium text-sm text-gray-800">${r.label}</p>
+        <p class="text-xs text-gray-400">${r.cap}</p>
+      </div>
+    </div>`),
   ].join('');
-  document.getElementById('roomSelectorArea').querySelector('p').textContent = `Select ${chooseCount} room${chooseCount>1?'s':''} ${mandatory.length>0?'(Barkada included)':''}:`;
 }
 
 function toggleRoom(roomId, max) {
   const el = document.getElementById('rsel-' + roomId);
-  const chosen = selectedRooms.filter(r => r !== 'Barkada'); // excludable choices
+  const chosen = selectedRooms.filter(r => r !== 'Barkada');
   if (selectedRooms.includes(roomId)) {
     selectedRooms = selectedRooms.filter(r => r !== roomId);
     el.classList.remove('selected');
   } else {
-    if (chosen.length >= max) {
-      showToast(`Select only ${max} room${max>1?'s':''}`, 'error'); return;
-    }
+    if (chosen.length >= max) { showToast(`Select only ${max} optional room${max > 1 ? 's' : ''}.`, 'error'); return; }
     selectedRooms.push(roomId);
     el.classList.add('selected');
   }
@@ -825,14 +1304,15 @@ function toggleRoom(roomId, max) {
 
 function buildAddonCards() {
   document.getElementById('addonCards').innerHTML = addonPricing.map(a => {
-    const isSelected = selectedAddons[a.key];
-    return `<div class="addon-item ${isSelected?'selected':''}" id="addon-${a.key}" onclick="toggleAddon('${a.key}')">
-      <input type="checkbox" class="w-4 h-4 accent-forest mt-0.5 pointer-events-none flex-shrink-0" ${isSelected?'checked':''} />
-      <div class="flex-1">
+    const sel = !!selectedAddons[a.key];
+    const unit = a.unit === 'per_unit' ? '/unit' : a.unit === 'per_hour' ? '/hr' : '';
+    return `<div class="addon-item ${sel ? 'selected' : ''}" id="addon-${a.key}" onclick="toggleAddon('${a.key}')">
+      <input type="checkbox" class="w-4 h-4 accent-forest mt-0.5 pointer-events-none flex-shrink-0" ${sel ? 'checked' : ''} />
+      <div class="flex-1 min-w-0">
         <p class="text-sm font-medium text-gray-800">${a.label}</p>
-        ${a.description?`<p class="text-xs text-gray-400">${a.description}</p>`:''}
+        ${a.description ? `<p class="text-xs text-gray-400">${a.description}</p>` : ''}
       </div>
-      <span class="text-sm font-semibold text-forest flex-shrink-0">+₱${a.price.toLocaleString()}${a.unit==='per_unit'?'/unit':a.unit==='per_hour'?'/hr':''}</span>
+      <span class="text-sm font-bold text-forest flex-shrink-0">+₱${a.price.toLocaleString()}${unit}</span>
     </div>`;
   }).join('');
 }
@@ -840,53 +1320,62 @@ function buildAddonCards() {
 function toggleAddon(key) {
   const a = addonPricing.find(x => x.key === key);
   if (!a) return;
-  const el = document.getElementById('addon-' + key);
+  const el  = document.getElementById('addon-' + key);
   const chk = el.querySelector('input');
   if (selectedAddons[key]) {
-    delete selectedAddons[key];
-    delete addonQtys[key];
-    el.classList.remove('selected');
-    chk.checked = false;
+    delete selectedAddons[key]; delete addonQtys[key];
+    el.classList.remove('selected'); chk.checked = false;
   } else {
-    selectedAddons[key] = a.price;
-    addonQtys[key] = 1;
-    el.classList.add('selected');
-    chk.checked = true;
+    selectedAddons[key] = a.price; addonQtys[key] = 1;
+    el.classList.add('selected'); chk.checked = true;
   }
-  // Show/hide quantity inputs
   document.getElementById('petCountArea').classList.toggle('hidden', !selectedAddons['pet_fee']);
   document.getElementById('poolSpaArea').classList.toggle('hidden', !selectedAddons['pool_spa']);
   recalcTotal();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// PRICE CALCULATION
+// ═══════════════════════════════════════════════════════════════════════════════
 function recalcTotal() {
   if (!selectedPackage) return;
   const nights = calcNights();
   if (nights <= 0) return;
+
   const base = selectedPackage.price * nights;
   const pax  = calcTotalPax();
+  let total  = base;
+  let lines  = [`<div class="flex justify-between text-white/80"><span>${selectedPackage.pax_min}–${selectedPackage.pax_max} pax × ${nights} night${nights > 1 ? 's' : ''}</span><span>₱${base.toLocaleString()}</span></div>`];
+
+  // Extra pax above 24
   const extraPax = Math.max(0, pax - 24);
-
-  let lines = [`<div class="flex justify-between text-white/80"><span>${selectedPackage.pax_min}–${selectedPackage.pax_max} pax × ${nights} night${nights>1?'s':''}</span><span>₱${base.toLocaleString()}</span></div>`];
-  let total = base;
-
   if (extraPax > 0) {
-    const ef = 500 * extraPax * nights;
-    total += ef;
-    lines.push(`<div class="flex justify-between text-yellow-300"><span>Extra pax (${extraPax}×₱500)</span><span>+₱${ef.toLocaleString()}</span></div>`);
+    const extraFee = 500 * extraPax * nights;
+    total += extraFee;
+    lines.push(`<div class="flex justify-between text-yellow-300"><span>Extra pax ×${extraPax} (₱500/person)</span><span>+₱${extraFee.toLocaleString()}</span></div>`);
     document.getElementById('extraPaxArea').classList.remove('hidden');
-    document.getElementById('extraPaxMsg').textContent = `${extraPax} guest${extraPax>1?'s':''} exceed the 24-pax max. Extra pax fee: ₱${ef.toLocaleString()}`;
+    document.getElementById('extraPaxMsg').textContent = `${extraPax} guest${extraPax > 1 ? 's' : ''} over the 24-pax limit. Fee: ₱${(500 * extraPax).toLocaleString()}/night.`;
   } else {
     document.getElementById('extraPaxArea').classList.add('hidden');
   }
 
+  // Add-ons
   Object.entries(selectedAddons).forEach(([key, price]) => {
     const a = addonPricing.find(x => x.key === key);
     if (!a) return;
-    let qty = 1, cost = 0, label = a.label;
-    if (key === 'pet_fee') { qty = parseInt(document.getElementById('pet_count').value)||1; cost = price * qty; label += ` ×${qty}`; }
-    else if (key === 'pool_spa') { qty = parseInt(document.getElementById('pool_spa_hours').value)||1; cost = price * qty; label += ` ×${qty}hr`; }
-    else { cost = price; }
+    let cost = 0, label = a.label;
+    if (key === 'pet_fee') {
+      const qty = parseInt(document.getElementById('pet_count').value) || 1;
+      cost = price * qty; label += ` ×${qty}`;
+    } else if (key === 'pool_spa') {
+      const hrs = parseInt(document.getElementById('pool_spa_hours').value) || 1;
+      cost = price * hrs; label += ` ×${hrs}hr`;
+    } else if (key === 'extra_mattress') {
+      const qty = parseInt(document.getElementById('pet_count')?.value) || 1;
+      cost = price; // flat for now, qty handled by user separately
+    } else {
+      cost = price;
+    }
     total += cost;
     lines.push(`<div class="flex justify-between text-white/80"><span>${label}</span><span>+₱${cost.toLocaleString()}</span></div>`);
   });
@@ -895,12 +1384,13 @@ function recalcTotal() {
   if (appliedVoucher) {
     const disc = Math.round(total * appliedVoucher.discount_percent / 100);
     total -= disc;
-    lines.push(`<div class="flex justify-between text-green-300"><span>🎟 Voucher (${appliedVoucher.discount_percent}% off)</span><span>-₱${disc.toLocaleString()}</span></div>`);
+    lines.push(`<div class="flex justify-between text-green-300"><span>🎟 Voucher (${appliedVoucher.discount_percent}% off)</span><span>−₱${disc.toLocaleString()}</span></div>`);
   }
 
   totalAmount   = total;
   depositAmount = Math.ceil(total * 0.5);
-  document.getElementById('priceLines').innerHTML  = lines.join('');
+
+  document.getElementById('priceLines').innerHTML    = lines.join('');
   document.getElementById('totalDisplay').textContent  = '₱' + total.toLocaleString();
   document.getElementById('depositDisplay').textContent = '₱' + depositAmount.toLocaleString();
   document.getElementById('priceBox').classList.remove('hidden');
@@ -908,166 +1398,184 @@ function recalcTotal() {
 }
 
 function updatePayAmount() {
-  const half = document.getElementById('halfAmt');
-  const full  = document.getElementById('fullAmt');
-  if (half) half.textContent = '₱' + depositAmount.toLocaleString();
-  if (full) full.textContent = '₱' + totalAmount.toLocaleString();
-  const amtToPay = document.getElementById('payFull')?.checked ? totalAmount : depositAmount;
-  document.getElementById('gcash-amount').textContent = '₱' + amtToPay.toLocaleString();
-  document.getElementById('maya-amount').textContent  = '₱' + amtToPay.toLocaleString();
-  // QR
-  const qrVal = encodeURIComponent(`GCash/Maya ₱${amtToPay} to 09175657918`);
-  document.getElementById('gcash-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${qrVal}`;
-  document.getElementById('maya-qr').src  = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${qrVal}`;
+  const isFull  = document.getElementById('payFull')?.checked;
+  const amtNow  = isFull ? totalAmount : depositAmount;
+  setText('halfAmt',    '₱' + depositAmount.toLocaleString());
+  setText('fullAmt',    '₱' + totalAmount.toLocaleString());
+  setText('gcash-amount', '₱' + amtNow.toLocaleString());
+  setText('maya-amount',  '₱' + amtNow.toLocaleString());
+  const qrData = encodeURIComponent(`Balay Maysa ₱${amtNow} to ${siteSettings.contact_phone || '09175657918'}`);
+  document.getElementById('gcash-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${qrData}`;
+  document.getElementById('maya-qr').src  = `https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${qrData}`;
 }
 
-function calcNights() {
-  const ci = document.getElementById('check_in').value;
-  const co = document.getElementById('check_out').value;
-  if (!ci || !co) return 0;
-  return Math.max(0, (new Date(co) - new Date(ci)) / 86400000);
-}
-
-// ── Voucher ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// VOUCHER
+// ═══════════════════════════════════════════════════════════════════════════════
 async function applyVoucher() {
   const code = document.getElementById('voucher_code').value.trim().toUpperCase();
-  const el   = document.getElementById('voucherStatus');
+  const el = document.getElementById('voucherStatus');
   if (!code) return;
   try {
     const { data } = await db.from('vouchers').select('*').eq('code', code).eq('is_active', true).single();
-    if (!data) { el.className='block mt-2 p-3 rounded-lg text-xs font-medium voucher-invalid'; el.textContent='❌ Invalid or expired voucher code.'; el.classList.remove('hidden'); return; }
+    if (!data) { showVoucherStatus(el, false, '❌ Invalid or unknown voucher code.'); return; }
     const now = new Date();
-    if (data.valid_from && new Date(data.valid_from) > now) { el.className='block mt-2 p-3 rounded-lg text-xs font-medium voucher-invalid'; el.textContent='❌ This voucher is not yet valid.'; el.classList.remove('hidden'); return; }
-    if (data.valid_to && new Date(data.valid_to) < now) { el.className='block mt-2 p-3 rounded-lg text-xs font-medium voucher-invalid'; el.textContent='❌ This voucher has expired.'; el.classList.remove('hidden'); return; }
-    if (data.times_used >= data.usage_limit) { el.className='block mt-2 p-3 rounded-lg text-xs font-medium voucher-invalid'; el.textContent='❌ This voucher has already been used.'; el.classList.remove('hidden'); return; }
+    if (data.valid_from && new Date(data.valid_from) > now) { showVoucherStatus(el, false, '❌ This voucher is not valid yet.'); return; }
+    if (data.valid_to   && new Date(data.valid_to)   < now) { showVoucherStatus(el, false, '❌ This voucher has expired.'); return; }
+    if (data.times_used >= data.usage_limit)                { showVoucherStatus(el, false, '❌ This voucher has already been fully used.'); return; }
     appliedVoucher = data;
-    el.className='block mt-2 p-3 rounded-lg text-xs font-medium voucher-valid';
-    el.textContent = `✅ Voucher applied! ${data.discount_percent}% discount`;
-    el.classList.remove('hidden');
+    showVoucherStatus(el, true, `✅ Voucher applied! ${data.discount_percent}% off your total.`);
     recalcTotal();
-    showToast(`Voucher applied: ${data.discount_percent}% off!`, 'success');
-  } catch(e) { console.error(e); el.className='block mt-2 p-3 rounded-lg text-xs font-medium voucher-invalid'; el.textContent='❌ Could not verify voucher.'; el.classList.remove('hidden'); }
+    showToast(`Voucher applied: ${data.discount_percent}% discount!`, 'success');
+  } catch(e) {
+    console.error(e);
+    showVoucherStatus(el, false, '❌ Could not verify voucher. Try again.');
+  }
 }
 
-// ── Step Navigation ───────────────────────────────────────────────────────────
+function showVoucherStatus(el, ok, msg) {
+  el.className = `block mt-2 p-3 rounded-lg text-xs font-medium ${ok ? 'voucher-ok' : 'voucher-err'}`;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STEP NAVIGATION
+// ═══════════════════════════════════════════════════════════════════════════════
 function goStep(n) {
-  if (n === 2) {
-    if (!validateStep1()) return;
-    buildPackageCards();
-    buildAddonCards();
-  }
-  if (n === 3) {
-    if (!validateStep2()) return;
-    populateStep3Summary();
-  }
+  if (n === 2) { if (!validateStep1()) return; buildPackageCards(); buildAddonCards(); }
+  if (n === 3) { if (!validateStep2()) return; fillStep3Summary(); }
   [1,2,3,4].forEach(s => {
-    document.getElementById('step-'+s).classList.remove('active');
-    document.getElementById('step-'+s).classList.add('hidden');
+    document.getElementById('step-' + s).classList.remove('active');
+    document.getElementById('step-' + s).classList.add('hidden');
   });
-  document.getElementById('step-'+n).classList.remove('hidden');
-  document.getElementById('step-'+n).classList.add('active');
+  document.getElementById('step-' + n).classList.remove('hidden');
+  document.getElementById('step-' + n).classList.add('active');
   updateDots(n);
-  document.getElementById('booking').scrollIntoView({behavior:'smooth'});
+  document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
 }
 
 function validateStep1() {
-  if (!document.getElementById('guest_name').value.trim())  { showToast('Please enter your name.', 'error'); return false; }
+  const name  = document.getElementById('guest_name').value.trim();
   const email = document.getElementById('guest_email').value.trim();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email.', 'error'); return false; }
-  if (!document.getElementById('guest_phone').value.trim()) { showToast('Please enter your phone number.', 'error'); return false; }
-  if (!document.getElementById('check_in').value)           { showToast('Please select check-in date.', 'error'); return false; }
-  if (!document.getElementById('check_out').value)          { showToast('Please select check-out date.', 'error'); return false; }
-  if (document.getElementById('check_out').value <= document.getElementById('check_in').value) { showToast('Check-out must be after check-in.', 'error'); return false; }
+  const phone = document.getElementById('guest_phone').value.trim();
+  const ci    = document.getElementById('check_in').value;
+  const co    = document.getElementById('check_out').value;
+  if (!name)  { showToast('Please enter your full name.', 'error'); return false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email address.', 'error'); return false; }
+  // PH mobile: 09XXXXXXXXX or +639XXXXXXXXX
+  const ph = phone.replace(/\s/g, '');
+  if (!ph || !/^(09\d{9}|\+639\d{9})$/.test(ph)) {
+    showToast('Please enter a valid Philippine mobile number (e.g. 09171234567).', 'error');
+    document.getElementById('guest_phone').classList.add('fi-err');
+    document.getElementById('err-phone').classList.add('show');
+    return false;
+  }
+  document.getElementById('guest_phone').classList.remove('fi-err');
+  document.getElementById('err-phone').classList.remove('show');
+  if (!ci) { showToast('Please select a check-in date.', 'error'); return false; }
+  if (!co) { showToast('Please select a check-out date.', 'error'); return false; }
+  if (co <= ci) { showToast('Check-out must be after check-in.', 'error'); return false; }
   return true;
 }
 
 function validateStep2() {
-  if (!selectedPackage)        { showToast('Please select a package.', 'error'); return false; }
-  const pkg = selectedPackage;
-  const needed = pkg.rooms_included < 4 ? pkg.rooms_included : 4;
-  if (selectedRooms.length < needed) { showToast(`Please select ${needed - selectedRooms.length} more room(s).`, 'error'); return false; }
+  if (!selectedPackage) { showToast('Please select a package.', 'error'); return false; }
+  const need = Math.min(selectedPackage.rooms_included, 4);
+  if (selectedRooms.length < need) { showToast(`Please select ${need - selectedRooms.length} more room(s).`, 'error'); return false; }
   return true;
 }
 
-function populateStep3Summary() {
+function fillStep3Summary() {
   const ci = document.getElementById('check_in').value;
   const co = document.getElementById('check_out').value;
   const nights = calcNights();
-  document.getElementById('sumPackage').textContent = `${selectedPackage.pax_min}–${selectedPackage.pax_max} pax package`;
-  document.getElementById('sumDates').textContent   = `${fmtDate(ci)} → ${fmtDate(co)} (${nights} night${nights>1?'s':''})`;
-  document.getElementById('sumPax').textContent     = `${calcTotalPax()} total pax`;
-  document.getElementById('sumRooms').textContent   = selectedRooms.join(', ') || 'All rooms';
-  document.getElementById('sumTotal').textContent   = '₱' + totalAmount.toLocaleString();
-  document.getElementById('halfAmt').textContent    = '₱' + depositAmount.toLocaleString();
-  document.getElementById('fullAmt').textContent    = '₱' + totalAmount.toLocaleString();
+  setText('sumPackage', `${selectedPackage.pax_min}–${selectedPackage.pax_max} pax (${getDayType(ci)})`);
+  setText('sumDates',   `${fmtDate(ci)} → ${fmtDate(co)}  (${nights} night${nights > 1 ? 's' : ''})`);
+  setText('sumPax',     `${calcTotalPax()} total pax`);
+  setText('sumRooms',   selectedRooms.join(', ') || 'All rooms');
+  setText('sumTotal',   '₱' + totalAmount.toLocaleString());
+  setText('halfAmt',    '₱' + depositAmount.toLocaleString());
+  setText('fullAmt',    '₱' + totalAmount.toLocaleString());
   updatePayAmount();
 }
 
 function updateDots(current) {
   [1,2,3,4].forEach(n => {
-    const dot  = document.getElementById('dot-'+n);
-    const line = document.getElementById('line-'+n);
-    if (n < current)       { dot.className='step-dot done'; dot.innerHTML='<i class="fas fa-check text-xs"></i>'; }
-    else if (n === current) { dot.className='step-dot active'; dot.textContent=n; }
-    else                   { dot.className='step-dot pending'; dot.textContent=n; }
-    if (line && n < 4) line.className = n < current ? 'step-line done' : 'step-line';
+    const dot  = document.getElementById('dot-' + n);
+    const line = document.getElementById('line-' + n);
+    if (n < current)      { dot.className = 'step-dot done'; dot.innerHTML = '<i class="fas fa-check text-xs"></i>'; }
+    else if (n === current){ dot.className = 'step-dot active'; dot.textContent = n; }
+    else                  { dot.className = 'step-dot pending'; dot.textContent = n; }
+    if (line && n < 4) line.className = 'step-line' + (n < current ? ' done' : '');
   });
 }
 
-// ── File Upload ───────────────────────────────────────────────────────────────
-function handleDrop(e) { e.preventDefault(); document.getElementById('uploadArea').classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) processFile(f); }
-function handleFile(e) { const f = e.target.files[0]; if(f) processFile(f); }
+// ═══════════════════════════════════════════════════════════════════════════════
+// FILE UPLOAD
+// ═══════════════════════════════════════════════════════════════════════════════
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadArea').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0]; if (f) processFile(f);
+}
+function handleFile(e) { const f = e.target.files[0]; if (f) processFile(f); }
 function processFile(f) {
-  if (f.size > 5*1024*1024) { showToast('File too large (max 5MB).','error'); return; }
+  if (f.size > 5 * 1024 * 1024) { showToast('File too large. Max 5 MB.', 'error'); return; }
   uploadedFile = f;
   document.getElementById('uploadPlaceholder').classList.add('hidden');
   document.getElementById('uploadPreview').classList.remove('hidden');
-  document.getElementById('uploadFileName').textContent = f.name;
+  setText('uploadFileName', f.name);
   document.getElementById('uploadArea').classList.add('uploaded');
 }
 
 function showPayMethod(m, btn) {
   document.querySelectorAll('.pay-method').forEach(el => el.classList.add('hidden'));
   document.querySelectorAll('.qr-tab').forEach(el => el.classList.remove('active'));
-  document.getElementById('pay-'+m).classList.remove('hidden');
+  document.getElementById('pay-' + m).classList.remove('hidden');
   btn.classList.add('active');
 }
 
-// ── Submit Booking ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// SUBMIT BOOKING
+// ═══════════════════════════════════════════════════════════════════════════════
 async function submitBooking() {
+  if (!document.getElementById('agreeTerms').checked) {
+    showToast('Please read and agree to the Terms & Conditions.', 'error'); return;
+  }
   const payRef = document.getElementById('payment_ref').value.trim();
-  if (!payRef)       { showToast('Enter your payment reference number.','error'); return; }
-  if (!uploadedFile) { showToast('Please upload your payment screenshot.','error'); return; }
+  if (!payRef)       { showToast('Please enter your transaction reference number.', 'error'); return; }
+  if (!uploadedFile) { showToast('Please upload your payment screenshot.', 'error'); return; }
 
-  const name     = document.getElementById('guest_name').value.trim();
-  const email    = document.getElementById('guest_email').value.trim();
-  const phone    = document.getElementById('guest_phone').value.trim();
-  const ci       = document.getElementById('check_in').value;
-  const co       = document.getElementById('check_out').value;
-  const adults   = parseInt(document.getElementById('adults').value)||0;
-  const chAbove  = parseInt(document.getElementById('children_above').value)||0;
-  const chBelow  = parseInt(document.getElementById('children_below').value)||0;
-  const pax      = calcTotalPax();
-  const nights   = calcNights();
-  const balance  = totalAmount - depositAmount;
-  const isFullPay = document.getElementById('payFull')?.checked;
-  const ref       = genRef();
+  const name    = document.getElementById('guest_name').value.trim();
+  const email   = document.getElementById('guest_email').value.trim();
+  const phone   = document.getElementById('guest_phone').value.trim();
+  const ci      = document.getElementById('check_in').value;
+  const co      = document.getElementById('check_out').value;
+  const adults  = parseInt(document.getElementById('adults').value) || 0;
+  const chAbove = parseInt(document.getElementById('children_above').value) || 0;
+  const chBelow = parseInt(document.getElementById('children_below').value) || 0;
+  const pax     = calcTotalPax();
+  const nights  = calcNights();
+  const isFull  = document.getElementById('payFull')?.checked;
+  const ref     = genRef();
+  const balance = isFull ? 0 : totalAmount - depositAmount;
 
   setBtnLoading(true);
   try {
-    // Upload proof to Supabase Storage
+    // Upload proof
     let proofUrl = null;
     try {
       const ext  = uploadedFile.name.split('.').pop();
       const path = `proofs/${ref}-${Date.now()}.${ext}`;
-      const { data: upData, error: upErr } = await db.storage.from('payment-proofs').upload(path, uploadedFile, {cacheControl:'3600'});
+      const { error: upErr } = await db.storage.from('payment-proofs').upload(path, uploadedFile, { cacheControl: '3600' });
       if (!upErr) {
         const { data: urlData } = db.storage.from('payment-proofs').getPublicUrl(path);
         proofUrl = urlData.publicUrl;
       }
     } catch(e) { console.warn('Proof upload failed:', e); }
 
-    // Save booking
+    // Save to bookings
     const { error: dbErr } = await db.from('bookings').insert({
       booking_ref: ref,
       guest_name: name, guest_email: email, guest_phone: phone,
@@ -1079,151 +1587,227 @@ async function submitBooking() {
       pax_count: pax,
       day_type: getDayType(ci),
       total_amount: totalAmount,
-      deposit_amount: isFullPay ? totalAmount : depositAmount,
-      remaining_balance: isFullPay ? 0 : balance,
+      deposit_amount: isFull ? totalAmount : depositAmount,
+      remaining_balance: balance,
       payment_status: 'proof_uploaded',
       payment_proof_url: proofUrl,
       payment_ref_number: payRef,
-      payment_type: isFullPay ? 'full' : 'downpayment',
+      payment_type: isFull ? 'full' : 'downpayment',
       addons: JSON.stringify(selectedAddons),
-      voucher_code: appliedVoucher ? appliedVoucher.code : null,
+      voucher_code: appliedVoucher?.code || null,
       voucher_discount: appliedVoucher ? Math.round(totalAmount * appliedVoucher.discount_percent / 100) : 0,
-      special_requests: document.getElementById('special_requests').value.trim()||null,
+      special_requests: document.getElementById('special_requests').value.trim() || null,
       status: 'pending_payment_verification',
       booking_type: 'online',
-      deposit_deadline: new Date(Date.now() + 24*60*60*1000).toISOString(),
-      edit_log: JSON.stringify([{action:'created',at:new Date().toISOString(),by:'guest'}]),
+      deposit_deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      edit_log: JSON.stringify([{ action: 'created', at: new Date().toISOString(), by: 'guest' }]),
     });
     if (dbErr) throw dbErr;
 
     // Mark voucher used
     if (appliedVoucher) {
-      await db.from('vouchers').update({times_used: appliedVoucher.times_used + 1}).eq('code', appliedVoucher.code);
-      await db.from('voucher_usage').insert({voucher_code: appliedVoucher.code, booking_ref: ref});
+      await db.from('vouchers').update({ times_used: appliedVoucher.times_used + 1 }).eq('code', appliedVoucher.code);
+      await db.from('voucher_usage').insert({ voucher_code: appliedVoucher.code, booking_ref: ref });
     }
 
-    // Email to guest
-    await sendEmail(email, `Balay Maysa – Booking Received (${ref})`, guestEmailHtml(name, ref, ci, co, nights, pax, selectedRooms, isFullPay));
-    // Email to Super Admin only
-    await sendEmail(SA_EMAIL, `🏡 New Booking + Payment Proof – ${ref} – ${name}`, adminEmailHtml(name, email, phone, ref, ci, co, pax, selectedRooms, isFullPay, payRef, proofUrl));
+    // Emails
+    await sendEmail(email, `Balay Maysa – Booking Received (${ref})`, buildGuestEmail(name, ref, ci, co, nights, pax, isFull));
+    await sendEmail(SA_EMAIL, `🏡 New Booking + Payment – ${ref} – ${name}`, buildAdminEmail(name, email, phone, ref, ci, co, pax, isFull, payRef, proofUrl));
 
-    document.getElementById('confirmRef').textContent = ref;
+    // Advance to confirmation
+    setText('confirmRef', ref);
     goStep(4);
-    showToast(`Booking submitted! Ref: ${ref}`, 'success');
+    showToast(`Submitted! Reference: ${ref}`, 'success');
+
+    // Refresh calendar
+    await loadBookedDates();
+    renderCalendar();
+
   } catch(err) {
     console.error(err);
-    showToast('Something went wrong. Please try again or contact us.','error');
+    showToast('Something went wrong. Please try again or contact us directly.', 'error');
   } finally { setBtnLoading(false); }
 }
 
 function setBtnLoading(on) {
-  document.getElementById('submitText').textContent = on ? 'Submitting...' : 'Submit Booking';
+  setText('submitText', on ? 'Submitting…' : 'Submit Booking');
   document.getElementById('submitSpinner').classList.toggle('hidden', !on);
   document.getElementById('submitBtn').disabled = on;
 }
 
-function guestEmailHtml(name, ref, ci, co, nights, pax, rooms, fullPay) {
+// ═══════════════════════════════════════════════════════════════════════════════
+// EMAIL TEMPLATES
+// ═══════════════════════════════════════════════════════════════════════════════
+function buildGuestEmail(name, ref, ci, co, nights, pax, fullPay) {
+  const phone = siteSettings.contact_phone || '0917 565 7918';
   return `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
-  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
-    <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1>
-    <p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">Booking Request Received ✅</p>
+<div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
+  <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1>
+  <p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">Booking Request Received ✅</p>
+</div>
+<div style="padding:40px;">
+  <p>Hello <strong>${name}</strong>,</p>
+  <p style="color:#666;line-height:1.7;">Your booking is <strong>pending payment verification</strong>. We'll confirm within 24 hours after reviewing your proof of payment.</p>
+  <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
+    <h3 style="margin:0 0 14px;color:#2d5a3b;font-family:Georgia,serif;font-weight:400;font-size:18px;">Booking Summary</h3>
+    <table style="width:100%;font-size:14px;border-collapse:collapse;">
+      <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">${ref}</td></tr>
+      <tr><td style="padding:6px 0;color:#666;">Room(s)</td><td>${selectedRooms.join(', ')}</td></tr>
+      <tr><td style="padding:6px 0;color:#666;">Check-in</td><td>${fmtDate(ci)}</td></tr>
+      <tr><td style="padding:6px 0;color:#666;">Check-out</td><td>${fmtDate(co)} (${nights} night${nights > 1 ? 's' : ''})</td></tr>
+      <tr><td style="padding:6px 0;color:#666;">Guests</td><td>${pax} pax</td></tr>
+      <tr><td style="padding:6px 0;color:#666;">Total Amount</td><td style="font-weight:700;">₱${totalAmount.toLocaleString()}</td></tr>
+      <tr><td style="padding:6px 0;color:#666;">Payment</td><td style="color:#2d5a3b;font-weight:600;">${fullPay ? 'Full Payment' : '50% Downpayment — Balance of ₱' + (totalAmount - depositAmount).toLocaleString() + ' due on arrival'}</td></tr>
+    </table>
   </div>
-  <div style="padding:40px;">
-    <p>Hello <strong>${name}</strong>,</p>
-    <p style="color:#666;line-height:1.7;">Your booking is <strong>pending payment verification</strong>. We'll confirm within 24 hours after reviewing your proof.</p>
-    <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
-      <table style="width:100%;font-size:14px;border-collapse:collapse;">
-        <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">${ref}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Rooms</td><td>${rooms.join(', ')}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Check-in</td><td>${fmtDate(ci)}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Check-out</td><td>${fmtDate(co)} (${nights} night${nights>1?'s':''})</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Pax</td><td>${pax} people</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Total</td><td style="font-weight:700;">₱${totalAmount.toLocaleString()}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Payment</td><td style="color:#2d5a3b;font-weight:600;">${fullPay ? 'Full Payment' : '50% Downpayment – ₱'+depositAmount.toLocaleString()+' balance due on arrival'}</td></tr>
-      </table>
-    </div>
-    <p style="color:#666;font-size:13px;">Track your booking at: <a href="https://balay-maysaa.vercel.app/lookup.html?ref=${ref}" style="color:#2d5a3b;">lookup page</a></p>
-    <p style="color:#666;font-size:13px;">Questions? Call <a href="tel:${(siteSettings.contact_phone||'09175657918').replace(/\s/g,'')}" style="color:#2d5a3b;">${siteSettings.contact_phone||'0917 565 7918'}</a></p>
-  </div>
-  <div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
+  <p style="color:#666;font-size:13px;">Track your booking: <a href="https://balay-maysaa.vercel.app/lookup.html?ref=${ref}&email=${encodeURIComponent(document.getElementById('guest_email').value)}" style="color:#2d5a3b;font-weight:600;">Click here to check status</a></p>
+  <p style="color:#666;font-size:13px;margin-top:8px;">Questions? Call us at <a href="tel:${phone.replace(/\s/g,'')}" style="color:#2d5a3b;">${phone}</a></p>
+</div>
+<div style="background:#2d5a3b;padding:20px;text-align:center;">
+  <p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p>
+</div>
 </div>`;
 }
 
-function adminEmailHtml(name, email, phone, ref, ci, co, pax, rooms, fullPay, payRef, proofUrl) {
-  return `<div style="font-family:Inter,sans-serif;max-width:500px;margin:0 auto;">
-  <div style="background:#1e3d28;padding:24px 32px;"><h2 style="color:white;font-size:20px;margin:0;">🏡 New Booking – Payment Proof Uploaded</h2></div>
-  <div style="background:#f9f9f9;padding:32px;">
-    <p><strong>Ref:</strong> ${ref}</p>
-    <p><strong>Guest:</strong> ${name} | ${email} | ${phone}</p>
-    <p><strong>Rooms:</strong> ${rooms.join(', ')}</p>
-    <p><strong>Dates:</strong> ${fmtDate(ci)} → ${fmtDate(co)}</p>
-    <p><strong>Pax:</strong> ${pax}</p>
-    <p><strong>Total:</strong> ₱${totalAmount.toLocaleString()} | ${fullPay ? 'FULLY PAID' : 'Downpayment: ₱'+depositAmount.toLocaleString()}</p>
-    <p><strong>Payment Ref:</strong> ${payRef}</p>
-    ${proofUrl ? `<p><strong>Proof:</strong> <a href="${proofUrl}">View Screenshot</a></p>` : ''}
-    <p style="margin-top:24px;"><a href="https://balay-maysaa.vercel.app/balay-super-secret.html" style="background:#2d5a3b;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;">Verify in Super Admin →</a></p>
-  </div>
+function buildAdminEmail(name, email, phone, ref, ci, co, pax, fullPay, payRef, proofUrl) {
+  const addonsStr = Object.keys(selectedAddons).join(', ') || 'None';
+  return `<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;">
+<div style="background:#1e3d28;padding:24px 32px;">
+  <h2 style="color:white;font-size:20px;margin:0;">🏡 New Booking + Payment Proof Uploaded</h2>
+</div>
+<div style="background:#f9f9f9;padding:32px;">
+  <p style="margin:0 0 8px;"><strong>Ref:</strong> <code>${ref}</code></p>
+  <p style="margin:0 0 8px;"><strong>Guest:</strong> ${name}</p>
+  <p style="margin:0 0 8px;"><strong>Email:</strong> ${email}</p>
+  <p style="margin:0 0 8px;"><strong>Phone:</strong> ${phone}</p>
+  <p style="margin:0 0 8px;"><strong>Room(s):</strong> ${selectedRooms.join(', ')}</p>
+  <p style="margin:0 0 8px;"><strong>Dates:</strong> ${fmtDate(ci)} → ${fmtDate(co)}</p>
+  <p style="margin:0 0 8px;"><strong>Pax:</strong> ${pax}</p>
+  <p style="margin:0 0 8px;"><strong>Add-ons:</strong> ${addonsStr}</p>
+  <p style="margin:0 0 8px;"><strong>Total:</strong> ₱${totalAmount.toLocaleString()} | <strong>${fullPay ? 'FULLY PAID' : 'Downpayment: ₱' + depositAmount.toLocaleString() + ' | Balance: ₱' + (totalAmount - depositAmount).toLocaleString()}</strong></p>
+  <p style="margin:0 0 8px;"><strong>Payment Ref:</strong> ${payRef}</p>
+  ${proofUrl ? `<p style="margin:0 0 16px;"><strong>Proof:</strong> <a href="${proofUrl}" style="color:#2d5a3b;">View Screenshot →</a></p>` : ''}
+  <a href="https://balay-maysaa.vercel.app/balay-super-secret.html" style="display:inline-block;background:#2d5a3b;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:500;">Verify in Super Admin →</a>
+</div>
 </div>`;
 }
 
-// ── Inquiry (small gatherings) ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// INQUIRY (small gatherings)
+// ═══════════════════════════════════════════════════════════════════════════════
 async function submitInquiry() {
   const name    = document.getElementById('inq_name').value.trim();
-  const email   = document.getElementById('inq_email').value.trim();
   const phone   = document.getElementById('inq_phone').value.trim();
-  const adults  = parseInt(document.getElementById('inq_adults').value)||0;
-  const children= parseInt(document.getElementById('inq_children').value)||0;
+  const email   = document.getElementById('inq_email').value.trim();
+  const adults  = parseInt(document.getElementById('inq_adults').value)   || 0;
+  const children= parseInt(document.getElementById('inq_children').value) || 0;
   const message = document.getElementById('inq_message').value.trim();
-  if (!name || !phone) { showToast('Please enter your name and phone number.','error'); return; }
-  document.getElementById('inqText').textContent = 'Sending...';
+  if (!name || !phone) { showToast('Please enter your name and phone number.', 'error'); return; }
+
+  document.getElementById('inqText').textContent = 'Sending…';
   document.getElementById('inqSpinner').classList.remove('hidden');
   document.getElementById('inqBtn').disabled = true;
   try {
-    await db.from('inquiries').insert({name, email, phone, adults, children, message});
-    const html = `<div style="font-family:Inter,sans-serif;max-width:500px;margin:0 auto;"><div style="background:#1e3d28;padding:24px 32px;"><h2 style="color:white;font-size:18px;margin:0;">📩 Small Gathering Inquiry</h2></div><div style="background:#f9f9f9;padding:24px;"><p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email||'—'}</p><p><strong>Phone:</strong> ${phone}</p><p><strong>Guests:</strong> ${adults} adults, ${children} children</p><p><strong>Message:</strong> ${message||'—'}</p></div></div>`;
+    await db.from('inquiries').insert({ name, email, phone, adults, children, message });
+    const html = `<div style="font-family:Inter,sans-serif;max-width:500px;margin:0 auto;">
+<div style="background:#1e3d28;padding:24px 32px;"><h2 style="color:white;margin:0;font-size:18px;">📩 Small Gathering Inquiry</h2></div>
+<div style="background:#f9f9f9;padding:28px;">
+  <p><strong>Name:</strong> ${name}</p>
+  <p><strong>Phone:</strong> ${phone}</p>
+  <p><strong>Email:</strong> ${email || '—'}</p>
+  <p><strong>Guests:</strong> ${adults} adults, ${children} children</p>
+  <p><strong>Message:</strong> ${message || '—'}</p>
+  <p style="margin-top:16px;font-size:13px;color:#666;">Reply directly to <strong>${email || phone}</strong>.</p>
+</div>
+</div>`;
     await sendEmail(SA_EMAIL, `📩 Inquiry from ${name} – Balay Maysa`, html);
-    showToast('Inquiry sent! We'll reach out to you soon.', 'success');
-    ['inq_name','inq_email','inq_phone','inq_message'].forEach(f => document.getElementById(f).value='');
-    document.getElementById('inq_adults').value='2';
-    document.getElementById('inq_children').value='0';
-  } catch(e) { console.error(e); showToast('Failed to send. Please call us directly.','error'); }
-  finally {
+    showToast('Inquiry sent! We\'ll contact you soon.', 'success');
+    ['inq_name','inq_phone','inq_email','inq_message'].forEach(f => document.getElementById(f).value = '');
+    document.getElementById('inq_adults').value   = '2';
+    document.getElementById('inq_children').value = '0';
+  } catch(e) {
+    console.error(e);
+    showToast('Failed to send. Please call us directly.', 'error');
+  } finally {
     document.getElementById('inqText').textContent = 'Send Inquiry';
     document.getElementById('inqSpinner').classList.add('hidden');
     document.getElementById('inqBtn').disabled = false;
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// TERMS MODAL
+// ═══════════════════════════════════════════════════════════════════════════════
+function openTerms()  { document.getElementById('termsModal').classList.remove('hidden'); }
+function closeTerms() { document.getElementById('termsModal').classList.add('hidden'); }
+document.getElementById('termsModal').addEventListener('click', e => { if (e.target === document.getElementById('termsModal')) closeTerms(); });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
 function genRef() {
   const d = new Date();
   return `BM-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
 }
-function fmtDate(d) { if(!d) return '—'; return new Date(d+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'}); }
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
 async function sendEmail(to, subject, html) {
-  try { await emailjs.send(EMAILJS_SID, EMAILJS_TMPL, {to_email:to, subject, message_html:html, to_name:to.split('@')[0]}); return true; } catch(e) { console.error('Email:',e); return false; }
+  try {
+    await emailjs.send(EJS_SID, EJS_TMPL, { to_email: to, subject, message_html: html, to_name: to.split('@')[0] });
+    return true;
+  } catch(e) { console.error('Email error:', e); return false; }
 }
-function showToast(msg, type='success') {
+
+function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
-  t.classList.remove('success','error','hidden'); t.classList.add(type);
+  t.classList.remove('success','error','info','hidden');
+  t.classList.add(type);
   document.getElementById('toastMsg').textContent = msg;
-  document.getElementById('toastIcon').className = type==='success'?'fas fa-check-circle':'fas fa-exclamation-circle';
-  setTimeout(() => t.classList.add('hidden'), 5000);
+  document.getElementById('toastIcon').className =
+    type === 'success' ? 'fas fa-check-circle' :
+    type === 'error'   ? 'fas fa-exclamation-circle' : 'fas fa-info-circle';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.add('hidden'), 5500);
 }
+
 function resetForm() {
-  selectedPackage=null; selectedRooms=[]; selectedAddons={}; addonQtys={}; uploadedFile=null; appliedVoucher=null; totalAmount=0; depositAmount=0;
-  ['guest_name','guest_email','guest_phone','check_in','check_out','payment_ref','special_requests','voucher_code'].forEach(f => document.getElementById(f).value='');
-  document.getElementById('adults').value='2';
-  document.getElementById('children_above').value='0';
-  document.getElementById('children_below').value='0';
+  selectedPackage = null; selectedRooms = []; selectedAddons = {}; addonQtys = {};
+  uploadedFile = null; appliedVoucher = null; totalAmount = 0; depositAmount = 0;
+  ['guest_name','guest_email','guest_phone','check_in','check_out','payment_ref','special_requests','voucher_code']
+    .forEach(f => document.getElementById(f).value = '');
+  document.getElementById('adults').value = '2';
+  document.getElementById('children_above').value = '0';
+  document.getElementById('children_below').value = '0';
+  document.getElementById('agreeTerms').checked = false;
+  document.getElementById('dayTypeNotice').classList.add('hidden');
+  document.getElementById('voucherStatus').classList.add('hidden');
+  document.getElementById('uploadPlaceholder').classList.remove('hidden');
+  document.getElementById('uploadPreview').classList.add('hidden');
+  document.getElementById('uploadArea').classList.remove('uploaded');
   calcTotalPax();
   goStep(1);
 }
 
-window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60));
-document.getElementById('mobileMenuBtn').addEventListener('click', () => document.getElementById('mobileMenu').classList.toggle('hidden'));
+// ═══════════════════════════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════════════════════════
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+});
+document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.toggle('hidden');
+});
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════════
 boot();
 </script>
 </body>
 </html>
+HTMLEOF
+echo "Done: $(wc -l < /home/claude/balay-maysa/index.html) lines"
