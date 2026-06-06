@@ -1,53 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Balay Maysa – Admin Panel</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: { forest: '#2d5a3b', 'forest-dark': '#1e3d28', gold: '#c9a03d' },
-          fontFamily: { heading: ['"Cormorant Garamond"', 'serif'], body: ['Inter', 'sans-serif'] },
-        },
-      },
-    };
+    tailwind.config={theme:{extend:{colors:{forest:'#2d5a3b','forest-dark':'#1e3d28',gold:'#c9a03d'},fontFamily:{heading:['"Cormorant Garamond"','serif'],body:['Inter','sans-serif']}}}};
   </script>
   <style>
-    body { font-family: 'Inter', sans-serif; background: #f3f4f1; }
-    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; padding: 14px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.18); display: flex; align-items: center; gap: 8px; max-width: 360px; }
-    #toast.hidden { display: none !important; }
-    #toast.success { background: #2d5a3b; color: white; }
-    #toast.error { background: #c0392b; color: white; }
-    .table-cell { padding: 12px 16px; border-bottom: 1px solid #eee; font-size: 13px; }
-    .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
-    .badge-pending { background: #fef3c7; color: #92400e; }
-    .badge-verified { background: #dbeafe; color: #1e40af; }
-    .badge-confirmed { background: #d1fae5; color: #065f46; }
-    .badge-declined { background: #fee2e2; color: #991b1b; }
-    .badge-cancelled { background: #f3f4f6; color: #6b7280; }
-    .badge-completed { background: #ede9fe; color: #5b21b6; }
-    .badge-fully_paid { background: #d1fae5; color: #065f46; }
-    /* Modal */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .modal-overlay.hidden { display: none !important; }
-    .modal-box { background: white; border-radius: 20px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; }
-    .form-input { width: 100%; border: 1.5px solid #d4d0ca; border-radius: 8px; padding: 10px 14px; font-size: 14px; outline: none; }
-    .form-input:focus { border-color: #2d5a3b; box-shadow: 0 0 0 3px rgba(45,90,59,0.1); }
-    /* Sidebar active */
-    .tab-btn.active-tab { background: rgba(255,255,255,0.12); color: white; }
-    /* Scrollable table wrapper */
-    .table-wrap { overflow-x: auto; }
-    /* Status colors for quick reference */
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    body{font-family:'Inter',sans-serif;background:#f3f4f1;}
+    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    #toast{position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;max-width:360px;}
+    #toast.hidden{display:none!important;}#toast.success{background:#2d5a3b;color:white;}#toast.error{background:#c0392b;color:white;}#toast.info{background:#1d4ed8;color:white;}
+    .tc{padding:11px 16px;border-bottom:1px solid #eee;font-size:13px;}
+    .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;}
+    .b-pending{background:#fef3c7;color:#92400e;}.b-confirmed{background:#d1fae5;color:#065f46;}.b-declined{background:#fee2e2;color:#991b1b;}.b-walkin{background:#ede9fe;color:#5b21b6;}.b-paid{background:#d1fae5;color:#065f46;}.b-cash{background:#e0f2fe;color:#0369a1;}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .modal.hidden{display:none!important;}
+    .modal-box{background:white;border-radius:20px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;}
+    .fi{width:100%;border:1.5px solid #ddd;border-radius:9px;padding:9px 13px;font-size:14px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;}
+    .fi:focus{border-color:#2d5a3b;box-shadow:0 0 0 3px rgba(45,90,59,.08);}
+    .fi-label{display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:5px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:10px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;width:100%;text-align:left;}
+    .nav-item:hover{background:rgba(255,255,255,.08);color:white;}
+    .nav-item.active{background:rgba(255,255,255,.14);color:white;font-weight:500;}
+    .nav-item i{width:16px;text-align:center;flex-shrink:0;}
+    .cal-event{font-size:10px;padding:1px 5px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f3;}
+    .activity-item:last-child{border:none;}
+    .act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+    .stat-card{background:white;border-radius:14px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);}
+    .sc{background:white;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);overflow:hidden;}
   </style>
 </head>
 <body>
@@ -59,789 +46,948 @@
       <h1 class="font-heading text-4xl text-forest font-light mb-1">Balay Maysa</h1>
       <p class="text-xs text-gray-400 uppercase tracking-widest">Admin Panel</p>
     </div>
-    <div class="mb-4">
-      <label class="block text-xs font-medium text-gray-500 mb-1.5">Username</label>
-      <input id="loginUser" type="text" placeholder="Username" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-forest" />
-    </div>
-    <div class="mb-6">
-      <label class="block text-xs font-medium text-gray-500 mb-1.5">Password</label>
-      <input id="loginPass" type="password" placeholder="Password" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-forest" onkeydown="if(event.key==='Enter')doLogin()" />
-    </div>
-    <p id="loginErr" class="hidden text-red-500 text-xs mb-3 text-center">Invalid credentials. Please try again.</p>
+    <div class="mb-4"><label class="block text-xs font-medium text-gray-500 mb-1.5">Username</label><input id="loginUser" type="text" class="fi" placeholder="balayadmin" /></div>
+    <div class="mb-6"><label class="block text-xs font-medium text-gray-500 mb-1.5">Password</label><input id="loginPass" type="password" class="fi" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+    <p id="loginErr" class="hidden text-red-500 text-xs mb-3 text-center">Invalid credentials.</p>
     <button onclick="doLogin()" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Log In</button>
   </div>
 </div>
 
-<!-- ADMIN DASHBOARD -->
+<!-- ADMIN PANEL -->
 <div id="adminPanel" class="hidden min-h-screen">
-
   <!-- Sidebar -->
-  <div class="fixed inset-y-0 left-0 w-60 bg-forest-dark z-30 flex flex-col">
-    <div class="px-6 py-6 border-b border-white/10">
-      <h1 class="font-heading text-xl text-white font-light">Balay Maysa</h1>
-      <p class="text-white/40 text-xs mt-0.5">Admin Panel</p>
+  <aside class="fixed inset-y-0 left-0 w-56 z-40 flex flex-col" style="background:#1a2e21;">
+    <div class="px-5 py-5 border-b border-white/10">
+      <p class="text-white font-semibold text-sm">Balay Maysa</p>
+      <p class="text-white/40 text-xs">Operations Panel</p>
     </div>
-    <nav class="flex-1 px-3 py-4 space-y-0.5">
-      <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3">
-        <i class="fas fa-chart-bar w-4"></i> Dashboard
-      </button>
-      <button onclick="showTab('payments')" id="tab-payments" class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3">
-        <i class="fas fa-file-invoice-dollar w-4"></i> Payment Verification
-        <span id="paymentBadge" class="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full hidden"></span>
-      </button>
-      <button onclick="showTab('pending')" id="tab-pending" class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3">
-        <i class="fas fa-clock w-4"></i> Pending
-        <span id="pendingBadge" class="ml-auto bg-gold text-white text-xs px-2 py-0.5 rounded-full hidden"></span>
-      </button>
-      <button onclick="showTab('confirmed')" id="tab-confirmed" class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3">
-        <i class="fas fa-check-circle w-4"></i> Confirmed
-      </button>
-      <button onclick="showTab('all')" id="tab-all" class="tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-3">
-        <i class="fas fa-list w-4"></i> All Bookings
-      </button>
+    <nav class="flex-1 px-3 py-3 overflow-y-auto space-y-0.5">
+      <button class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard"><i class="fas fa-chart-bar"></i> Dashboard</button>
+      <button class="nav-item" onclick="showTab('verification')" id="nav-verification"><i class="fas fa-file-invoice-dollar"></i> Verification <span id="verifBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
+      <button class="nav-item" onclick="showTab('confirmed')" id="nav-confirmed"><i class="fas fa-check-circle"></i> Confirmed</button>
+      <button class="nav-item" onclick="showTab('all')" id="nav-all"><i class="fas fa-list"></i> All Bookings</button>
+      <button class="nav-item" onclick="showTab('calendar')" id="nav-calendar"><i class="fas fa-calendar-days"></i> Calendar</button>
+      <button class="nav-item" onclick="showTab('guestlog')" id="nav-guestlog"><i class="fas fa-clipboard-list"></i> Guest Log</button>
+      <button class="nav-item" onclick="showTab('walkin')" id="nav-walkin"><i class="fas fa-walking"></i> Walk-in Booking</button>
+      <button class="nav-item" onclick="showTab('personnel')" id="nav-personnel"><i class="fas fa-users"></i> Personnel</button>
+      <button class="nav-item" onclick="showTab('inventory')" id="nav-inventory"><i class="fas fa-boxes-stacked"></i> Inventory</button>
+      <button class="nav-item" onclick="showTab('inquiries')" id="nav-inquiries"><i class="fas fa-envelope"></i> Inquiries <span id="inqBadge" class="ml-auto bg-gold text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
     </nav>
-    <div class="p-4 border-t border-white/10 space-y-1">
-      <button onclick="openManualBookingModal()" class="w-full bg-gold hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2 justify-center">
-        <i class="fas fa-plus"></i> Add Walk-in Booking
-      </button>
-      <button onclick="doLogout()" class="w-full text-left px-4 py-2 text-white/50 text-xs hover:text-white transition-colors flex items-center gap-2">
-        <i class="fas fa-sign-out-alt"></i> Log Out
-      </button>
+    <div class="p-4 border-t border-white/10">
+      <button onclick="doLogout()" class="nav-item w-full"><i class="fas fa-sign-out-alt"></i> Log Out</button>
     </div>
-  </div>
+  </aside>
 
   <!-- Main -->
-  <div class="ml-60 p-8">
+  <main class="ml-56 p-7">
 
-    <!-- DASHBOARD -->
-    <div id="view-dashboard" class="tab-view">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="font-heading text-3xl text-gray-800 font-light">Dashboard</h2>
-        <button onclick="loadAll()" class="text-xs text-forest hover:underline flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Pending Payment</span>
-            <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center"><i class="fas fa-file-invoice text-red-500 text-sm"></i></div>
-          </div>
-          <div id="statPayment" class="text-3xl font-semibold text-gray-800">–</div>
-        </div>
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Confirmed</span>
-            <div class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center"><i class="fas fa-check-circle text-green-500 text-sm"></i></div>
-          </div>
-          <div id="statConfirmed" class="text-3xl font-semibold text-gray-800">–</div>
-        </div>
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Total Revenue</span>
-            <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center"><i class="fas fa-peso-sign text-yellow-500 text-sm"></i></div>
-          </div>
-          <div id="statRevenue" class="text-2xl font-semibold text-gray-800">–</div>
-        </div>
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs text-gray-400 uppercase tracking-wide">Total Bookings</span>
-            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i class="fas fa-calendar text-blue-500 text-sm"></i></div>
-          </div>
-          <div id="statTotal" class="text-3xl font-semibold text-gray-800">–</div>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h3 class="font-medium text-gray-700 mb-4 text-sm">Recent Bookings</h3>
-        <div id="recentList" class="text-sm text-gray-400">Loading...</div>
-      </div>
-    </div>
-
-    <!-- PAYMENT VERIFICATION -->
-    <div id="view-payments" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="font-heading text-3xl text-gray-800 font-light">Payment Verification</h2>
-        <button onclick="loadAll()" class="text-xs text-forest hover:underline flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="table-wrap">
-          <table class="w-full">
-            <thead><tr class="bg-gray-50 border-b border-gray-100">
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Submitted</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Guest</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Room</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Dates</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Deposit</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Proof</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Actions</th>
-            </tr></thead>
-            <tbody id="paymentsTable"><tr><td colspan="7" class="table-cell text-center text-gray-400">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PENDING -->
-    <div id="view-pending" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="font-heading text-3xl text-gray-800 font-light">Pending Bookings</h2>
-        <button onclick="loadAll()" class="text-xs text-forest hover:underline flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="table-wrap">
-          <table class="w-full">
-            <thead><tr class="bg-gray-50 border-b border-gray-100">
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Date</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Guest</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Room</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-in</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Pax</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Status</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Actions</th>
-            </tr></thead>
-            <tbody id="pendingTable"><tr><td colspan="7" class="table-cell text-center text-gray-400">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- CONFIRMED -->
-    <div id="view-confirmed" class="tab-view hidden">
-      <h2 class="font-heading text-3xl text-gray-800 font-light mb-6">Confirmed Bookings</h2>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="table-wrap">
-          <table class="w-full">
-            <thead><tr class="bg-gray-50 border-b border-gray-100">
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Reference</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Guest</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Room</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-in</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-out</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Balance Due</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Status</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Actions</th>
-            </tr></thead>
-            <tbody id="confirmedTable"><tr><td colspan="8" class="table-cell text-center text-gray-400">Loading...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ALL -->
-    <div id="view-all" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="font-heading text-3xl text-gray-800 font-light">All Bookings</h2>
+    <!-- ===== DASHBOARD ===== -->
+    <div id="tab-dashboard" class="tab-view">
+      <div class="flex items-center justify-between mb-5">
+        <div><h2 class="font-heading text-3xl text-gray-800 font-light">Operations Dashboard</h2><p class="text-gray-400 text-xs" id="dashDateDisplay">–</p></div>
         <div class="flex gap-2">
-          <input type="text" id="searchInput" placeholder="Search guest, ref, room..." class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-forest" oninput="filterAll()" />
-          <select id="statusFilter" class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-forest" onchange="filterAll()">
-            <option value="">All Status</option>
-            <option value="pending_payment_verification">Pending Payment</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="fully_paid">Fully Paid</option>
-            <option value="declined">Declined</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="completed_stayed">Completed</option>
-          </select>
+          <button onclick="loadAll()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
+          <a href="balay-super-secret.html" target="_blank" class="text-xs bg-forest text-white px-3 py-2 rounded-lg hover:bg-forest-dark flex items-center gap-1"><i class="fas fa-crown"></i> Super Admin</a>
         </div>
       </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="table-wrap">
-          <table class="w-full">
-            <thead><tr class="bg-gray-50 border-b border-gray-100">
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Reference</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Guest</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Room</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Check-in</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Total</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Status</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Submitted</th>
-              <th class="table-cell text-left font-medium text-gray-500 text-xs uppercase tracking-wide">Actions</th>
-            </tr></thead>
-            <tbody id="allTable"><tr><td colspan="8" class="table-cell text-center text-gray-400">Loading...</td></tr></tbody>
-          </table>
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+        <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Check-ins Today</p><p class="text-3xl font-bold text-forest" id="dashCICount">–</p></div>
+        <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Check-outs Today</p><p class="text-3xl font-bold text-gray-700" id="dashCOCount">–</p></div>
+        <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Pending Verification</p><p class="text-3xl font-bold text-yellow-600" id="dashPendingCount">–</p></div>
+        <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Balance Collectible</p><p class="text-2xl font-bold text-purple-700" id="dashBalance">₱–</p></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <!-- Today's Check-ins -->
+        <div class="sc">
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-semibold text-gray-700 text-sm">Today's Check-ins</h3>
+            <button onclick="showTab('guestlog')" class="text-xs text-forest hover:underline">Log Guest →</button>
+          </div>
+          <div class="divide-y divide-gray-50" id="todayCI"><div class="p-4 text-sm text-gray-300 text-center">Loading...</div></div>
+        </div>
+        <!-- Today's Check-outs -->
+        <div class="sc">
+          <div class="p-4 border-b border-gray-100"><h3 class="font-semibold text-gray-700 text-sm">Today's Check-outs</h3></div>
+          <div class="divide-y divide-gray-50" id="todayCO"><div class="p-4 text-sm text-gray-300 text-center">Loading...</div></div>
+        </div>
+      </div>
+      <!-- Activity log + Tasks -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="sc p-5">
+          <h3 class="font-semibold text-gray-700 text-sm mb-3">Real-time Activity Log</h3>
+          <div id="activityLog" class="text-sm text-gray-400">Loading...</div>
+        </div>
+        <div class="sc p-5">
+          <div class="flex items-center justify-between mb-3"><h3 class="font-semibold text-gray-700 text-sm">Tasks from Super Admin</h3><span class="text-xs text-gray-400" id="taskCount">–</span></div>
+          <div id="tasksList" class="space-y-2 text-sm"></div>
         </div>
       </div>
     </div>
 
+    <!-- ===== VERIFICATION ===== -->
+    <div id="tab-verification" class="tab-view hidden">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-heading text-3xl text-gray-800 font-light">Payment Verification</h2>
+        <button onclick="loadAll()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
+      </div>
+      <div class="sc overflow-hidden">
+        <table class="w-full">
+          <thead><tr class="bg-gray-50 border-b border-gray-100">
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Date</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Guest</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Rooms</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Dates</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Amount</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Proof</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Actions</th>
+          </tr></thead>
+          <tbody id="verifTable"><tr><td colspan="7" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== CONFIRMED ===== -->
+    <div id="tab-confirmed" class="tab-view hidden">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Confirmed Bookings</h2>
+      <div class="sc overflow-hidden">
+        <table class="w-full">
+          <thead><tr class="bg-gray-50 border-b border-gray-100">
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Ref</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Guest</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Rooms</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Check-in</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Check-out</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Balance</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Actions</th>
+          </tr></thead>
+          <tbody id="confirmedTable"><tr><td colspan="7" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== ALL BOOKINGS ===== -->
+    <div id="tab-all" class="tab-view hidden">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-heading text-3xl text-gray-800 font-light">All Bookings</h2>
+        <input type="text" id="searchAll" placeholder="Search..." class="fi w-56" oninput="filterAll()" />
+      </div>
+      <div class="sc overflow-hidden overflow-x-auto">
+        <table class="w-full min-w-max">
+          <thead><tr class="bg-gray-50 border-b border-gray-100">
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Ref</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Guest</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Rooms</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Check-in</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Total</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Pmt Type</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Status</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Actions</th>
+          </tr></thead>
+          <tbody id="allTable"><tr><td colspan="8" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== CALENDAR ===== -->
+    <div id="tab-calendar" class="tab-view hidden">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-heading text-3xl text-gray-800 font-light">Operations Calendar</h2>
+        <div class="flex gap-2">
+          <button onclick="opCalPrev()" class="bg-white border border-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-chevron-left"></i></button>
+          <span id="opCalLabel" class="bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 min-w-[140px] text-center">–</span>
+          <button onclick="opCalNext()" class="bg-white border border-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="flex gap-3 mb-3 text-xs flex-wrap">
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-200 inline-block border border-green-400"></span> Check-in</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-200 inline-block border border-blue-400"></span> Check-out</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-purple-200 inline-block border border-purple-400"></span> Task Due</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-200 inline-block border border-red-400"></span> Maintenance</div>
+      </div>
+      <div class="sc p-4">
+        <div class="grid grid-cols-7 gap-1 mb-1">
+          <div class="text-center text-xs font-semibold text-gray-400 py-2">SUN</div><div class="text-center text-xs font-semibold text-gray-400 py-2">MON</div><div class="text-center text-xs font-semibold text-gray-400 py-2">TUE</div><div class="text-center text-xs font-semibold text-gray-400 py-2">WED</div><div class="text-center text-xs font-semibold text-gray-400 py-2">THU</div><div class="text-center text-xs font-semibold text-gray-400 py-2">FRI</div><div class="text-center text-xs font-semibold text-gray-400 py-2">SAT</div>
+        </div>
+        <div id="opCalGrid" class="grid grid-cols-7 gap-1"></div>
+      </div>
+    </div>
+
+    <!-- ===== GUEST LOG ===== -->
+    <div id="tab-guestlog" class="tab-view hidden">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Guest Check-in Log</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Log form -->
+        <div class="sc p-6">
+          <h3 class="font-semibold text-gray-700 mb-4">Log Guest Check-in</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="fi-label">Booking Reference *</label>
+              <div class="flex gap-2">
+                <input type="text" id="gl_ref" class="fi" placeholder="BM-20260528-XXXX" style="text-transform:uppercase;" />
+                <button onclick="fetchBookingForLog()" class="px-4 py-2 bg-forest text-white rounded-lg text-sm hover:bg-forest-dark">Fetch</button>
+              </div>
+            </div>
+            <div id="gl_bookingInfo" class="hidden bg-gray-50 rounded-xl p-3 text-sm">
+              <p class="font-semibold text-gray-800" id="gl_guestName">–</p>
+              <p class="text-gray-500 text-xs" id="gl_bookingDetails">–</p>
+            </div>
+            <div>
+              <label class="fi-label">Guest Names (one per line) *</label>
+              <textarea id="gl_names" class="fi" rows="4" placeholder="Juan dela Cruz&#10;Maria dela Cruz&#10;..."></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="fi-label">Adults</label><input type="number" id="gl_adults" class="fi" value="2" min="0" /></div>
+              <div><label class="fi-label">Children (3+yrs)</label><input type="number" id="gl_ch_above" class="fi" value="0" min="0" /></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="fi-label">Infants (below 3)</label><input type="number" id="gl_ch_below" class="fi" value="0" min="0" /></div>
+              <div><label class="fi-label">Pets</label><input type="number" id="gl_pets" class="fi" value="0" min="0" /></div>
+            </div>
+            <div><label class="fi-label">Security Deposit (₱)</label><input type="number" id="gl_deposit" class="fi" value="0" /></div>
+            <div><label class="fi-label">Special Notes</label><textarea id="gl_notes" class="fi" rows="2" placeholder="Any special notes for this check-in..."></textarea></div>
+            <label class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl cursor-pointer">
+              <input type="checkbox" id="gl_agree" class="w-4 h-4 accent-forest mt-0.5 flex-shrink-0" />
+              <span class="text-xs text-gray-600">Guest agrees to <strong>house rules, terms & conditions</strong>. Security deposit will be refunded accordingly upon checkout.</span>
+            </label>
+            <button onclick="submitGuestLog()" id="glSubmitBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center justify-center gap-2">
+              <span id="glSubmitText">Log Check-in</span><div class="spin hidden" id="glSpin"></div>
+            </button>
+          </div>
+        </div>
+        <!-- Recent logs -->
+        <div class="sc p-6">
+          <h3 class="font-semibold text-gray-700 mb-4">Recent Check-in Logs</h3>
+          <div id="recentLogs" class="space-y-3 text-sm">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WALK-IN BOOKING ===== -->
+    <div id="tab-walkin" class="tab-view hidden">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Walk-in Booking</h2>
+      <div class="max-w-xl">
+        <div class="sc p-7 space-y-4">
+          <div class="p-3 bg-blue-50 rounded-xl text-xs text-blue-700 border border-blue-200"><i class="fas fa-info-circle mr-1"></i> Walk-in bookings are marked as <strong>Confirmed</strong> immediately. No payment upload required.</div>
+          <div class="grid grid-cols-2 gap-4">
+            <div><label class="fi-label">Guest Name *</label><input type="text" id="wi_name" class="fi" /></div>
+            <div><label class="fi-label">Phone *</label><input type="tel" id="wi_phone" class="fi" /></div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div><label class="fi-label">Email</label><input type="email" id="wi_email" class="fi" /></div>
+            <div><label class="fi-label">Room(s) *</label>
+              <select id="wi_room" class="fi">
+                <option value="Silayan">Silayan</option><option value="Sinta">Sinta</option>
+                <option value="Tahanan">Tahanan</option><option value="Barkada">Barkada</option>
+                <option value="All Rooms">All Rooms (Whole Resort)</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div><label class="fi-label">Check-in *</label><input type="date" id="wi_ci" class="fi" onchange="calcWIPrice()" /></div>
+            <div><label class="fi-label">Check-out *</label><input type="date" id="wi_co" class="fi" onchange="calcWIPrice()" /></div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div><label class="fi-label">Adults *</label><input type="number" id="wi_adults" class="fi" value="2" min="1" oninput="calcWIPrice()" /></div>
+            <div><label class="fi-label">Children (3+)</label><input type="number" id="wi_ch" class="fi" value="0" min="0" /></div>
+            <div><label class="fi-label">Infants</label><input type="number" id="wi_inf" class="fi" value="0" min="0" /></div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div><label class="fi-label">Total Amount (₱) *</label><input type="number" id="wi_total" class="fi" /></div>
+            <div><label class="fi-label">Payment Status</label>
+              <select id="wi_paystatus" class="fi">
+                <option value="fully_paid">Fully Paid (Cash)</option>
+                <option value="deposit_paid">Downpayment Only</option>
+                <option value="pending">Pending (no payment yet)</option>
+              </select>
+            </div>
+          </div>
+          <div><label class="fi-label">Special Requests / Notes</label><textarea id="wi_notes" class="fi" rows="2"></textarea></div>
+          <div id="wiPriceBox" class="hidden bg-gray-50 rounded-xl p-4 text-sm">
+            <div class="flex justify-between mb-1"><span class="text-gray-500">Nights</span><span id="wi_nights">–</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Suggested Total</span><span class="font-bold text-forest" id="wi_suggested">–</span></div>
+          </div>
+          <button onclick="submitWalkIn()" id="wiBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center justify-center gap-2">
+            <span id="wiText">Create Walk-in Booking</span><div class="spin hidden" id="wiSpin"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PERSONNEL ===== -->
+    <div id="tab-personnel" class="tab-view hidden">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Personnel</h2>
+      <div id="personnelGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"><p class="text-gray-400 text-sm">Loading...</p></div>
+    </div>
+
+    <!-- ===== INVENTORY ===== -->
+    <div id="tab-inventory" class="tab-view hidden">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Inventory</h2>
+      <div id="lowStockBanner" class="hidden mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800"><i class="fas fa-exclamation-triangle mr-2"></i><span id="lowStockMsg">–</span></div>
+      <div class="sc overflow-hidden">
+        <table class="w-full">
+          <thead><tr class="bg-gray-50 border-b border-gray-100">
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Item</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Category</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Qty</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Min</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Unit</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Status</th>
+          </tr></thead>
+          <tbody id="inventoryTable"><tr><td colspan="6" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== INQUIRIES ===== -->
+    <div id="tab-inquiries" class="tab-view hidden">
+      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Guest Inquiries</h2>
+      <div class="sc overflow-hidden">
+        <table class="w-full">
+          <thead><tr class="bg-gray-50 border-b border-gray-100">
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Date</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Name</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Contact</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Guests</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Message</th>
+            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Actions</th>
+          </tr></thead>
+          <tbody id="inquiriesTable"><tr><td colspan="6" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Booking Detail Modal -->
+<div id="bookingModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+      <h3 class="font-heading text-xl text-forest font-light" id="bmTitle">Booking Details</h3>
+      <button onclick="closeModal('bookingModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-sm"><i class="fas fa-times text-gray-500"></i></button>
+    </div>
+    <div class="p-5" id="bmContent">Loading...</div>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- Payment Mark Modal -->
+<div id="paymentModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+      <h3 class="font-heading text-xl text-forest font-light">Mark Cash Payment</h3>
+      <button onclick="closeModal('paymentModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-sm"><i class="fas fa-times text-gray-500"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <input type="hidden" id="pm_bookingId" />
+      <div><label class="fi-label">Amount Received (₱) *</label><input type="number" id="pm_amount" class="fi" /></div>
+      <div><label class="fi-label">Payment Method</label>
+        <select id="pm_method" class="fi"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="maya">Maya</option><option value="bank_transfer">Bank Transfer</option></select>
+      </div>
+      <div><label class="fi-label">Reference / Notes</label><input type="text" id="pm_ref" class="fi" placeholder="GCash ref or receipt note" /></div>
+      <div class="flex gap-3">
+        <button onclick="closeModal('paymentModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600">Cancel</button>
+        <button onclick="savePayment()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="hidden"><i id="toastIcon" class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
-
-<!-- BOOKING DETAIL / EDIT MODAL -->
-<div id="bookingModal" class="modal-overlay hidden">
-  <div class="modal-box">
-    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-      <h3 class="font-heading text-2xl text-forest font-light" id="modalTitle">Booking Details</h3>
-      <button onclick="closeModal('bookingModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i class="fas fa-times text-sm text-gray-500"></i></button>
-    </div>
-    <div class="p-6" id="modalContent">Loading...</div>
-  </div>
-</div>
-
-<!-- MANUAL BOOKING MODAL -->
-<div id="manualModal" class="modal-overlay hidden">
-  <div class="modal-box">
-    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-      <h3 class="font-heading text-2xl text-forest font-light">Add Walk-in Booking</h3>
-      <button onclick="closeModal('manualModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"><i class="fas fa-times text-sm text-gray-500"></i></button>
-    </div>
-    <div class="p-6">
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Full Name *</label><input type="text" id="m_name" class="form-input" placeholder="Guest Name" /></div>
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Email</label><input type="email" id="m_email" class="form-input" placeholder="guest@email.com" /></div>
-      </div>
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Phone *</label><input type="tel" id="m_phone" class="form-input" placeholder="09XX XXX XXXX" /></div>
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Room *</label>
-          <select id="m_room" class="form-input" onchange="calcManualPrice()">
-            <option value="">Select room</option>
-            <option value="Silayan">Silayan – ₱10,000</option>
-            <option value="Sinta">Sinta – ₱10,000</option>
-            <option value="Tahanan">Tahanan – ₱12,000</option>
-            <option value="Barkada">Barkada – ₱15,000</option>
-            <option value="Whole Resort">Whole Resort – ₱45,000</option>
-          </select>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Check-in *</label><input type="date" id="m_checkin" class="form-input" onchange="calcManualPrice()" /></div>
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Check-out *</label><input type="date" id="m_checkout" class="form-input" onchange="calcManualPrice()" /></div>
-      </div>
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Adults *</label>
-          <select id="m_adults" class="form-input" onchange="calcManualPrice()">
-            <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
-            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-            <option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
-          </select>
-        </div>
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Children</label>
-          <select id="m_children" class="form-input"><option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Payment Status</label>
-          <select id="m_payStatus" class="form-input">
-            <option value="fully_paid">Fully Paid (Cash)</option>
-            <option value="deposit_paid">Deposit Paid</option>
-            <option value="pending">Pending</option>
-          </select>
-        </div>
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Booking Status</label>
-          <select id="m_status" class="form-input">
-            <option value="confirmed">Confirmed</option>
-            <option value="pending_payment_verification">Pending</option>
-          </select>
-        </div>
-      </div>
-      <div id="manualPriceBox" class="hidden bg-gray-50 rounded-xl p-4 mb-4">
-        <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Base price</span><span id="mp_base" class="font-medium">–</span></div>
-        <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Extra pax</span><span id="mp_extra" class="font-medium">–</span></div>
-        <div class="flex justify-between text-sm font-semibold border-t pt-2 mt-2"><span>Total</span><span id="mp_total" class="text-forest">–</span></div>
-        <div class="flex justify-between text-xs text-gray-400 mt-1"><span>50% Deposit</span><span id="mp_deposit">–</span></div>
-      </div>
-      <div><label class="block text-xs font-medium text-gray-500 mb-1">Notes (optional)</label><textarea id="m_notes" class="form-input" rows="2" placeholder="Any notes..."></textarea></div>
-      <div class="flex gap-3 mt-6">
-        <button onclick="closeModal('manualModal')" class="px-5 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-        <button onclick="submitManualBooking()" id="manualSubmitBtn" class="flex-1 bg-forest text-white py-2.5 rounded-lg text-sm font-medium hover:bg-forest-dark transition-colors flex items-center justify-center gap-2">
-          <span id="manualSubmitText">Create Walk-in Booking</span>
-          <div id="manualSpinner" class="spinner hidden"></div>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-  emailjs.init('yupgCoqLB4unb0OAz');
-  const SUPABASE_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
-  const EMAILJS_SID   = 'service_t13ealt';
-  const EMAILJS_TMPL  = 'template_s17clcj';
-  const ADMIN_USER    = 'balayadmin';
-  const ADMIN_PASS    = 'BalayMaysa2026';
-  const ROOM_PRICES   = { 'Silayan': 10000, 'Sinta': 10000, 'Tahanan': 12000, 'Barkada': 15000, 'Whole Resort': 45000 };
-  const ROOM_STD      = { 'Silayan': 3, 'Sinta': 3, 'Tahanan': 6, 'Barkada': 10, 'Whole Resort': 22 };
-  const EXTRA_PAX_FEE = 500;
-  const STATUS_LABELS = {
-    'pending_payment_verification': 'Pending Payment',
-    'deposit_paid_waiting_confirmation': 'Deposit Paid',
-    'confirmed': 'Confirmed',
-    'confirmed_balance_due': 'Balance Due',
-    'fully_paid': 'Fully Paid',
-    'cancelled': 'Cancelled',
-    'declined': 'Declined',
-    'completed_stayed': 'Completed',
-  };
-  const STATUS_BADGE  = {
-    'pending_payment_verification': 'badge-pending',
-    'deposit_paid_waiting_confirmation': 'badge-verified',
-    'confirmed': 'badge-confirmed',
-    'confirmed_balance_due': 'badge-confirmed',
-    'fully_paid': 'badge-fully_paid',
-    'cancelled': 'badge-cancelled',
-    'declined': 'badge-declined',
-    'completed_stayed': 'badge-completed',
-  };
+emailjs.init('yupgCoqLB4unb0OAz');
+const SB_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
+const EMAILJS_SID  = 'service_t13ealt';
+const EMAILJS_TMPL = 'template_s17clcj';
+const ADMIN_USER   = 'balayadmin';
+const ADMIN_PASS   = 'BalayMaysa2026';
+const SA_EMAIL     = 'balaymaysa@gmail.com';
+const db = window.supabase.createClient(SB_URL, SB_ANON);
 
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-  let allBookings = [];
+const STATUS_LABELS = {pending_payment_verification:'Pending Payment',deposit_paid_waiting_confirmation:'Deposit Paid',confirmed:'Confirmed',confirmed_balance_due:'Balance Due',fully_paid:'Fully Paid',cancelled:'Cancelled',declined:'Declined',completed_stayed:'Completed'};
+const STATUS_CSS    = {pending_payment_verification:'b-pending',deposit_paid_waiting_confirmation:'b-pending',confirmed:'b-confirmed',confirmed_balance_due:'b-confirmed',fully_paid:'b-paid',cancelled:'b-declined',declined:'b-declined',completed_stayed:'badge bg-purple-100 text-purple-700'};
 
-  // AUTH
-  function doLogin() {
-    if (document.getElementById('loginUser').value.trim() === ADMIN_USER && document.getElementById('loginPass').value === ADMIN_PASS) {
-      sessionStorage.setItem('bm_admin', '1');
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('adminPanel').classList.remove('hidden');
-      showTab('dashboard'); loadAll();
-      showToast('Welcome back!', 'success');
-    } else {
-      const e = document.getElementById('loginErr'); e.classList.remove('hidden'); setTimeout(() => e.classList.add('hidden'), 3000);
-    }
-  }
-  function doLogout() { sessionStorage.removeItem('bm_admin'); location.reload(); }
-  if (sessionStorage.getItem('bm_admin') === '1') {
+let allBookings = [], allStaff = [], allTasks = [], allInventory = [], allInquiries = [], allMaintenance = [];
+let opCalYear = new Date().getFullYear(), opCalMonth = new Date().getMonth();
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if ((u === ADMIN_USER && p === ADMIN_PASS) || (u === 'superadmin' && p === 'SecurePass2026')) {
+    sessionStorage.setItem('bm_admin', '1');
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminPanel').classList.remove('hidden');
     showTab('dashboard'); loadAll();
+    showToast('Welcome!', 'success');
+  } else {
+    const e = document.getElementById('loginErr'); e.classList.remove('hidden'); setTimeout(()=>e.classList.add('hidden'),3000);
   }
+}
+function doLogout() { sessionStorage.removeItem('bm_admin'); location.reload(); }
+if (sessionStorage.getItem('bm_admin')==='1') { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); showTab('dashboard'); loadAll(); }
 
-  // TABS
-  function showTab(name) {
-    document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-    document.getElementById('view-' + name).classList.remove('hidden');
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
-    const btn = document.getElementById('tab-' + name);
-    if (btn) btn.classList.add('active-tab');
-  }
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab-view').forEach(v=>v.classList.add('hidden'));
+  document.getElementById('tab-'+name).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const nb = document.getElementById('nav-'+name); if(nb) nb.classList.add('active');
+  const tabLoaders = { dashboard:renderDashboard, verification:renderVerification, confirmed:renderConfirmed, all:()=>renderAll(allBookings), calendar:renderOpCal, guestlog:renderRecentLogs, personnel:renderPersonnel, inventory:renderInventory, inquiries:renderInquiries };
+  if (tabLoaders[name]) tabLoaders[name]();
+}
 
-  // LOAD DATA
-  async function loadAll() {
-    try {
-      const { data, error } = await sb.from('bookings').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
-      allBookings = data || [];
-      renderAll();
-    } catch(err) { console.error(err); showToast('Failed to load bookings.', 'error'); }
-  }
+// ── Load All Data ─────────────────────────────────────────────────────────────
+async function loadAll() {
+  try {
+    const [bkRes, sfRes, tkRes, invRes, inqRes, mntRes] = await Promise.all([
+      db.from('bookings').select('*').order('created_at',{ascending:false}),
+      db.from('staff').select('*').order('name'),
+      db.from('staff_tasks').select('*,staff(name)').order('created_at',{ascending:false}),
+      db.from('inventory').select('*').order('item_name'),
+      db.from('inquiries').select('*').order('created_at',{ascending:false}),
+      db.from('maintenance').select('*').order('created_at',{ascending:false}),
+    ]);
+    allBookings   = bkRes.data  || [];
+    allStaff      = sfRes.data  || [];
+    allTasks      = tkRes.data  || [];
+    allInventory  = invRes.data || [];
+    allInquiries  = inqRes.data || [];
+    allMaintenance= mntRes.data || [];
+    updateBadges();
+    renderDashboard();
+  } catch(e) { console.error(e); showToast('Failed to load data.','error'); }
+}
 
-  function renderAll() {
-    const paymentPending = allBookings.filter(b => b.status === 'pending_payment_verification');
-    const pending        = allBookings.filter(b => ['pending_payment_verification', 'deposit_paid_waiting_confirmation'].includes(b.status));
-    const confirmed      = allBookings.filter(b => ['confirmed', 'confirmed_balance_due', 'fully_paid'].includes(b.status));
-    const totalRevenue   = confirmed.reduce((s, b) => s + (b.total_amount || 0), 0);
+function updateBadges() {
+  const vp = allBookings.filter(b=>b.status==='pending_payment_verification').length;
+  const ub = document.getElementById('verifBadge'); if(vp>0){ub.textContent=vp;ub.classList.remove('hidden');}else ub.classList.add('hidden');
+  const ui = allInquiries.filter(i=>i.status==='unread').length;
+  const ib = document.getElementById('inqBadge'); if(ui>0){ib.textContent=ui;ib.classList.remove('hidden');}else ib.classList.add('hidden');
+}
 
-    // Stats
-    document.getElementById('statPayment').textContent   = paymentPending.length;
-    document.getElementById('statConfirmed').textContent = confirmed.length;
-    document.getElementById('statRevenue').textContent   = totalRevenue > 0 ? '₱' + totalRevenue.toLocaleString() : '₱0';
-    document.getElementById('statTotal').textContent     = allBookings.length;
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  document.getElementById('dashDateDisplay').textContent = new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const todayStr = new Date().toISOString().split('T')[0];
+  const ciToday  = allBookings.filter(b=>b.check_in_date===todayStr && ['confirmed','confirmed_balance_due','fully_paid'].includes(b.status));
+  const coToday  = allBookings.filter(b=>b.check_out_date===todayStr && ['confirmed','confirmed_balance_due','fully_paid'].includes(b.status));
+  const pending  = allBookings.filter(b=>b.status==='pending_payment_verification');
+  const balance  = allBookings.filter(b=>['confirmed','confirmed_balance_due'].includes(b.status)).reduce((s,b)=>s+(b.remaining_balance||0),0);
 
-    // Badges
-    const pb = document.getElementById('paymentBadge');
-    if (paymentPending.length > 0) { pb.textContent = paymentPending.length; pb.classList.remove('hidden'); } else pb.classList.add('hidden');
-    const pennb = document.getElementById('pendingBadge');
-    if (pending.length > 0) { pennb.textContent = pending.length; pennb.classList.remove('hidden'); } else pennb.classList.add('hidden');
+  document.getElementById('dashCICount').textContent = ciToday.length;
+  document.getElementById('dashCOCount').textContent = coToday.length;
+  document.getElementById('dashPendingCount').textContent = pending.length;
+  document.getElementById('dashBalance').textContent = '₱'+balance.toLocaleString();
 
-    // Recent
-    const recentList = document.getElementById('recentList');
-    if (allBookings.length === 0) { recentList.innerHTML = '<p class="text-center text-gray-300 py-6">No bookings yet.</p>'; }
-    else {
-      recentList.innerHTML = allBookings.slice(0, 6).map(b => `
-        <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50 px-2 rounded-lg" onclick="openBookingModal('${b.id}')">
-          <div class="flex items-center gap-3">
-            <div>
-              <span class="font-medium text-gray-800 text-sm">${esc(b.guest_name)}</span>
-              <span class="text-gray-400 mx-1.5 text-xs">·</span>
-              <span class="text-gray-500 text-xs">${b.room_type}</span>
-              <span class="text-gray-300 mx-1.5 text-xs">·</span>
-              <span class="text-gray-400 text-xs font-mono">${b.booking_ref}</span>
-            </div>
-          </div>
-          <span class="badge ${STATUS_BADGE[b.status] || 'badge-pending'}">${STATUS_LABELS[b.status] || b.status}</span>
-        </div>`).join('');
-    }
+  // CI list
+  document.getElementById('todayCI').innerHTML = ciToday.length===0 ?
+    '<div class="p-4 text-sm text-gray-300 text-center">No check-ins today.</div>' :
+    ciToday.map(b=>`<div class="p-4">
+      <div class="flex justify-between items-start">
+        <div><p class="font-semibold text-gray-800 text-sm">${esc(b.guest_name)}</p>
+          <p class="text-xs text-gray-400">${b.room_type} · ${b.pax_count||b.adults} pax</p>
+          ${b.special_requests?`<p class="text-xs text-amber-600 mt-1"><i class="fas fa-comment mr-1"></i>${esc(b.special_requests.substring(0,60))}${b.special_requests.length>60?'...':''}</p>`:''}
+        </div>
+        <div class="text-right">
+          <span class="badge b-confirmed text-xs">Check-in</span>
+          ${(b.remaining_balance||0)>0?`<p class="text-xs text-red-600 mt-1 font-medium">Balance: ₱${b.remaining_balance.toLocaleString()}</p>`:'<p class="text-xs text-green-600 mt-1">Fully Paid ✓</p>'}
+        </div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button onclick="openBookingModal('${b.id}')" class="text-xs border border-gray-200 px-3 py-1 rounded-lg hover:bg-gray-50">View</button>
+        <button onclick="showTab('guestlog')" class="text-xs bg-forest/10 text-forest px-3 py-1 rounded-lg hover:bg-forest/20">Log Guest</button>
+        ${(b.remaining_balance||0)>0?`<button onclick="openPaymentModal('${b.id}',${b.remaining_balance})" class="text-xs bg-gold/10 text-yellow-700 px-3 py-1 rounded-lg hover:bg-gold/20">Mark Payment</button>`:''}
+      </div>
+    </div>`).join('');
 
-    // Payment verification table
-    const pTbl = document.getElementById('paymentsTable');
-    if (paymentPending.length === 0) {
-      pTbl.innerHTML = '<tr><td colspan="7" class="table-cell text-center text-gray-300 py-8">No payments to verify. ✅</td></tr>';
-    } else {
-      pTbl.innerHTML = paymentPending.map(b => `
-        <tr class="hover:bg-gray-50 transition-colors">
-          <td class="table-cell text-gray-500 text-xs">${fmtDateTime(b.created_at)}</td>
-          <td class="table-cell"><p class="font-medium text-gray-800 text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_email}</p></td>
-          <td class="table-cell text-gray-700">${b.room_type}</td>
-          <td class="table-cell text-xs text-gray-600">${fmtDate(b.check_in_date)}<br/><span class="text-gray-400">→ ${fmtDate(b.check_out_date)}</span></td>
-          <td class="table-cell"><p class="font-semibold text-forest">₱${(b.deposit_amount||0).toLocaleString()}</p><p class="text-xs text-gray-400">${b.payment_ref_number || '—'}</p></td>
-          <td class="table-cell">${b.payment_proof_url ? `<a href="${b.payment_proof_url}" target="_blank" class="text-forest text-xs underline hover:text-forest-dark flex items-center gap-1"><i class="fas fa-image"></i> View</a>` : '<span class="text-gray-400 text-xs">No file</span>'}</td>
-          <td class="table-cell">
-            <div class="flex gap-2">
-              <button onclick="verifyPayment('${b.id}', true)" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"><i class="fas fa-check mr-1"></i>Confirm</button>
-              <button onclick="verifyPayment('${b.id}', false)" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"><i class="fas fa-times mr-1"></i>Decline</button>
-            </div>
-          </td>
-        </tr>`).join('');
-    }
+  // CO list
+  document.getElementById('todayCO').innerHTML = coToday.length===0 ?
+    '<div class="p-4 text-sm text-gray-300 text-center">No check-outs today.</div>' :
+    coToday.map(b=>`<div class="p-4 flex justify-between items-center">
+      <div><p class="font-semibold text-gray-800 text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.room_type}</p></div>
+      <div class="flex gap-2">
+        <button onclick="openBookingModal('${b.id}')" class="text-xs border border-gray-200 px-3 py-1 rounded-lg hover:bg-gray-50">View</button>
+        <button onclick="markCompleted('${b.id}')" class="text-xs bg-forest text-white px-3 py-1 rounded-lg hover:bg-forest-dark">Done ✓</button>
+      </div>
+    </div>`).join('');
 
-    // Pending table
-    const pendTbl = document.getElementById('pendingTable');
-    if (pending.length === 0) {
-      pendTbl.innerHTML = '<tr><td colspan="7" class="table-cell text-center text-gray-300 py-8">No pending bookings.</td></tr>';
-    } else {
-      pendTbl.innerHTML = pending.map(b => `
-        <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="openBookingModal('${b.id}')">
-          <td class="table-cell text-gray-400 text-xs">${fmtDateTime(b.created_at)}</td>
-          <td class="table-cell"><p class="font-medium text-gray-800">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_phone || ''}</p></td>
-          <td class="table-cell text-gray-700">${b.room_type}</td>
-          <td class="table-cell text-gray-700 text-xs">${fmtDate(b.check_in_date)}</td>
-          <td class="table-cell text-gray-700 text-xs">${b.adults} adults, ${b.children||0} children</td>
-          <td class="table-cell"><span class="badge ${STATUS_BADGE[b.status] || 'badge-pending'}">${STATUS_LABELS[b.status] || b.status}</span></td>
-          <td class="table-cell" onclick="event.stopPropagation()">
-            <button onclick="openBookingModal('${b.id}')" class="text-forest text-xs underline hover:text-forest-dark">View / Edit</button>
-          </td>
-        </tr>`).join('');
-    }
+  // Activity log (last 10 bookings as activity)
+  const recent = allBookings.slice(0,8);
+  document.getElementById('activityLog').innerHTML = recent.length===0 ? '<p class="text-gray-300">No activity yet.</p>' :
+    recent.map(b=>{
+      const dotColor = b.status==='confirmed'?'bg-green-500':b.status==='pending_payment_verification'?'bg-yellow-500':b.status==='declined'?'bg-red-500':'bg-gray-400';
+      const action = b.status==='pending_payment_verification'?'Submitted booking':b.status==='confirmed'?'Booking confirmed':STATUS_LABELS[b.status]||b.status;
+      return `<div class="activity-item"><div class="act-dot ${dotColor}"></div><div><p class="text-sm text-gray-700">${esc(b.guest_name)} – ${esc(b.room_type)}</p><p class="text-xs text-gray-400">${action} · ${fmtDateTime(b.created_at)}</p></div></div>`;
+    }).join('');
 
-    // Confirmed table
-    const cTbl = document.getElementById('confirmedTable');
-    if (confirmed.length === 0) {
-      cTbl.innerHTML = '<tr><td colspan="8" class="table-cell text-center text-gray-300 py-8">No confirmed bookings.</td></tr>';
-    } else {
-      cTbl.innerHTML = confirmed.map(b => `
-        <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="openBookingModal('${b.id}')">
-          <td class="table-cell text-xs font-mono text-gray-500">${b.booking_ref}</td>
-          <td class="table-cell font-medium text-gray-800">${esc(b.guest_name)}</td>
-          <td class="table-cell text-gray-700">${b.room_type}</td>
-          <td class="table-cell text-gray-700 text-xs">${fmtDate(b.check_in_date)}</td>
-          <td class="table-cell text-gray-700 text-xs">${fmtDate(b.check_out_date)}</td>
-          <td class="table-cell"><span class="font-semibold text-red-600 text-sm">₱${(b.remaining_balance||0).toLocaleString()}</span></td>
-          <td class="table-cell"><span class="badge ${STATUS_BADGE[b.status] || 'badge-confirmed'}">${STATUS_LABELS[b.status] || b.status}</span></td>
-          <td class="table-cell" onclick="event.stopPropagation()">
-            <div class="flex gap-2">
-              <button onclick="markFullyPaid('${b.id}')" class="text-xs text-green-600 underline hover:text-green-800">Mark Paid</button>
-              <button onclick="markCompleted('${b.id}')" class="text-xs text-purple-600 underline hover:text-purple-800">Completed</button>
-            </div>
-          </td>
-        </tr>`).join('');
-    }
+  // Tasks
+  const activeTasks = allTasks.filter(t=>t.status==='pending'||t.status==='in_progress');
+  document.getElementById('taskCount').textContent = activeTasks.length + ' active';
+  document.getElementById('tasksList').innerHTML = activeTasks.length===0 ? '<p class="text-gray-300 text-xs">No tasks assigned.</p>' :
+    activeTasks.slice(0,6).map(t=>`<div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+      <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${t.priority==='urgent'?'bg-red-500':t.priority==='high'?'bg-orange-400':'bg-blue-400'}"></span>
+      <div class="flex-1 min-w-0"><p class="font-medium text-xs text-gray-800 truncate">${esc(t.task_name)}</p><p class="text-xs text-gray-400">${t.staff?.name||'Unassigned'} ${t.due_date?'· Due '+t.due_date:''}</p></div>
+      <button onclick="updateTask('${t.id}','completed')" class="text-xs text-green-600 hover:underline flex-shrink-0">Done</button>
+    </div>`).join('');
+}
 
-    // All table (filtered)
-    renderAllTable(allBookings);
-  }
+// ── Verification ──────────────────────────────────────────────────────────────
+function renderVerification() {
+  const pending = allBookings.filter(b=>b.status==='pending_payment_verification');
+  const tbl = document.getElementById('verifTable');
+  tbl.innerHTML = pending.length===0 ? `<tr><td colspan="7" class="tc text-center text-gray-300 py-8">No bookings pending verification. ✅</td></tr>` :
+    pending.map(b=>`<tr class="hover:bg-gray-50">
+      <td class="tc text-xs text-gray-400">${fmtDate(b.created_at)}</td>
+      <td class="tc"><p class="font-medium text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_email}</p></td>
+      <td class="tc text-sm text-gray-700">${b.room_type}</td>
+      <td class="tc text-xs text-gray-600">${fmtDate(b.check_in_date)}<br/><span class="text-gray-400">→ ${fmtDate(b.check_out_date)}</span></td>
+      <td class="tc"><p class="font-bold text-forest text-sm">₱${(b.deposit_amount||0).toLocaleString()}</p><p class="text-xs text-gray-400">${b.payment_type==='full'?'Full payment':'50% downpayment'}</p></td>
+      <td class="tc">${b.payment_proof_url?`<a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest underline flex items-center gap-1"><i class="fas fa-image"></i> View</a>`:'<span class="text-xs text-gray-300">No file</span>'}</td>
+      <td class="tc">
+        <div class="flex flex-col gap-1">
+          <button onclick="approveBooking('${b.id}','confirmed')" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg">✓ Confirm</button>
+          <button onclick="approveBooking('${b.id}','declined')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg">✗ Decline</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
 
-  function renderAllTable(data) {
-    const aTbl = document.getElementById('allTable');
-    if (data.length === 0) {
-      aTbl.innerHTML = '<tr><td colspan="8" class="table-cell text-center text-gray-300 py-8">No bookings found.</td></tr>';
-    } else {
-      aTbl.innerHTML = data.map(b => `
-        <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="openBookingModal('${b.id}')">
-          <td class="table-cell text-xs font-mono text-gray-500">${b.booking_ref}</td>
-          <td class="table-cell"><p class="font-medium text-gray-800 text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_email}</p></td>
-          <td class="table-cell text-gray-700">${b.room_type}</td>
-          <td class="table-cell text-xs text-gray-700">${fmtDate(b.check_in_date)}</td>
-          <td class="table-cell text-sm font-medium text-gray-700">${b.total_amount ? '₱'+b.total_amount.toLocaleString() : '—'}</td>
-          <td class="table-cell"><span class="badge ${STATUS_BADGE[b.status] || 'badge-pending'}">${STATUS_LABELS[b.status] || b.status}</span></td>
-          <td class="table-cell text-gray-400 text-xs">${fmtDateTime(b.created_at)}</td>
-          <td class="table-cell" onclick="event.stopPropagation()">
-            <button onclick="openBookingModal('${b.id}')" class="text-forest text-xs underline hover:text-forest-dark">Edit</button>
-          </td>
-        </tr>`).join('');
-    }
-  }
+async function approveBooking(id, newStatus) {
+  const b = allBookings.find(x=>x.id===id);
+  if (!b) return;
+  const msg = newStatus==='confirmed' ? `Confirm booking for ${b.guest_name}?` : `Decline booking for ${b.guest_name}? They will be notified.`;
+  if (!confirm(msg)) return;
+  try {
+    const updates = { status: newStatus };
+    if (newStatus==='confirmed') updates.confirmed_at = new Date().toISOString();
+    const { error } = await db.from('bookings').update(updates).eq('id', id);
+    if (error) throw error;
+    if (newStatus==='confirmed') await sendConfirmEmail(b);
+    else await sendDeclineEmail(b);
+    showToast(newStatus==='confirmed'?`✅ Booking confirmed for ${b.guest_name}!`:'Booking declined.','success');
+    await loadAll();
+    renderVerification();
+  } catch(e) { console.error(e); showToast('Action failed.','error'); }
+}
 
-  function filterAll() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    const s = document.getElementById('statusFilter').value;
-    const filtered = allBookings.filter(b => {
-      const matchQ = !q || b.guest_name.toLowerCase().includes(q) || b.booking_ref.toLowerCase().includes(q) || b.room_type.toLowerCase().includes(q) || (b.guest_email||'').toLowerCase().includes(q);
-      const matchS = !s || b.status === s;
-      return matchQ && matchS;
-    });
-    renderAllTable(filtered);
-  }
-
-  // VERIFY PAYMENT → CONFIRM or DECLINE
-  async function verifyPayment(id, approve) {
-    const b = allBookings.find(x => x.id === id);
-    if (!b) return;
-    const action = approve ? 'confirm' : 'decline';
-    if (!confirm(`${approve ? 'Confirm' : 'Decline'} this booking for ${b.guest_name}?`)) return;
-    try {
-      const newStatus = approve ? 'confirmed' : 'declined';
-      const updates = { status: newStatus };
-      if (approve) updates.confirmed_at = new Date().toISOString();
-      const { error } = await sb.from('bookings').update(updates).eq('id', id);
-      if (error) throw error;
-      if (approve) await sendConfirmEmail(b);
-      else await sendDeclineEmail(b);
-      showToast(approve ? `✅ Booking confirmed for ${b.guest_name}!` : `Booking declined.`, 'success');
-      await loadAll();
-    } catch(err) { console.error(err); showToast('Action failed.', 'error'); }
-  }
-
-  async function sendConfirmEmail(b) {
-    const calStart = b.check_in_date.replace(/-/g,'');
-    const calEnd   = b.check_out_date.replace(/-/g,'');
-    const calUrl   = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Balay Maysa ' + b.booking_ref)}&dates=${calStart}/${calEnd}&location=${encodeURIComponent('Blk 8 Lot 12 M.Cuenco St., Caloocan North')}`;
-    const html = `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
-  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
-    <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1>
-    <p style="color:rgba(255,255,255,0.7);font-size:13px;margin:8px 0 0;">Booking Confirmed 🎉</p>
-  </div>
+async function sendConfirmEmail(b) {
+  const calStart = b.check_in_date.replace(/-/g,'');
+  const calEnd   = b.check_out_date.replace(/-/g,'');
+  const calUrl   = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Balay Maysa '+b.booking_ref)}&dates=${calStart}/${calEnd}&location=${encodeURIComponent('Blk 8 Lot 12 M.Cuenco St., Caloocan North')}`;
+  const html = `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
+  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1><p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">🎉 Booking Confirmed!</p></div>
   <div style="padding:40px;">
     <p>Hello <strong>${esc(b.guest_name)}</strong>,</p>
-    <p style="color:#666;line-height:1.7;">Your booking is <strong style="color:#2d5a3b;">CONFIRMED</strong>! We look forward to hosting you.</p>
+    <p style="color:#666;line-height:1.7;">Great news! Your booking has been <strong style="color:#2d5a3b;">CONFIRMED</strong>. We look forward to welcoming you at Balay Maysa!</p>
     <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
       <table style="width:100%;font-size:14px;border-collapse:collapse;">
         <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">${b.booking_ref}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Room</td><td>${b.room_type}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Room(s)</td><td>${b.room_type}</td></tr>
         <tr><td style="padding:6px 0;color:#666;">Check-in</td><td>${fmtDate(b.check_in_date)}</td></tr>
         <tr><td style="padding:6px 0;color:#666;">Check-out</td><td>${fmtDate(b.check_out_date)}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Remaining Balance</td><td style="color:#c0392b;font-weight:600;">₱${(b.remaining_balance||0).toLocaleString()} (payable on arrival)</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Balance on Arrival</td><td style="color:#dc2626;font-weight:600;">₱${(b.remaining_balance||0).toLocaleString()}</td></tr>
       </table>
     </div>
-    <div style="text-align:center;margin:24px 0;">
-      <a href="${calUrl}" style="background:#2d5a3b;color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;">📅 Add to Google Calendar</a>
-    </div>
-    <div style="background:#fef9ee;border-radius:12px;padding:18px 24px;">
-      <p style="margin:0;color:#92400e;font-size:13px;"><strong>📍</strong> Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North</p>
-      <p style="margin:6px 0 0;color:#92400e;font-size:13px;"><strong>📞</strong> <a href="tel:09175657918" style="color:#92400e;">0917 565 7918</a></p>
-    </div>
+    <div style="text-align:center;margin:24px 0;"><a href="${calUrl}" style="background:#2d5a3b;color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;">📅 Add to Google Calendar</a></div>
+    <div style="background:#fef9ee;border-radius:12px;padding:18px 24px;"><p style="margin:0;color:#92400e;font-size:13px;"><strong>📍</strong> Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North</p><p style="margin:6px 0 0;color:#92400e;font-size:13px;"><strong>📞</strong> <a href="tel:09175657918" style="color:#92400e;">0917 565 7918</a></p></div>
   </div>
-  <div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,0.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
+  <div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
 </div>`;
-    await sendEmail(b.guest_email, `Balay Maysa Booking CONFIRMED – ${b.booking_ref}`, html);
-  }
+  await sendEmail(b.guest_email, `Balay Maysa CONFIRMED – ${b.booking_ref}`, html);
+}
 
-  async function sendDeclineEmail(b) {
-    const html = `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
-  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1></div>
-  <div style="padding:40px;">
-    <p>Hello <strong>${esc(b.guest_name)}</strong>,</p>
-    <p style="color:#666;line-height:1.7;">We regret that your booking request (<strong>${b.booking_ref}</strong>) could not be accommodated. Please contact us to rebook or explore other dates.</p>
-    <p style="color:#666;font-size:13px;">📞 <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a> · ✉️ <a href="mailto:balaymaysa@gmail.com" style="color:#2d5a3b;">balaymaysa@gmail.com</a></p>
-  </div>
-  <div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,0.6);font-size:12px;margin:0;">Balay Maysa Resort</p></div>
-</div>`;
-    await sendEmail(b.guest_email, `Balay Maysa Booking Update – ${b.booking_ref}`, html);
-  }
+async function sendDeclineEmail(b) {
+  const html = `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;"><div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1></div><div style="padding:40px;"><p>Hello <strong>${esc(b.guest_name)}</strong>,</p><p style="color:#666;line-height:1.7;">We regret that your booking (<strong>${b.booking_ref}</strong>) could not be accommodated. Please contact us to explore other dates.</p><p style="color:#666;font-size:13px;">📞 <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a></p></div></div>`;
+  await sendEmail(b.guest_email, `Balay Maysa Booking Update – ${b.booking_ref}`, html);
+}
 
-  async function markFullyPaid(id) {
-    if (!confirm('Mark this booking as fully paid?')) return;
-    try {
-      const { error } = await sb.from('bookings').update({ status: 'fully_paid', payment_status: 'fully_paid', remaining_balance: 0 }).eq('id', id);
-      if (error) throw error;
-      showToast('Marked as fully paid!', 'success');
-      await loadAll();
-    } catch(err) { showToast('Failed.', 'error'); }
-  }
-
-  async function markCompleted(id) {
-    if (!confirm('Mark this booking as completed?')) return;
-    try {
-      const { error } = await sb.from('bookings').update({ status: 'completed_stayed' }).eq('id', id);
-      if (error) throw error;
-      showToast('Booking marked as completed.', 'success');
-      await loadAll();
-    } catch(err) { showToast('Failed.', 'error'); }
-  }
-
-  // BOOKING DETAIL MODAL
-  function openBookingModal(id) {
-    const b = allBookings.find(x => x.id === id);
-    if (!b) return;
-    document.getElementById('modalTitle').textContent = `Booking – ${b.booking_ref}`;
-    const addons = (() => { try { const a = typeof b.addons === 'string' ? JSON.parse(b.addons) : b.addons; return a || {}; } catch(e) { return {}; } })();
-    const addonStr = Object.keys(addons).length > 0 ? Object.keys(addons).join(', ') : 'None';
-    const log = (() => { try { return (typeof b.edit_log === 'string' ? JSON.parse(b.edit_log) : b.edit_log) || []; } catch(e) { return []; } })();
-    document.getElementById('modalContent').innerHTML = `
-      <div class="grid grid-cols-2 gap-6 mb-6">
-        <div>
-          <p class="text-xs text-gray-400 uppercase tracking-wide mb-3">Guest Info</p>
-          <p class="font-semibold text-gray-800 mb-1">${esc(b.guest_name)}</p>
-          <p class="text-sm text-gray-500 mb-1"><a href="mailto:${b.guest_email}" class="hover:text-forest">${b.guest_email}</a></p>
-          <p class="text-sm text-gray-500">${b.guest_phone || '—'}</p>
+// ── Confirmed / All ───────────────────────────────────────────────────────────
+function renderConfirmed() {
+  const confirmed = allBookings.filter(b=>['confirmed','confirmed_balance_due','fully_paid'].includes(b.status));
+  const tbl = document.getElementById('confirmedTable');
+  tbl.innerHTML = confirmed.length===0 ? `<tr><td colspan="7" class="tc text-center text-gray-300 py-8">No confirmed bookings.</td></tr>` :
+    confirmed.map(b=>`<tr class="hover:bg-gray-50 cursor-pointer" onclick="openBookingModal('${b.id}')">
+      <td class="tc text-xs font-mono text-gray-500">${b.booking_ref}</td>
+      <td class="tc font-medium">${esc(b.guest_name)}</td>
+      <td class="tc text-sm text-gray-600">${b.room_type}</td>
+      <td class="tc text-xs text-gray-600">${fmtDate(b.check_in_date)}</td>
+      <td class="tc text-xs text-gray-600">${fmtDate(b.check_out_date)}</td>
+      <td class="tc font-semibold ${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}">₱${(b.remaining_balance||0).toLocaleString()}</td>
+      <td class="tc" onclick="event.stopPropagation()">
+        <div class="flex gap-2">
+          ${(b.remaining_balance||0)>0?`<button onclick="openPaymentModal('${b.id}',${b.remaining_balance})" class="text-xs text-green-600 hover:underline">Mark Paid</button>`:''}
+          <button onclick="markCompleted('${b.id}')" class="text-xs text-purple-600 hover:underline">Completed</button>
         </div>
-        <div>
-          <p class="text-xs text-gray-400 uppercase tracking-wide mb-3">Booking</p>
-          <p class="font-mono text-sm text-forest font-bold mb-1">${b.booking_ref}</p>
-          <span class="badge ${STATUS_BADGE[b.status] || 'badge-pending'}">${STATUS_LABELS[b.status] || b.status}</span>
-          <p class="text-xs text-gray-400 mt-2">${b.booking_type === 'walk-in' ? '🚶 Walk-in' : '💻 Online'}</p>
-        </div>
-      </div>
-      <div class="bg-gray-50 rounded-xl p-4 mb-6">
-        <div class="grid grid-cols-2 gap-3 text-sm">
-          <div><span class="text-gray-400">Room</span><p class="font-medium mt-0.5">${b.room_type}</p></div>
-          <div><span class="text-gray-400">Guests</span><p class="font-medium mt-0.5">${b.adults} adults, ${b.children||0} children</p></div>
-          <div><span class="text-gray-400">Check-in</span><p class="font-medium mt-0.5">${fmtDate(b.check_in_date)}</p></div>
-          <div><span class="text-gray-400">Check-out</span><p class="font-medium mt-0.5">${fmtDate(b.check_out_date)}</p></div>
-          <div><span class="text-gray-400">Add-ons</span><p class="font-medium mt-0.5 text-xs">${addonStr}</p></div>
-        </div>
-      </div>
-      <div class="bg-forest/5 rounded-xl p-4 mb-6">
-        <div class="flex justify-between text-sm mb-2"><span class="text-gray-500">Total Amount</span><span class="font-semibold">₱${(b.total_amount||0).toLocaleString()}</span></div>
-        <div class="flex justify-between text-sm mb-2"><span class="text-gray-500">Deposit</span><span class="font-semibold text-forest">₱${(b.deposit_amount||0).toLocaleString()}</span></div>
-        <div class="flex justify-between text-sm"><span class="text-gray-500">Remaining Balance</span><span class="font-semibold ${b.remaining_balance > 0 ? 'text-red-600' : 'text-gray-400'}">₱${(b.remaining_balance||0).toLocaleString()}</span></div>
-        ${b.payment_ref_number ? `<div class="flex justify-between text-sm mt-2 pt-2 border-t border-gray-200"><span class="text-gray-400">Payment Ref</span><span class="text-gray-600">${b.payment_ref_number}</span></div>` : ''}
-        ${b.payment_proof_url ? `<div class="mt-3"><a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest underline flex items-center gap-1"><i class="fas fa-image"></i> View Payment Proof</a></div>` : ''}
-      </div>
-      <div class="mb-6">
-        <p class="text-xs text-gray-400 uppercase tracking-wide mb-3">Update Status</p>
-        <div class="flex flex-wrap gap-2">
-          ${Object.entries(STATUS_LABELS).map(([k, v]) => `<button onclick="updateStatus('${b.id}', '${k}')" class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-forest transition-colors ${b.status === k ? 'bg-forest text-white border-forest' : ''}">${v}</button>`).join('')}
-        </div>
-      </div>
-      ${log.length > 0 ? `<div>
-        <p class="text-xs text-gray-400 uppercase tracking-wide mb-3">Audit Log</p>
-        <div class="space-y-1.5">
-          ${log.slice(-5).reverse().map(e => `<div class="flex items-center gap-2 text-xs text-gray-500"><i class="fas fa-circle text-gray-300" style="font-size:6px"></i><span>${fmtDateTime(e.at)}</span><span class="text-gray-400">·</span><span>${e.action}</span><span class="text-gray-300">by ${e.by}</span></div>`).join('')}
-        </div>
-      </div>` : ''}
-    `;
-    document.getElementById('bookingModal').classList.remove('hidden');
-  }
+      </td>
+    </tr>`).join('');
+}
 
-  async function updateStatus(id, newStatus) {
-    try {
-      const b = allBookings.find(x => x.id === id);
-      const logEntry = { action: `status changed to ${newStatus}`, at: new Date().toISOString(), by: 'admin' };
-      const existingLog = (() => { try { return (typeof b.edit_log === 'string' ? JSON.parse(b.edit_log) : b.edit_log) || []; } catch(e) { return []; } })();
-      const { error } = await sb.from('bookings').update({
-        status: newStatus,
-        edit_log: JSON.stringify([...existingLog, logEntry])
-      }).eq('id', id);
-      if (error) throw error;
-      if (newStatus === 'confirmed') await sendConfirmEmail(b);
-      if (newStatus === 'declined') await sendDeclineEmail(b);
-      showToast('Status updated!', 'success');
-      closeModal('bookingModal');
-      await loadAll();
-    } catch(err) { console.error(err); showToast('Failed to update status.', 'error'); }
-  }
+function renderAll(data) {
+  const tbl = document.getElementById('allTable');
+  tbl.innerHTML = data.length===0 ? `<tr><td colspan="8" class="tc text-center text-gray-300 py-8">No bookings.</td></tr>` :
+    data.map(b=>`<tr class="hover:bg-gray-50 cursor-pointer" onclick="openBookingModal('${b.id}')">
+      <td class="tc text-xs font-mono text-gray-500">${b.booking_ref}</td>
+      <td class="tc"><p class="font-medium text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_phone||''}</p></td>
+      <td class="tc text-sm text-gray-600">${b.room_type}</td>
+      <td class="tc text-xs text-gray-600">${fmtDate(b.check_in_date)}</td>
+      <td class="tc font-medium text-gray-700">${b.total_amount?'₱'+b.total_amount.toLocaleString():'—'}</td>
+      <td class="tc"><span class="badge ${b.payment_type==='full'?'b-paid':'b-pending'} text-xs">${b.payment_type==='full'?'Full':'Down'}</span></td>
+      <td class="tc"><span class="badge ${STATUS_CSS[b.status]||'b-pending'} text-xs">${STATUS_LABELS[b.status]||b.status}</span></td>
+      <td class="tc" onclick="event.stopPropagation()"><button onclick="openBookingModal('${b.id}')" class="text-xs text-forest underline">Details</button></td>
+    </tr>`).join('');
+}
 
-  // MANUAL BOOKING
-  function openManualBookingModal() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('m_checkin').min = today;
-    document.getElementById('m_checkout').min = today;
-    document.getElementById('manualModal').classList.remove('hidden');
-  }
+function filterAll() {
+  const q = document.getElementById('searchAll').value.toLowerCase();
+  const filtered = allBookings.filter(b=>(b.guest_name||'').toLowerCase().includes(q)||(b.booking_ref||'').toLowerCase().includes(q)||(b.room_type||'').toLowerCase().includes(q));
+  renderAll(filtered);
+}
 
-  function calcManualPrice() {
-    const room    = document.getElementById('m_room').value;
-    const ci      = document.getElementById('m_checkin').value;
-    const co      = document.getElementById('m_checkout').value;
-    const adults  = parseInt(document.getElementById('m_adults').value);
-    const box     = document.getElementById('manualPriceBox');
-    if (!room || !ci || !co) { box.classList.add('hidden'); return; }
-    const nights  = Math.max(0, (new Date(co) - new Date(ci)) / (1000*60*60*24));
-    if (nights <= 0) { box.classList.add('hidden'); return; }
-    const base    = ROOM_PRICES[room] * nights;
-    const extra   = Math.max(0, adults - ROOM_STD[room]) * EXTRA_PAX_FEE * nights;
-    const total   = base + extra;
-    document.getElementById('mp_base').textContent  = '₱' + base.toLocaleString();
-    document.getElementById('mp_extra').textContent = extra > 0 ? '+₱' + extra.toLocaleString() : '₱0';
-    document.getElementById('mp_total').textContent = '₱' + total.toLocaleString();
-    document.getElementById('mp_deposit').textContent = '₱' + Math.ceil(total*0.5).toLocaleString();
-    box.classList.remove('hidden');
-  }
+// ── Calendar ──────────────────────────────────────────────────────────────────
+function opCalPrev() { opCalMonth--; if(opCalMonth<0){opCalMonth=11;opCalYear--;} renderOpCal(); }
+function opCalNext() { opCalMonth++; if(opCalMonth>11){opCalMonth=0;opCalYear++;} renderOpCal(); }
 
-  async function submitManualBooking() {
-    const name    = document.getElementById('m_name').value.trim();
-    const email   = document.getElementById('m_email').value.trim();
-    const phone   = document.getElementById('m_phone').value.trim();
-    const room    = document.getElementById('m_room').value;
-    const ci      = document.getElementById('m_checkin').value;
-    const co      = document.getElementById('m_checkout').value;
-    const adults  = parseInt(document.getElementById('m_adults').value);
-    const kids    = parseInt(document.getElementById('m_children').value);
-    const payStatus = document.getElementById('m_payStatus').value;
-    const status  = document.getElementById('m_status').value;
-    const notes   = document.getElementById('m_notes').value.trim();
+function renderOpCal() {
+  const label = new Date(opCalYear, opCalMonth, 1).toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+  document.getElementById('opCalLabel').textContent = label;
+  const firstDay   = new Date(opCalYear, opCalMonth, 1).getDay();
+  const daysInMonth= new Date(opCalYear, opCalMonth+1, 0).getDate();
+  const todayStr   = new Date().toISOString().split('T')[0];
 
-    if (!name) { showToast('Guest name required.', 'error'); return; }
-    if (!phone) { showToast('Phone number required.', 'error'); return; }
-    if (!room) { showToast('Please select a room.', 'error'); return; }
-    if (!ci || !co) { showToast('Please set check-in and check-out dates.', 'error'); return; }
+  const events = {};
+  const addEv  = (date, ev) => { if(!events[date]) events[date]=[]; events[date].push(ev); };
 
-    const nights  = Math.max(0, (new Date(co) - new Date(ci)) / (1000*60*60*24));
-    const base    = ROOM_PRICES[room] * nights;
-    const extraPax = Math.max(0, adults - ROOM_STD[room]);
-    const extraFee = extraPax * EXTRA_PAX_FEE * nights;
-    const total   = base + extraFee;
-    const deposit = Math.ceil(total * 0.5);
-    const balance = payStatus === 'fully_paid' ? 0 : (payStatus === 'deposit_paid' ? total - deposit : total);
-
-    const ref = generateRef();
-    document.getElementById('manualSubmitText').textContent = 'Saving...';
-    document.getElementById('manualSpinner').classList.remove('hidden');
-    document.getElementById('manualSubmitBtn').disabled = true;
-
-    try {
-      const { error } = await sb.from('bookings').insert({
-        booking_ref: ref,
-        guest_name: name,
-        guest_email: email || null,
-        guest_phone: phone,
-        room_type: room,
-        check_in_date: ci,
-        check_out_date: co,
-        adults, children: kids,
-        status,
-        total_amount: total,
-        deposit_amount: deposit,
-        remaining_balance: balance,
-        payment_status: payStatus,
-        extra_pax: extraPax,
-        extra_pax_fee: extraFee,
-        booking_type: 'walk-in',
-        edit_log: JSON.stringify([{ action: 'created as walk-in', at: new Date().toISOString(), by: 'admin' }]),
-        notes: notes || null,
-      });
-      if (error) throw error;
-      showToast(`Walk-in booking created: ${ref}`, 'success');
-      closeModal('manualModal');
-      await loadAll();
-    } catch(err) { console.error(err); showToast('Failed to save booking.', 'error'); }
-    finally {
-      document.getElementById('manualSubmitText').textContent = 'Create Walk-in Booking';
-      document.getElementById('manualSpinner').classList.add('hidden');
-      document.getElementById('manualSubmitBtn').disabled = false;
-    }
-  }
-
-  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-  // HELPERS
-  function generateRef() {
-    const d = new Date();
-    return `BM-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
-  }
-  function fmtDate(d) { if (!d) return '—'; return new Date(d + 'T00:00:00').toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' }); }
-  function fmtDateTime(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
-  function esc(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
-  async function sendEmail(to, subject, html) {
-    if (!to) return false;
-    try { await emailjs.send(EMAILJS_SID, EMAILJS_TMPL, { to_email: to, subject, message_html: html, to_name: to.split('@')[0] }); return true; } catch(e) { console.error(e); return false; }
-  }
-  function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    t.classList.remove('success','error','hidden'); t.classList.add(type);
-    document.getElementById('toastMsg').textContent = msg;
-    document.getElementById('toastIcon').className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
-    setTimeout(() => t.classList.add('hidden'), 5000);
-  }
-
-  // Close modals on overlay click
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.add('hidden'); });
+  allBookings.filter(b=>['confirmed','confirmed_balance_due','fully_paid'].includes(b.status)).forEach(b=>{
+    addEv(b.check_in_date,  {label:`↓ ${b.guest_name.split(' ')[0]}`, color:'bg-green-100 text-green-800'});
+    addEv(b.check_out_date, {label:`↑ ${b.guest_name.split(' ')[0]}`, color:'bg-blue-100 text-blue-800'});
+  });
+  allTasks.filter(t=>t.due_date&&t.status!=='completed').forEach(t=>{
+    addEv(t.due_date,{label:`📌 ${t.task_name.substring(0,12)}`,color:'bg-purple-100 text-purple-800'});
+  });
+  allMaintenance.filter(m=>m.status!=='completed').forEach(m=>{
+    addEv(m.reported_date,{label:`🔧 ${m.room_name}`,color:'bg-red-100 text-red-700'});
   });
 
-  // Auto-refresh every 30s
-  setInterval(() => { if (sessionStorage.getItem('bm_admin') === '1') loadAll(); }, 30000);
+  let html = '';
+  for (let i=0;i<firstDay;i++) html += '<div class="bg-gray-50 rounded-lg opacity-30" style="min-height:72px;"></div>';
+  for (let d=1;d<=daysInMonth;d++) {
+    const ds = `${opCalYear}-${String(opCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = ds===todayStr;
+    const dayEvs  = events[ds]||[];
+    html += `<div class="rounded-lg border ${isToday?'border-forest ring-2 ring-forest bg-forest/5':'border-gray-100 bg-white hover:bg-gray-50'} p-1.5" style="min-height:72px;">
+      <p class="text-xs font-bold mb-1 ${isToday?'text-forest':'text-gray-500'}">${d}</p>
+      ${dayEvs.slice(0,3).map(e=>`<div class="cal-event ${e.color}">${e.label}</div>`).join('')}
+      ${dayEvs.length>3?`<div class="cal-event bg-gray-100 text-gray-500">+${dayEvs.length-3}</div>`:''}
+    </div>`;
+  }
+  document.getElementById('opCalGrid').innerHTML = html;
+}
+
+// ── Guest Log ─────────────────────────────────────────────────────────────────
+async function fetchBookingForLog() {
+  const ref = document.getElementById('gl_ref').value.trim().toUpperCase();
+  if (!ref) { showToast('Enter a booking reference.','error'); return; }
+  try {
+    const { data, error } = await db.from('bookings').select('*').ilike('booking_ref', ref).single();
+    if (error || !data) { showToast('Booking not found.','error'); return; }
+    document.getElementById('gl_guestName').textContent    = data.guest_name;
+    document.getElementById('gl_bookingDetails').textContent = `${data.room_type} · ${fmtDate(data.check_in_date)} → ${fmtDate(data.check_out_date)}`;
+    document.getElementById('gl_adults').value  = data.adults||2;
+    document.getElementById('gl_bookingInfo').classList.remove('hidden');
+    showToast('Booking found!','success');
+  } catch(e) { showToast('Booking not found.','error'); }
+}
+
+async function submitGuestLog() {
+  const ref   = document.getElementById('gl_ref').value.trim().toUpperCase();
+  const names = document.getElementById('gl_names').value.trim().split('\n').filter(n=>n.trim());
+  if (!ref || names.length===0) { showToast('Please enter the booking ref and at least one guest name.','error'); return; }
+  if (!document.getElementById('gl_agree').checked) { showToast('Guest must agree to house rules.','error'); return; }
+
+  document.getElementById('glSubmitText').textContent='Saving...';
+  document.getElementById('glSpin').classList.remove('hidden');
+  document.getElementById('glSubmitBtn').disabled=true;
+  try {
+    const { error } = await db.from('guest_logs').insert({
+      booking_ref: ref,
+      guest_names: JSON.stringify(names),
+      adults_count: parseInt(document.getElementById('gl_adults').value)||0,
+      children_above_3: parseInt(document.getElementById('gl_ch_above').value)||0,
+      children_below_3: parseInt(document.getElementById('gl_ch_below').value)||0,
+      pets_count: parseInt(document.getElementById('gl_pets').value)||0,
+      house_rules_agreed: true,
+      security_deposit: parseInt(document.getElementById('gl_deposit').value)||0,
+      special_notes: document.getElementById('gl_notes').value.trim()||null,
+      logged_by: 'admin',
+    });
+    if (error) throw error;
+    showToast('Guest check-in logged!','success');
+    ['gl_ref','gl_names','gl_notes'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('gl_agree').checked=false;
+    document.getElementById('gl_bookingInfo').classList.add('hidden');
+    await renderRecentLogs();
+  } catch(e) { console.error(e); showToast('Failed to save log.','error'); }
+  finally {
+    document.getElementById('glSubmitText').textContent='Log Check-in';
+    document.getElementById('glSpin').classList.add('hidden');
+    document.getElementById('glSubmitBtn').disabled=false;
+  }
+}
+
+async function renderRecentLogs() {
+  try {
+    const { data } = await db.from('guest_logs').select('*').order('checked_in_at',{ascending:false}).limit(10);
+    const el = document.getElementById('recentLogs');
+    el.innerHTML = (data||[]).length===0 ? '<p class="text-gray-300 text-xs">No guest logs yet.</p>' :
+      (data||[]).map(l=>{
+        const names = (() => { try { const n = typeof l.guest_names==='string'?JSON.parse(l.guest_names):l.guest_names; return Array.isArray(n)?n:n; } catch(e){return [];} })();
+        return `<div class="p-3 bg-gray-50 rounded-xl">
+          <div class="flex justify-between items-start mb-1">
+            <p class="font-semibold text-sm text-gray-800">${l.booking_ref}</p>
+            <p class="text-xs text-gray-400">${fmtDateTime(l.checked_in_at)}</p>
+          </div>
+          <p class="text-xs text-gray-500">${l.adults_count} adults, ${l.children_above_3} kids (3+), ${l.children_below_3} infants · ${l.pets_count} pets</p>
+          <p class="text-xs text-gray-400 mt-1">${Array.isArray(names)?names.join(', '):names}</p>
+          ${l.security_deposit>0?`<p class="text-xs text-green-600 mt-1">Security deposit: ₱${l.security_deposit.toLocaleString()}</p>`:''}
+        </div>`;
+      }).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── Walk-in Booking ───────────────────────────────────────────────────────────
+function calcWIPrice() {
+  const ci = document.getElementById('wi_ci').value;
+  const co = document.getElementById('wi_co').value;
+  const box = document.getElementById('wiPriceBox');
+  if (!ci || !co) { box.classList.add('hidden'); return; }
+  const nights = Math.max(0,(new Date(co)-new Date(ci))/86400000);
+  document.getElementById('wi_nights').textContent = nights + ' night' + (nights!==1?'s':'');
+  document.getElementById('wi_suggested').textContent = '(enter manually)';
+  box.classList.remove('hidden');
+}
+
+async function submitWalkIn() {
+  const name  = document.getElementById('wi_name').value.trim();
+  const phone = document.getElementById('wi_phone').value.trim();
+  const room  = document.getElementById('wi_room').value;
+  const ci    = document.getElementById('wi_ci').value;
+  const co    = document.getElementById('wi_co').value;
+  const total = parseInt(document.getElementById('wi_total').value)||0;
+  const adults= parseInt(document.getElementById('wi_adults').value)||1;
+  if (!name||!phone||!ci||!co||!total) { showToast('Please fill all required fields.','error'); return; }
+
+  const payStatus = document.getElementById('wi_paystatus').value;
+  const balance   = payStatus==='fully_paid' ? 0 : payStatus==='deposit_paid' ? Math.ceil(total*0.5) : total;
+  const ref = `BM-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+
+  document.getElementById('wiText').textContent='Saving...'; document.getElementById('wiSpin').classList.remove('hidden'); document.getElementById('wiBtn').disabled=true;
+  try {
+    const { error } = await db.from('bookings').insert({
+      booking_ref: ref, guest_name: name, guest_phone: phone,
+      guest_email: document.getElementById('wi_email').value||null,
+      room_type: room, rooms_selected: JSON.stringify([room]),
+      check_in_date: ci, check_out_date: co,
+      adults, children: parseInt(document.getElementById('wi_ch').value)||0,
+      children_below_3: parseInt(document.getElementById('wi_inf').value)||0,
+      pax_count: adults,
+      total_amount: total,
+      deposit_amount: payStatus==='fully_paid'?total:Math.ceil(total*0.5),
+      remaining_balance: balance,
+      payment_status: payStatus,
+      payment_type: payStatus==='fully_paid'?'full':'downpayment',
+      status: 'confirmed',
+      booking_type: 'walk-in',
+      special_requests: document.getElementById('wi_notes').value||null,
+      confirmed_at: new Date().toISOString(),
+      edit_log: JSON.stringify([{action:'created as walk-in',at:new Date().toISOString(),by:'admin'}]),
+    });
+    if (error) throw error;
+    showToast(`Walk-in booking created! Ref: ${ref}`,'success');
+    ['wi_name','wi_phone','wi_email','wi_ci','wi_co','wi_total','wi_notes'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('wi_adults').value='2';
+    await loadAll();
+  } catch(e) { console.error(e); showToast('Failed.','error'); }
+  finally { document.getElementById('wiText').textContent='Create Walk-in Booking'; document.getElementById('wiSpin').classList.add('hidden'); document.getElementById('wiBtn').disabled=false; }
+}
+
+// ── Personnel ─────────────────────────────────────────────────────────────────
+function renderPersonnel() {
+  const grid = document.getElementById('personnelGrid');
+  grid.innerHTML = allStaff.length===0 ? '<p class="text-gray-400 text-sm col-span-3">No staff added. Add staff in Super Admin.</p>' :
+    allStaff.map(s=>`<div class="sc p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-forest/10 flex items-center justify-center font-bold text-forest flex-shrink-0">${s.name.charAt(0)}</div>
+        <div><p class="font-semibold text-gray-800 text-sm">${esc(s.name)}</p><p class="text-xs text-gray-400">${s.role}</p></div>
+        <span class="ml-auto badge ${s.status==='active'?'b-confirmed':'badge bg-gray-100 text-gray-500'} text-xs">${s.status}</span>
+      </div>
+      <p class="text-xs text-gray-500"><i class="fas fa-phone text-gold mr-1"></i>${s.phone||'—'}</p>
+    </div>`).join('');
+}
+
+// ── Inventory ─────────────────────────────────────────────────────────────────
+function renderInventory() {
+  const low = allInventory.filter(i=>parseFloat(i.quantity||0)<=parseFloat(i.min_stock||0));
+  const banner = document.getElementById('lowStockBanner');
+  if (low.length>0) { banner.classList.remove('hidden'); document.getElementById('lowStockMsg').textContent=`${low.length} item(s) below minimum stock: ${low.map(i=>i.item_name).join(', ')}`; }
+  else banner.classList.add('hidden');
+  const tbl = document.getElementById('inventoryTable');
+  tbl.innerHTML = allInventory.length===0 ? `<tr><td colspan="6" class="tc text-center text-gray-300 py-8">No inventory. Add items in Super Admin.</td></tr>` :
+    allInventory.map(i=>{
+      const isLow = parseFloat(i.quantity||0)<=parseFloat(i.min_stock||0);
+      return `<tr class="${isLow?'bg-amber-50':'hover:bg-gray-50'}">
+        <td class="tc font-medium ${isLow?'text-amber-700':''}">${esc(i.item_name)} ${isLow?'<span class="text-xs text-red-500 ml-1">⚠ LOW</span>':''}</td>
+        <td class="tc text-xs text-gray-500">${i.category||'—'}</td>
+        <td class="tc font-bold ${isLow?'text-red-600':'text-gray-800'}">${i.quantity||0} ${i.unit||''}</td>
+        <td class="tc text-xs text-gray-400">${i.min_stock||0} ${i.unit||''}</td>
+        <td class="tc text-xs text-gray-500">${i.unit||'—'}</td>
+        <td class="tc"><span class="badge ${isLow?'b-declined':'b-confirmed'} text-xs">${isLow?'Low Stock':'OK'}</span></td>
+      </tr>`;
+    }).join('');
+}
+
+// ── Inquiries ─────────────────────────────────────────────────────────────────
+async function renderInquiries() {
+  const tbl = document.getElementById('inquiriesTable');
+  tbl.innerHTML = allInquiries.length===0 ? `<tr><td colspan="6" class="tc text-center text-gray-300 py-8">No inquiries yet.</td></tr>` :
+    allInquiries.map(i=>`<tr class="hover:bg-gray-50">
+      <td class="tc text-xs text-gray-400">${fmtDate(i.created_at)}</td>
+      <td class="tc font-medium text-sm">${esc(i.name)} ${i.status==='unread'?'<span class="ml-1 badge bg-red-100 text-red-700" style="font-size:9px;">NEW</span>':''}</td>
+      <td class="tc text-xs text-gray-500">${i.email||'—'}<br/>${i.phone||'—'}</td>
+      <td class="tc text-xs">${i.adults} adults, ${i.children} children</td>
+      <td class="tc text-xs text-gray-500 max-w-xs truncate">${esc(i.message||'—')}</td>
+      <td class="tc"><div class="flex gap-2">
+        <a href="tel:${i.phone}" class="text-xs text-forest hover:underline">Call</a>
+        ${i.status==='unread'?`<button onclick="markInquiryRead('${i.id}')" class="text-xs text-gray-400 hover:text-gray-600">Mark Read</button>`:''}
+      </div></td>
+    </tr>`).join('');
+}
+
+async function markInquiryRead(id) {
+  await db.from('inquiries').update({status:'read'}).eq('id',id);
+  allInquiries = allInquiries.map(i=>i.id===id?{...i,status:'read'}:i);
+  updateBadges();
+  renderInquiries();
+}
+
+// ── Booking Modal ─────────────────────────────────────────────────────────────
+function openBookingModal(id) {
+  const b = allBookings.find(x=>x.id===id);
+  if (!b) return;
+  document.getElementById('bmTitle').textContent = `Booking – ${b.booking_ref}`;
+  const addons = (() => { try { const a=typeof b.addons==='string'?JSON.parse(b.addons):b.addons; return a||{}; } catch(e){return {};} })();
+  const addonStr = Object.keys(addons).length>0 ? Object.keys(addons).join(', ') : 'None';
+  document.getElementById('bmContent').innerHTML = `
+    <div class="grid grid-cols-2 gap-5 mb-5">
+      <div><p class="text-xs text-gray-400 uppercase mb-2">Guest</p>
+        <p class="font-semibold text-gray-800">${esc(b.guest_name)}</p>
+        <p class="text-sm text-gray-500"><a href="mailto:${b.guest_email}" class="hover:text-forest">${b.guest_email||'—'}</a></p>
+        <p class="text-sm text-gray-500">${b.guest_phone||'—'}</p>
+        <p class="text-xs text-gray-400 mt-1">${b.booking_type==='walk-in'?'🚶 Walk-in':'💻 Online'}</p>
+      </div>
+      <div><p class="text-xs text-gray-400 uppercase mb-2">Status</p>
+        <span class="badge ${STATUS_CSS[b.status]||'b-pending'} mb-2">${STATUS_LABELS[b.status]||b.status}</span>
+        <p class="text-xs text-gray-400 mt-2 font-mono">${b.booking_ref}</p>
+      </div>
+    </div>
+    <div class="bg-gray-50 rounded-xl p-4 mb-4">
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div><span class="text-gray-400 text-xs">Rooms</span><p class="font-medium mt-0.5">${b.room_type}</p></div>
+        <div><span class="text-gray-400 text-xs">Pax</span><p class="font-medium mt-0.5">${b.pax_count||b.adults} pax (${b.adults} adults)</p></div>
+        <div><span class="text-gray-400 text-xs">Check-in</span><p class="font-medium mt-0.5">${fmtDate(b.check_in_date)}</p></div>
+        <div><span class="text-gray-400 text-xs">Check-out</span><p class="font-medium mt-0.5">${fmtDate(b.check_out_date)}</p></div>
+        <div><span class="text-gray-400 text-xs">Add-ons</span><p class="font-medium mt-0.5 text-xs">${addonStr}</p></div>
+        <div><span class="text-gray-400 text-xs">Day type</span><p class="font-medium mt-0.5 capitalize">${b.day_type||'weekday'}</p></div>
+      </div>
+    </div>
+    <div class="bg-green-50 rounded-xl p-4 mb-4">
+      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Total</span><span class="font-bold">₱${(b.total_amount||0).toLocaleString()}</span></div>
+      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Deposit Paid</span><span class="text-forest font-bold">₱${(b.deposit_amount||0).toLocaleString()}</span></div>
+      <div class="flex justify-between text-sm"><span class="text-gray-500">Balance Due</span><span class="font-bold ${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}">₱${(b.remaining_balance||0).toLocaleString()}</span></div>
+      ${b.payment_ref_number?`<div class="flex justify-between text-sm mt-2 pt-2 border-t border-green-100"><span class="text-gray-400">Payment Ref</span><span class="text-gray-600">${b.payment_ref_number}</span></div>`:''}
+      ${b.voucher_code?`<div class="flex justify-between text-sm mt-1"><span class="text-gray-400">Voucher</span><span class="text-green-600">${b.voucher_code} (-₱${b.voucher_discount||0})</span></div>`:''}
+      ${b.payment_proof_url?`<div class="mt-2"><a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest underline"><i class="fas fa-image mr-1"></i>View Payment Proof</a></div>`:''}
+    </div>
+    ${b.special_requests?`<div class="bg-amber-50 rounded-xl p-4 mb-4"><p class="text-xs text-gray-400 mb-1 uppercase">Special Requests</p><p class="text-sm text-gray-700">${esc(b.special_requests)}</p></div>`:''}
+    <div class="flex flex-wrap gap-2">
+      ${b.status==='pending_payment_verification'?`<button onclick="approveBooking('${b.id}','confirmed');closeModal('bookingModal')" class="bg-green-600 text-white text-xs px-4 py-2 rounded-lg hover:bg-green-700">✓ Confirm</button>`:''}
+      ${(b.remaining_balance||0)>0?`<button onclick="closeModal('bookingModal');openPaymentModal('${b.id}',${b.remaining_balance})" class="bg-gold text-white text-xs px-4 py-2 rounded-lg hover:bg-yellow-600">Mark Cash Payment</button>`:''}
+      ${['confirmed','confirmed_balance_due','fully_paid'].includes(b.status)?`<button onclick="markCompleted('${b.id}')" class="bg-purple-600 text-white text-xs px-4 py-2 rounded-lg hover:bg-purple-700">Mark Completed</button>`:''}
+    </div>`;
+  document.getElementById('bookingModal').classList.remove('hidden');
+}
+
+// ── Payment Modal ─────────────────────────────────────────────────────────────
+function openPaymentModal(id, balance) {
+  document.getElementById('pm_bookingId').value = id;
+  document.getElementById('pm_amount').value = balance;
+  document.getElementById('pm_ref').value = '';
+  document.getElementById('paymentModal').classList.remove('hidden');
+}
+
+async function savePayment() {
+  const id      = document.getElementById('pm_bookingId').value;
+  const amount  = parseInt(document.getElementById('pm_amount').value)||0;
+  const method  = document.getElementById('pm_method').value;
+  const ref     = document.getElementById('pm_ref').value;
+  const b       = allBookings.find(x=>x.id===id);
+  if (!b) return;
+
+  const newBalance  = Math.max(0, (b.remaining_balance||0) - amount);
+  const newStatus   = newBalance===0 ? 'fully_paid' : 'confirmed_balance_due';
+  const logEntry    = {action:`Payment marked: ₱${amount} via ${method}${ref?' ref:'+ref:''}`,at:new Date().toISOString(),by:'admin'};
+  const existLog    = (() => { try { return (typeof b.edit_log==='string'?JSON.parse(b.edit_log):b.edit_log)||[]; } catch(e){return[];} })();
+
+  try {
+    const { error } = await db.from('bookings').update({
+      remaining_balance: newBalance,
+      status: newStatus,
+      second_payment_amount: amount,
+      second_payment_method: method,
+      second_payment_ref: ref,
+      second_payment_date: new Date().toISOString(),
+      edit_log: JSON.stringify([...existLog, logEntry]),
+    }).eq('id', id);
+    if (error) throw error;
+    showToast(`Payment of ₱${amount.toLocaleString()} recorded. ${newBalance===0?'Fully paid!':'Balance: ₱'+newBalance.toLocaleString()}`,'success');
+    closeModal('paymentModal');
+    closeModal('bookingModal');
+    await loadAll();
+  } catch(e) { console.error(e); showToast('Failed.','error'); }
+}
+
+async function markCompleted(id) {
+  if (!confirm('Mark this booking as completed?')) return;
+  await db.from('bookings').update({status:'completed_stayed'}).eq('id', id);
+  showToast('Marked as completed.','success');
+  await loadAll();
+}
+
+async function updateTask(id, status) {
+  await db.from('staff_tasks').update({status, completed_at: status==='completed'?new Date().toISOString():null}).eq('id',id);
+  showToast('Task updated!','success');
+  await loadAll();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden');}));
+function esc(str) { if(!str) return ''; return String(str).replace(/[&<>]/g,m=>m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
+function fmtDate(d) { if(!d) return '—'; return new Date(d+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}); }
+function fmtDateTime(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+async function sendEmail(to,subject,html) { if(!to) return false; try { await emailjs.send(EMAILJS_SID,EMAILJS_TMPL,{to_email:to,subject,message_html:html,to_name:to.split('@')[0]}); return true; } catch(e){ console.error(e); return false; } }
+function showToast(msg,type='success') { const t=document.getElementById('toast'); t.classList.remove('success','error','info','hidden'); t.classList.add(type); document.getElementById('toastMsg').textContent=msg; document.getElementById('toastIcon').className=type==='success'?'fas fa-check-circle':type==='error'?'fas fa-exclamation-circle':'fas fa-info-circle'; setTimeout(()=>t.classList.add('hidden'),5000); }
+
+// Set walk-in min dates
+const todayWI = new Date().toISOString().split('T')[0];
+document.getElementById('wi_ci').min = todayWI;
+document.getElementById('wi_co').min = todayWI;
+
+// Auto-refresh every 60s
+setInterval(()=>{ if(sessionStorage.getItem('bm_admin')==='1') loadAll(); }, 60000);
 </script>
 </body>
 </html>
