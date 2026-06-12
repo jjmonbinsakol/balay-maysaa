@@ -21,8 +21,12 @@
     #navbar.scrolled{background:white!important;box-shadow:0 2px 24px rgba(0,0,0,.08);}
     #navbar.scrolled .nav-link,#navbar.scrolled .nav-logo{color:#2d5a3b!important;}
     #navbar.scrolled .nav-cta{background:#2d5a3b!important;color:white!important;}
-    #navLogoImg{height:38px;width:auto;object-fit:contain;display:none;}
+    #navLogoImg{height:38px;max-width:140px;width:auto;object-fit:contain;display:none;}
     #navLogoImg.show{display:inline-block;}
+    @media (max-width:480px){
+      #navLogoImg{height:30px;max-width:100px;}
+      #navLogoImg.show ~ #siteTitle{display:none;}
+    }
     /* ── HERO ────────────────────────────────────────── */
     .hero-bg{background:linear-gradient(135deg,rgba(30,61,40,.72),rgba(45,90,59,.52) 50%,rgba(201,160,61,.18)),url('https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1800&q=80') center/cover no-repeat;min-height:100vh;position:relative;overflow:hidden;}
     .hero-bg video.heroVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
@@ -114,8 +118,78 @@
     .btn-sheen{position:relative;overflow:hidden;}
     .btn-sheen::after{content:'';position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .6s ease;}
     .btn-sheen:hover::after{left:125%;}
+
+    /* ══════════════════════════════════════════════════
+       MOBILE RESPONSIVENESS
+       ══════════════════════════════════════════════════ */
+    @media (max-width:640px){
+      /* Hero: tighter vertical rhythm + smaller display type */
+      .hero-content{padding-top:7rem;padding-bottom:7rem;}
+      #heroTitle{font-size:2.75rem;line-height:1.15;}
+      #heroTagline{font-size:11px;}
+      #heroSubtitle{font-size:15px;}
+
+      /* Section headings scale down */
+      #aboutTitle, #roomsTitle, #contactTitle{font-size:2.5rem;}
+      h2.font-heading{font-size:2.25rem;}
+
+      /* Intro stats: avoid cramped 3-column on very small screens */
+      .reveal .grid.grid-cols-3{gap:0.75rem;}
+      .reveal .grid.grid-cols-3 .text-3xl{font-size:1.5rem;}
+
+      /* Booking card: reduce padding so content has more width */
+      #booking .bg-white.rounded-3xl{padding:1.25rem;}
+
+      /* Guest count grid: tighten gaps + input padding on narrow screens */
+      #step-1 .grid.grid-cols-3{gap:0.5rem;}
+      #step-1 .grid.grid-cols-3 input.fi{padding:9px 8px;font-size:14px;text-align:center;}
+
+      /* Step indicator row: shrink connecting lines + dots so all 4
+         steps + 3 lines fit comfortably on narrow screens */
+      .sdot2{width:26px;height:26px;font-size:11px;}
+      .sline{width:18px;}
+      #booking .flex.justify-between.text-xs.text-text-muted span{font-size:10px;}
+
+      /* Room feature grids: single column for readability */
+      [data-room-features]{grid-template-columns:1fr 1fr;gap:0.5rem;}
+
+      /* Pricing table note + addons wrap nicely already via flex-wrap */
+      #pricingNote{font-size:12px;}
+
+      /* Payment QR codes: slightly smaller on tiny screens */
+      #gcash-qr,#maya-qr{width:80px;height:80px;}
+
+      /* Upload area: less vertical padding */
+      .upload-area{padding:20px;}
+
+      /* Inquiry card padding */
+      .inq-card{padding:20px;}
+
+      /* Price box text doesn't overflow on narrow screens */
+      #priceLines > div{font-size:13px;}
+      #totalDisp{font-size:1.125rem;}
+
+      /* Calendar day cells: ensure numerals stay legible */
+      .cday{font-size:11px;}
+
+      /* Payment type cards: reduce padding so two columns fit comfortably */
+      #step-3 .grid.grid-cols-2.gap-3 > label{padding:0.75rem;gap:0.5rem;}
+      #step-3 .grid.grid-cols-2.gap-3 > label p{font-size:12px;}
+      #step-3 .grid.grid-cols-2.gap-3 > label p.font-medium{font-size:13px;}
+
+      /* Terms modal: full-height friendly on small screens */
+      .mbox{max-height:90vh;}
+    }
+
+    @media (max-width:400px){
+      #heroTitle{font-size:2.25rem;}
+      .sline{width:12px;}
+      .sdot2{width:24px;height:24px;font-size:10px;}
+      #booking .bg-white.rounded-3xl{padding:1rem;}
+    }
   </style>
 </head>
+
 <body>
 
 <!-- PROMO BANNER (controlled by super admin site_settings) -->
@@ -525,9 +599,9 @@
         </div>
         <!-- GCash -->
         <div id="pay-gcash" class="paymethod mb-4">
-          <div class="flex items-center gap-5 p-4 bg-blue-50 rounded-xl border border-blue-100">
-            <img id="gcash-qr" src="" alt="GCash QR" class="w-24 h-24 rounded-xl bg-white object-contain border"/>
-            <div>
+          <div class="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-5 p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <img id="gcash-qr" src="" alt="GCash QR" class="w-24 h-24 rounded-xl bg-white object-contain border flex-shrink-0"/>
+            <div class="text-center sm:text-left">
               <p class="font-semibold text-blue-700 mb-1">GCash</p>
               <p class="text-sm text-blue-600">Name: <strong id="gcashAccName">Balay Maysa Resort</strong></p>
               <p class="text-sm text-blue-600">Number: <strong id="gcash_phone">0917 565 7918</strong></p>
@@ -537,9 +611,9 @@
         </div>
         <!-- Maya -->
         <div id="pay-maya" class="paymethod hidden mb-4">
-          <div class="flex items-center gap-5 p-4 bg-green-50 rounded-xl border border-green-100">
-            <img id="maya-qr" src="" alt="Maya QR" class="w-24 h-24 rounded-xl bg-white object-contain border"/>
-            <div>
+          <div class="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-5 p-4 bg-green-50 rounded-xl border border-green-100">
+            <img id="maya-qr" src="" alt="Maya QR" class="w-24 h-24 rounded-xl bg-white object-contain border flex-shrink-0"/>
+            <div class="text-center sm:text-left">
               <p class="font-semibold text-green-700 mb-1">Maya</p>
               <p class="text-sm text-green-600">Name: <strong id="mayaAccName">Balay Maysa Resort</strong></p>
               <p class="text-sm text-green-600">Number: <strong id="maya_phone">0917 565 7918</strong></p>
@@ -837,6 +911,7 @@ let uploadedFile = null;
 let appliedVoucher = null;
 let totalAmt  = 0;
 let depositAmt= 0;
+let appliedVoucherDiscount = 0; // peso amount currently being deducted by appliedVoucher
 let calY = new Date().getFullYear();
 let calM = new Date().getMonth();
 // slider: { roomName: { cur:0, total:N } }
@@ -1436,11 +1511,16 @@ function recalc(){
     lines.push(`<div class="flex justify-between text-white/80"><span>${lbl}</span><span>+₱${cost.toLocaleString()}</span></div>`);
   });
 
-  // Voucher discount
+  // Voucher discount — fixed peso amount (with legacy % support)
+  appliedVoucherDiscount = 0;
   if(appliedVoucher){
-    const disc=Math.round(total*(appliedVoucher.discount_percent/100));
-    total-=disc;
-    lines.push(`<div class="flex justify-between text-green-300"><span>🎟 Voucher (${appliedVoucher.discount_percent}% off)</span><span>−₱${disc.toLocaleString()}</span></div>`);
+    const disc=getVoucherDiscount(appliedVoucher,total);
+    appliedVoucherDiscount = disc;
+    total=Math.max(0,total-disc);
+    const lbl=appliedVoucher.discount_amount>0
+      ? `🎟 Voucher (₱${Number(appliedVoucher.discount_amount).toLocaleString()} off)`
+      : `🎟 Voucher (${appliedVoucher.discount_percent}% off)`;
+    lines.push(`<div class="flex justify-between text-green-300"><span>${lbl}</span><span>−₱${disc.toLocaleString()}</span></div>`);
   }
 
   totalAmt=total; depositAmt=Math.ceil(total*0.5);
@@ -1466,20 +1546,36 @@ function updatePayAmt(){
 // ═══════════════════════════════════════════════════════
 // VOUCHER
 // ═══════════════════════════════════════════════════════
+// Returns the peso amount a voucher should discount off `total`.
+// Supports a fixed peso amount (discount_amount) — the primary model
+// now used — with a fallback to legacy percent-based vouchers
+// (discount_percent) for any codes created under the old scheme.
+function getVoucherDiscount(voucher,total){
+  const amt = Number(voucher.discount_amount)||0;
+  if(amt>0) return Math.min(amt,total);
+  const pct = Number(voucher.discount_percent)||0;
+  if(pct>0) return Math.round(total*(pct/100));
+  return 0;
+}
+
 async function applyVoucher(){
   const code=document.getElementById('voucher_code').value.trim().toUpperCase();
   const el=document.getElementById('voucherStatus'); if(!code) return;
   try {
-    const {data}=await db.from('vouchers').select('*').eq('code',code).eq('is_active',true).single();
+    const {data,error}=await db.from('vouchers').select('*').eq('code',code).eq('is_active',true).maybeSingle();
+    if(error) throw error;
     if(!data){ showVStat(el,false,'❌ Invalid or unknown voucher code.'); return; }
     const now=new Date();
     if(data.valid_from&&new Date(data.valid_from)>now){ showVStat(el,false,'❌ Voucher not valid yet.'); return; }
     if(data.valid_to&&new Date(data.valid_to)<now){ showVStat(el,false,'❌ Voucher has expired.'); return; }
-    if(data.times_used>=data.usage_limit){ showVStat(el,false,'❌ Voucher has been fully used.'); return; }
+    if((data.times_used||0)>=(data.usage_limit||1)){ showVStat(el,false,'❌ Voucher has been fully used.'); return; }
     appliedVoucher=data;
-    showVStat(el,true,`✅ Voucher applied! ${data.discount_percent}% off your total.`);
-    recalc(); toast(`${data.discount_percent}% discount applied!`,'success');
-  } catch(e){ showVStat(el,false,'❌ Could not verify voucher.'); }
+    const label = data.discount_amount>0
+      ? `₱${Number(data.discount_amount).toLocaleString()} off`
+      : `${data.discount_percent}% off`;
+    showVStat(el,true,`✅ Voucher applied! ${label} your total.`);
+    recalc(); toast(`Voucher applied — ${label}!`,'success');
+  } catch(e){ console.error('Voucher error:',e); showVStat(el,false,'❌ Could not verify voucher. Please try again.'); }
 }
 function showVStat(el,ok,msg){
   el.className=`block mt-2 p-3 rounded-lg text-xs font-medium ${ok?'vok':'verr'}`;
@@ -1644,7 +1740,7 @@ async function submitBooking(){
       payment_type:    isFull?'full':'downpayment',
       addons:          JSON.stringify(selAddons),
       voucher_code:    appliedVoucher?.code||null,
-      voucher_discount:appliedVoucher?Math.round(totalAmt*(appliedVoucher.discount_percent/100)):0,
+      voucher_discount:appliedVoucherDiscount||0,
       special_requests:document.getElementById('special_requests').value.trim()||null,
       status:          'pending_payment_verification',
       booking_type:    'online',
@@ -1675,8 +1771,9 @@ async function submitBooking(){
     renderCalendar();
 
   } catch(err){
-    console.error(err);
-    toast('Something went wrong. Please try again or contact us.','error');
+    console.error('Booking submission failed:',err);
+    const detail = err?.message || err?.error_description || err?.hint || '';
+    toast(detail ? `Booking failed: ${detail}` : 'Something went wrong. Please try again or contact us.','error');
   } finally { setBtnLoad(false); }
 }
 
@@ -1758,9 +1855,10 @@ async function submitInquiry(){
   setInqLoad(true);
   try {
     // Save to inquiries table — super admin sees it in their Inquiries tab
-    await db.from('inquiries').insert({name,email:email||null,phone,adults,children,message:message||null,status:'unread'});
+    const {error:insErr} = await db.from('inquiries').insert({name,email:email||null,phone,adults,children,message:message||null,status:'unread'});
+    if(insErr) throw insErr;
 
-    // Email to super admin
+    // Email to super admin (best-effort — inquiry is already saved even if this fails)
     const html=`<div style="font-family:Inter,sans-serif;max-width:500px;margin:0 auto;">
 <div style="background:#1e3d28;padding:24px 32px;"><h2 style="color:white;margin:0;font-size:18px;">📩 Small Gathering Inquiry</h2></div>
 <div style="background:#f9f9f9;padding:28px;font-size:14px;line-height:1.8;">
@@ -1773,7 +1871,8 @@ async function submitInquiry(){
   <p style="margin-top:8px;"><a href="https://balay-maysaa.vercel.app/balay-super-secret.html" style="background:#2d5a3b;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;font-size:13px;">View in Super Admin →</a></p>
 </div>
 </div>`;
-    await sendEmail(SA_EMAIL,`📩 Gathering Inquiry from ${name}`,html);
+    const emailed = await sendEmail(SA_EMAIL,`📩 Gathering Inquiry from ${name}`,html);
+    if(!emailed) console.warn('Inquiry saved to database, but the notification email did not send. Check the EmailJS template "To Email" field is set to {{to_email}}.');
 
     toast('Inquiry sent! We\'ll contact you soon.','success');
     ['inq_name','inq_phone','inq_email','inq_message'].forEach(id=>document.getElementById(id).value='');
@@ -1824,7 +1923,7 @@ function toast(msg,type='success'){
 }
 function resetForm(){
   selPkg=null;selRooms=[];selAddons={};addonQtys={};
-  uploadedFile=null;appliedVoucher=null;totalAmt=0;depositAmt=0;
+  uploadedFile=null;appliedVoucher=null;appliedVoucherDiscount=0;totalAmt=0;depositAmt=0;
   ['guest_name','guest_email','guest_phone','check_in','check_out',
    'payment_ref','special_requests','voucher_code'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('adults').value='2';
