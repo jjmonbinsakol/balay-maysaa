@@ -446,9 +446,14 @@
             <div class="space-y-3">
               <div><label class="fi-label">Site Name</label><input type="text" id="cms_siteName" class="fi" placeholder="Balay Maysa"/></div>
               <div>
-                <label class="fi-label">Logo URL <span class="text-xs text-gray-400 font-normal">(shown in navbar &amp; favicon)</span></label>
-                <input type="url" id="cms_logoUrl" class="fi" placeholder="https://…/logo.png" onchange="previewImg('cms_logoUrl','logoPreview')"/>
-                <img id="logoPreview" class="cms-thumb mt-2 hidden" style="height:48px;width:auto;object-fit:contain;"/>
+                <label class="fi-label">Logo <span class="text-xs text-gray-400 font-normal">(shown in navbar &amp; favicon)</span></label>
+                <input type="hidden" id="cms_logoUrl"/>
+                <img id="logoPreview" class="cms-thumb mt-1 mb-2 hidden" style="height:48px;width:auto;object-fit:contain;"/>
+                <div class="upload-zone" onclick="document.getElementById('logoFile').click()" id="logoUploadZone">
+                  <i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-1"></i>
+                  <p class="text-xs text-gray-500" id="logoUploadLabel">Click to upload logo (PNG, JPG, SVG)</p>
+                </div>
+                <input type="file" id="logoFile" class="hidden" accept="image/*" onchange="handleMediaUpload(this,'cms_logoUrl','logoPreview','logoUploadLabel','site-logos')"/>
               </div>
             </div>
           </div>
@@ -459,13 +464,25 @@
               <div><label class="fi-label">Main Title</label><input type="text" id="cms_title" class="fi"/></div>
               <div><label class="fi-label">Subtitle</label><textarea id="cms_subtitle" class="fi" rows="2"></textarea></div>
               <div>
-                <label class="fi-label">Background Image URL <span class="text-xs text-gray-400 font-normal">(used if no video)</span></label>
-                <input type="url" id="cms_heroImg" class="fi" placeholder="https://…" onchange="previewImg('cms_heroImg','heroImgPreview')"/>
-                <img id="heroImgPreview" class="cms-thumb mt-2 hidden"/>
+                <label class="fi-label">Background Image <span class="text-xs text-gray-400 font-normal">(used if no video)</span></label>
+                <input type="hidden" id="cms_heroImg"/>
+                <img id="heroImgPreview" class="cms-thumb mt-1 mb-2 hidden"/>
+                <div class="upload-zone" onclick="document.getElementById('heroImgFile').click()">
+                  <i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-1"></i>
+                  <p class="text-xs text-gray-500" id="heroImgUploadLabel">Click to upload background image</p>
+                </div>
+                <input type="file" id="heroImgFile" class="hidden" accept="image/*" onchange="handleMediaUpload(this,'cms_heroImg','heroImgPreview','heroImgUploadLabel','hero-media')"/>
               </div>
               <div>
-                <label class="fi-label">Background Video URL <span class="text-xs text-gray-400 font-normal">(mp4/webm — overrides image)</span></label>
-                <input type="url" id="cms_heroVideo" class="fi" placeholder="https://…/hero.mp4"/>
+                <label class="fi-label">Background Video <span class="text-xs text-gray-400 font-normal">(mp4/webm — overrides image)</span></label>
+                <input type="hidden" id="cms_heroVideo"/>
+                <video id="heroVideoPreview" class="cms-thumb mt-1 mb-2 hidden" controls muted></video>
+                <div class="upload-zone" onclick="document.getElementById('heroVideoFile').click()">
+                  <i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-1"></i>
+                  <p class="text-xs text-gray-500" id="heroVideoUploadLabel">Click to upload background video</p>
+                </div>
+                <input type="file" id="heroVideoFile" class="hidden" accept="video/*" onchange="handleMediaUpload(this,'cms_heroVideo','heroVideoPreview','heroVideoUploadLabel','hero-media',true)"/>
+                <button type="button" onclick="clearMediaField('cms_heroVideo','heroVideoPreview','heroVideoUploadLabel','Click to upload background video')" class="text-xs text-red-400 hover:text-red-600 mt-1">Remove video</button>
               </div>
             </div>
           </div>
@@ -625,8 +642,9 @@
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="fi-label">Discount (%)</label>
-          <input type="number" id="v_discount" class="fi" placeholder="e.g. 10" min="1" max="100"/>
+          <label class="fi-label">Discount Amount (₱)</label>
+          <input type="number" id="v_discount" class="fi" placeholder="e.g. 500" min="1"/>
+          <p class="text-xs text-gray-400 mt-1">Fixed peso amount off the total.</p>
         </div>
         <div>
           <label class="fi-label">Usage Limit</label>
@@ -855,10 +873,20 @@
     </div>
     <div class="p-5 space-y-4">
       <div><label class="fi-label">Room *</label><select id="ri_room" class="fi"><option value="Silayan">Silayan</option><option value="Sinta">Sinta</option><option value="Tahanan">Tahanan</option><option value="Barkada">Barkada</option></select></div>
-      <div><label class="fi-label">Image / Video URL *</label><input type="url" id="ri_url" class="fi" placeholder="https://…"/></div>
-      <div class="flex items-center gap-3"><input type="checkbox" id="ri_video" class="w-4 h-4 accent-forest"/><label class="text-sm text-gray-600" for="ri_video">This is a video (mp4/webm)</label></div>
+      <div class="flex items-center gap-3"><input type="checkbox" id="ri_video" class="w-4 h-4 accent-forest" onchange="toggleRoomMediaAccept()"/><label class="text-sm text-gray-600" for="ri_video">This is a video (mp4/webm)</label></div>
+      <div>
+        <label class="fi-label">Upload Image / Video *</label>
+        <input type="hidden" id="ri_url"/>
+        <img id="riImgPreview" class="cms-thumb mb-2 hidden"/>
+        <video id="riVideoPreview" class="cms-thumb mb-2 hidden" controls muted></video>
+        <div class="upload-zone" onclick="document.getElementById('riFile').click()">
+          <i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-1"></i>
+          <p class="text-xs text-gray-500" id="riUploadLabel">Click to upload</p>
+        </div>
+        <input type="file" id="riFile" class="hidden" accept="image/*" onchange="handleMediaUpload(this,'ri_url',['riImgPreview','riVideoPreview'],'riUploadLabel','room-media')"/>
+      </div>
       <div><label class="fi-label">Display Order</label><input type="number" id="ri_order" class="fi" value="0" min="0"/></div>
-      <p class="text-xs text-gray-400">Tip: Use direct image URLs from Supabase Storage, Google Drive, or Unsplash. Changes appear on the booking page after save.</p>
+      <p class="text-xs text-gray-400">Uploaded files are stored in Supabase Storage and appear on the booking page immediately after saving.</p>
       <div class="flex gap-3 mt-2">
         <button onclick="closeModal('roomImageModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
         <button onclick="saveRoomImage()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save Image</button>
@@ -868,6 +896,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // CONFIG
@@ -879,6 +908,9 @@ const SA_PASS = 'SecurePass2026';
 const SESSION_MS = 2 * 60 * 60 * 1000;
 const WARN_MS    = 10 * 60 * 1000;
 const db = window.supabase.createClient(SB_URL, SB_ANON);
+const EJS_SID  = 'service_t13ealt';
+const EJS_TMPL = 'template_s17clcj';
+if (typeof emailjs !== 'undefined') emailjs.init('yupgCoqLB4unb0OAz');
 
 const STATUS_LABELS = {
   pending_payment_verification:'Pending Verification',
@@ -1512,7 +1544,7 @@ function renderVouchers(){
     const active=v.is_active&&!expired;
     return `<tr>
       <td class="font-mono font-bold text-forest">${v.code}</td>
-      <td class="font-semibold">${v.discount_percent}% off</td>
+      <td class="font-semibold">${(v.discount_amount>0)?`₱${Number(v.discount_amount).toLocaleString()} off`:`${v.discount_percent||0}% off`}</td>
       <td class="text-xs text-gray-500">${v.valid_from?fmtDateTime(v.valid_from):'—'}</td>
       <td class="text-xs text-gray-500">${v.valid_to?fmtDateTime(v.valid_to):'—'}</td>
       <td><span class="${(v.times_used||0)>=(v.usage_limit||1)?'text-red-600':'text-gray-700'} font-medium">${v.times_used||0}</span><span class="text-gray-400"> / ${v.usage_limit||1}</span></td>
@@ -1541,7 +1573,7 @@ function openVoucherModal(id=null){
     const v=allVouchers.find(x=>x.id===id); if(!v) return;
     document.getElementById('v_id').value=v.id;
     document.getElementById('v_code').value=v.code;
-    document.getElementById('v_discount').value=v.discount_percent||'';
+    document.getElementById('v_discount').value=v.discount_amount||v.discount_percent||'';
     document.getElementById('v_limit').value=v.usage_limit||1;
     document.getElementById('v_from').value=v.valid_from?v.valid_from.slice(0,16):'';
     document.getElementById('v_to').value=v.valid_to?v.valid_to.slice(0,16):'';
@@ -1562,10 +1594,10 @@ async function saveVoucher(){
   const code=(document.getElementById('v_code').value.trim()||'').toUpperCase();
   const disc=parseInt(document.getElementById('v_discount').value)||0;
   if(!code){genVoucherCode(); return;}
-  if(!disc||disc<1||disc>100){toast('Enter a discount between 1–100%.','error'); return;}
+  if(!disc||disc<1){toast('Enter a discount amount in pesos (e.g. 500).','error'); return;}
   const id=document.getElementById('v_id').value;
   const data={
-    code, discount_percent:disc,
+    code, discount_amount:disc, discount_percent:0,
     usage_limit:parseInt(document.getElementById('v_limit').value)||1,
     valid_from:document.getElementById('v_from').value||null,
     valid_to:document.getElementById('v_to').value||null,
@@ -1575,11 +1607,11 @@ async function saveVoucher(){
   try{
     let err;
     if(id){({error:err}=await db.from('vouchers').update(data).eq('id',id));}
-    else{({error:err}=await db.from('vouchers').insert(data));}
+    else{({error:err}=await db.from('vouchers').insert({...data,times_used:0}));}
     if(err) throw err;
     toast(`Voucher ${id?'updated':'created'}!`,'success');
     closeModal('voucherModal'); await loadVouchers();
-  }catch(e){console.error(e);toast('Failed: '+(e.message||e),'error');}
+  }catch(e){console.error('Voucher save failed:',e);toast('Failed: '+(e.message||e.hint||'Unknown error — check console.'),'error');}
   finally{setBtnLoad('vSaveText','vSaveSpin',false,'Save Voucher');}
 }
 
@@ -1878,14 +1910,16 @@ async function loadContent(){
     // Branding
     document.getElementById('cms_siteName').value  =s.site_name||'';
     document.getElementById('cms_logoUrl').value   =s.logo_url||'';
-    previewImg('cms_logoUrl','logoPreview',true);
+    setMediaPreview(s.logo_url,'logoPreview',null,'logoUploadLabel','Click to upload logo (PNG, JPG, SVG)');
     // Hero
     document.getElementById('cms_tagline').value   =s.hero_tagline||'';
     document.getElementById('cms_title').value     =s.hero_title||'';
     document.getElementById('cms_subtitle').value  =s.hero_subtitle||'';
     document.getElementById('cms_heroImg').value   =s.hero_bg_image||'';
     document.getElementById('cms_heroVideo').value =s.hero_video_url||'';
-    previewImg('cms_heroImg','heroImgPreview',true);
+    setMediaPreview(s.hero_bg_image,'heroImgPreview',null,'heroImgUploadLabel','Click to upload background image');
+    setMediaPreview(s.hero_video_url,null,'heroVideoPreview','heroVideoUploadLabel','Click to upload background video');
+    if(s.hero_video_url){ const v=document.getElementById('heroVideoPreview'); v.src=s.hero_video_url; v.classList.remove('hidden'); }
     // About + stats
     document.getElementById('cms_aboutTitle').value=s.about_title||'';
     document.getElementById('cms_about').value     =s.about_text||'';
@@ -1929,12 +1963,91 @@ async function loadContent(){
   }catch(e){console.error(e);}
 }
 
-function previewImg(inputId,imgId,initial=false){
-  const url=document.getElementById(inputId).value.trim();
-  const img=document.getElementById(imgId);
-  if(url){ img.src=url; img.classList.remove('hidden'); }
-  else if(!initial){ img.classList.add('hidden'); }
-  else { img.classList.toggle('hidden',!url); }
+// ── Generic media preview/upload helpers (Supabase Storage) ───
+const MEDIA_BUCKET = 'site-media';
+
+// Show/hide an image and/or video preview element for a given URL.
+function setMediaPreview(url,imgId,videoId,labelId,labelText){
+  if(imgId){
+    const img=document.getElementById(imgId);
+    if(img){
+      if(url){ img.src=url; img.classList.remove('hidden'); }
+      else { img.classList.add('hidden'); img.removeAttribute('src'); }
+    }
+  }
+  if(videoId){
+    const vid=document.getElementById(videoId);
+    if(vid && !url){ vid.classList.add('hidden'); vid.removeAttribute('src'); }
+  }
+  if(labelId){
+    const lbl=document.getElementById(labelId);
+    if(lbl) lbl.textContent = url ? 'Uploaded ✓ — click to replace' : labelText;
+  }
+}
+
+function clearMediaField(hiddenInputId,previewId,labelId,labelText){
+  document.getElementById(hiddenInputId).value='';
+  const prev=document.getElementById(previewId);
+  if(prev){ prev.classList.add('hidden'); prev.removeAttribute('src'); }
+  const lbl=document.getElementById(labelId);
+  if(lbl) lbl.textContent=labelText;
+}
+
+// Toggle the accepted file type for the room image/video uploader
+function toggleRoomMediaAccept(){
+  const isVideo=document.getElementById('ri_video').checked;
+  document.getElementById('riFile').accept = isVideo ? 'video/*' : 'image/*';
+}
+
+// Upload a File to Supabase Storage (site-media bucket) and return its public URL
+async function uploadFileToStorage(file,folder){
+  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
+  const path=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+  const{error}=await db.storage.from(MEDIA_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
+  if(error) throw error;
+  const{data}=db.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// Generic handler: uploads the selected file, stores the resulting URL in
+// `hiddenInputId`, and updates preview element(s). previewIds can be a
+// single element id (image) or [imgId, videoId] for room media that can
+// be either type. forceVideo treats the upload as a video preview.
+async function handleMediaUpload(inputEl,hiddenInputId,previewIds,labelId,folder,forceVideo){
+  const file=inputEl.files[0]; if(!file) return;
+  const maxMB = forceVideo || file.type.startsWith('video/') ? 50 : 5;
+  if(file.size>maxMB*1024*1024){ toast(`File too large. Max ${maxMB} MB.`,'error'); inputEl.value=''; return; }
+
+  const label=document.getElementById(labelId);
+  const origLabel = label ? label.textContent : '';
+  if(label) label.textContent='Uploading…';
+
+  try{
+    const url=await uploadFileToStorage(file,folder);
+    document.getElementById(hiddenInputId).value=url;
+
+    const isVideo = forceVideo || file.type.startsWith('video/');
+    let imgId=previewIds, videoId=null;
+    if(Array.isArray(previewIds)){ [imgId,videoId]=previewIds; }
+
+    if(isVideo){
+      const vid=document.getElementById(videoId||imgId);
+      if(vid){ vid.src=url; vid.classList.remove('hidden'); }
+      if(videoId && imgId){ const img=document.getElementById(imgId); if(img) img.classList.add('hidden'); }
+    } else {
+      const img=document.getElementById(imgId);
+      if(img){ img.src=url; img.classList.remove('hidden'); }
+      if(videoId){ const vid=document.getElementById(videoId); if(vid) vid.classList.add('hidden'); }
+    }
+    if(label) label.textContent='Uploaded ✓ — click to replace';
+    toast('File uploaded!','success');
+  }catch(e){
+    console.error('Upload failed:',e);
+    toast('Upload failed: '+(e.message||'check Supabase storage setup'),'error');
+    if(label) label.textContent=origLabel;
+  } finally {
+    inputEl.value='';
+  }
 }
 
 async function saveAllSettings(){
@@ -2069,8 +2182,27 @@ function renderRoomImages(){
     </div>`;
   }).join('');
 }
-function openRoomImageModal(){['ri_url','ri_order'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});document.getElementById('ri_order').value='0';document.getElementById('ri_video').checked=false;document.getElementById('roomImageModal').classList.remove('hidden');}
-async function saveRoomImage(){const room=document.getElementById('ri_room').value;const url=document.getElementById('ri_url').value.trim();if(!url){toast('URL required.','error');return;}try{const{error}=await db.from('room_images').insert({room_type:room,image_url:url,is_video:document.getElementById('ri_video').checked,display_order:parseInt(document.getElementById('ri_order').value)||0});if(error)throw error;toast('Image added! Booking page updated.','success');closeModal('roomImageModal');await loadRoomImages();}catch(e){toast('Failed.','error');}}
+function openRoomImageModal(){
+  ['ri_url','ri_order'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+  document.getElementById('ri_order').value='0';
+  document.getElementById('ri_video').checked=false;
+  toggleRoomMediaAccept();
+  clearMediaField('ri_url','riImgPreview','riUploadLabel','Click to upload');
+  document.getElementById('riVideoPreview').classList.add('hidden');
+  document.getElementById('roomImageModal').classList.remove('hidden');
+}
+async function saveRoomImage(){
+  const room=document.getElementById('ri_room').value;
+  const url=document.getElementById('ri_url').value.trim();
+  if(!url){toast('Please upload an image or video first.','error');return;}
+  try{
+    const{error}=await db.from('room_images').insert({room_type:room,image_url:url,is_video:document.getElementById('ri_video').checked,display_order:parseInt(document.getElementById('ri_order').value)||0});
+    if(error)throw error;
+    toast('Image added! Booking page updated.','success');
+    closeModal('roomImageModal');
+    await loadRoomImages();
+  }catch(e){console.error('Room image save failed:',e);toast('Failed: '+(e.message||'check console'),'error');}
+}
 async function deleteRoomImage(id){if(!confirm('Remove this image?'))return;try{await db.from('room_images').delete().eq('id',id);toast('Removed.','success');await loadRoomImages();}catch(e){toast('Failed.','error');}}
 
 // ═══════════════════════════════════════════════════════
@@ -2108,10 +2240,15 @@ async function sendEmail(to,subject,html){
   if(!to) return false;
   try{
     if(typeof emailjs!=='undefined' && emailjs.send){
-      await emailjs.send('service_t13ealt','template_s17clcj',{to_email:to,subject,message_html:html,to_name:to.split('@')[0]});
+      await emailjs.send(EJS_SID,EJS_TMPL,{to_email:to,subject,message_html:html,to_name:to.split('@')[0]});
+      return true;
     }
-    return true;
-  }catch(e){ console.warn('Email send failed:',e); return false; }
+    console.warn('EmailJS SDK not loaded — email not sent to',to);
+    return false;
+  }catch(e){
+    console.error('Email send failed (check EmailJS template "To Email" is set to {{to_email}}):',e);
+    return false;
+  }
 }
 function toast(msg,type='success'){const t=document.getElementById('toast');t.classList.remove('success','error','info','hidden');t.classList.add(type);document.getElementById('toastMsg').textContent=msg;document.getElementById('toastIcon').className=type==='success'?'fas fa-check-circle':type==='error'?'fas fa-exclamation-circle':'fas fa-info-circle';clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.add('hidden'),5000);}
 function setBtnLoad(textId,spinId,on,label){const t=document.getElementById(textId);const s=document.getElementById(spinId);if(t)t.textContent=on?'Saving…':label;if(s)s.classList.toggle('hidden',!on);}
