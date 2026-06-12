@@ -80,6 +80,8 @@
     .profit-pos{color:#059669;}.profit-neg{color:#dc2626;}
     /* VIEW HIDDEN */
     .view{display:none;}.view.active{display:block;}
+    /* CMS preview thumb */
+    .cms-thumb{width:100%;height:90px;object-fit:cover;border-radius:8px;background:#f3f4f6;}
   </style>
 </head>
 <body>
@@ -436,18 +438,56 @@
           <h2 class="font-heading text-3xl text-gray-800 font-light">Content & CMS</h2>
           <button onclick="saveAllSettings()" class="bg-forest text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-save"></i> Save All</button>
         </div>
+        <p class="text-sm text-gray-400 mb-5">Everything below controls the live guest website (index.html) in real time — branding, hero media, room descriptions, inquiry section, and legal text.</p>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <!-- Branding -->
+          <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-paint-brush text-gold text-sm"></i>Branding</h3>
+            <div class="space-y-3">
+              <div><label class="fi-label">Site Name</label><input type="text" id="cms_siteName" class="fi" placeholder="Balay Maysa"/></div>
+              <div>
+                <label class="fi-label">Logo URL <span class="text-xs text-gray-400 font-normal">(shown in navbar &amp; favicon)</span></label>
+                <input type="url" id="cms_logoUrl" class="fi" placeholder="https://…/logo.png" onchange="previewImg('cms_logoUrl','logoPreview')"/>
+                <img id="logoPreview" class="cms-thumb mt-2 hidden" style="height:48px;width:auto;object-fit:contain;"/>
+              </div>
+            </div>
+          </div>
           <!-- Hero -->
           <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-image text-gold text-sm"></i>Hero Section</h3>
             <div class="space-y-3">
               <div><label class="fi-label">Tagline</label><input type="text" id="cms_tagline" class="fi"/></div>
               <div><label class="fi-label">Main Title</label><input type="text" id="cms_title" class="fi"/></div>
               <div><label class="fi-label">Subtitle</label><textarea id="cms_subtitle" class="fi" rows="2"></textarea></div>
+              <div>
+                <label class="fi-label">Background Image URL <span class="text-xs text-gray-400 font-normal">(used if no video)</span></label>
+                <input type="url" id="cms_heroImg" class="fi" placeholder="https://…" onchange="previewImg('cms_heroImg','heroImgPreview')"/>
+                <img id="heroImgPreview" class="cms-thumb mt-2 hidden"/>
+              </div>
+              <div>
+                <label class="fi-label">Background Video URL <span class="text-xs text-gray-400 font-normal">(mp4/webm — overrides image)</span></label>
+                <input type="url" id="cms_heroVideo" class="fi" placeholder="https://…/hero.mp4"/>
+              </div>
             </div>
           </div>
-          <!-- About -->
+          <!-- About + Stats -->
           <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-info-circle text-gold text-sm"></i>About Section</h3>
-            <div><label class="fi-label">About Text</label><textarea id="cms_about" class="fi" rows="5"></textarea></div>
+            <div class="space-y-3">
+              <div><label class="fi-label">About Title <span class="text-xs text-gray-400 font-normal">(HTML allowed, e.g. for &lt;em&gt;)</span></label><input type="text" id="cms_aboutTitle" class="fi" placeholder="Your Private &lt;em&gt;Paradise&lt;/em&gt;"/></div>
+              <div><label class="fi-label">About Text</label><textarea id="cms_about" class="fi" rows="4"></textarea></div>
+              <div class="grid grid-cols-3 gap-2">
+                <div><label class="fi-label text-xs">Stat 1</label><input type="text" id="cms_stat1Num" class="fi mb-1" placeholder="4"/><input type="text" id="cms_stat1Label" class="fi" placeholder="Unique Rooms"/></div>
+                <div><label class="fi-label text-xs">Stat 2</label><input type="text" id="cms_stat2Num" class="fi mb-1" placeholder="100%"/><input type="text" id="cms_stat2Label" class="fi" placeholder="Private"/></div>
+                <div><label class="fi-label text-xs">Stat 3</label><input type="text" id="cms_stat3Num" class="fi mb-1" placeholder="24/7"/><input type="text" id="cms_stat3Label" class="fi" placeholder="Support"/></div>
+              </div>
+            </div>
+          </div>
+          <!-- Section Titles -->
+          <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-heading text-gold text-sm"></i>Section Titles</h3>
+            <div class="space-y-3">
+              <div><label class="fi-label">Rooms Section Title</label><input type="text" id="cms_roomsTitle" class="fi" placeholder="Our Rooms"/></div>
+              <div><label class="fi-label">Contact Section Title</label><input type="text" id="cms_contactTitle" class="fi" placeholder="Contact Us"/></div>
+              <div><label class="fi-label">Footer Text</label><input type="text" id="cms_footerText" class="fi" placeholder="© 2026 Balay Maysa Resort. All rights reserved."/></div>
+            </div>
           </div>
           <!-- Contact -->
           <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-phone text-gold text-sm"></i>Contact Info</h3>
@@ -460,6 +500,8 @@
           <!-- Payment Details -->
           <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-university text-gold text-sm"></i>Bank / Payment Details</h3>
             <div class="space-y-3">
+              <div><label class="fi-label">GCash / Maya / Bank Account Name</label><input type="text" id="cms_paymentAccName" class="fi" placeholder="Balay Maysa Resort"/></div>
+              <div><label class="fi-label">Bank Title <span class="text-xs text-gray-400 font-normal">(e.g. Bank Transfer – BDO)</span></label><input type="text" id="cms_bankTitle" class="fi" placeholder="Bank Transfer – BDO"/></div>
               <div><label class="fi-label">Bank Account Name</label><input type="text" id="cms_bankName" class="fi" placeholder="Balay Maysa Resort"/></div>
               <div><label class="fi-label">Bank Account Number</label><input type="text" id="cms_bankNum" class="fi" placeholder="001234567890"/></div>
               <div><label class="fi-label">GCash / Maya Number</label><input type="text" id="cms_ewallet" class="fi" placeholder="09175657918"/></div>
@@ -475,8 +517,16 @@
               <div><label class="fi-label">Cancellation Policy</label><textarea id="cms_cancel" class="fi" rows="2"></textarea></div>
             </div>
           </div>
+          <!-- Inquiry Section -->
+          <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-paper-plane text-gold text-sm"></i>Small Gatherings / Inquiry Section</h3>
+            <div class="space-y-3">
+              <div><label class="fi-label">Eyebrow Label</label><input type="text" id="cms_inqEyebrow" class="fi" placeholder="Small Gatherings"/></div>
+              <div><label class="fi-label">Heading</label><input type="text" id="cms_inqTitle" class="fi" placeholder="Planning a Small Gathering?"/></div>
+              <div><label class="fi-label">Description <span class="text-xs text-gray-400 font-normal">(use {phone} where the phone number/link should appear)</span></label><textarea id="cms_inqDesc" class="fi" rows="2" placeholder="Send us an inquiry and we'll craft a custom package — or call us at {phone}."></textarea></div>
+            </div>
+          </div>
           <!-- Terms & Conditions -->
-          <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-gavel text-gold text-sm"></i>Terms & Conditions</h3>
+          <div class="sc p-6 md:col-span-2"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-gavel text-gold text-sm"></i>Terms & Conditions</h3>
             <div><label class="fi-label">Terms Content <span class="text-xs text-gray-400 font-normal">(HTML supported)</span></label>
               <textarea id="cms_terms" class="fi" rows="8" placeholder="Enter full terms & conditions HTML or plain text…"></textarea>
             </div>
@@ -488,6 +538,20 @@
               <div><label class="fi-label">Banner Text</label><input type="text" id="cms_promoText" class="fi" placeholder="e.g. Book now and get 10% off!"/></div>
               <div><label class="fi-label">Active?</label><select id="cms_promoActive" class="fi"><option value="false">No – Hidden</option><option value="true">Yes – Show on website</option></select></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Room Content Manager -->
+        <div class="sc overflow-hidden mb-5">
+          <div class="p-5 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-700">Room Content Manager</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Edit each room's display name, subtitle, badge tag, and feature list shown on the guest site.</p>
+          </div>
+          <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5" id="roomContentGrid">
+            <p class="text-gray-400 text-sm col-span-2">Loading…</p>
+          </div>
+          <div class="p-5 border-t border-gray-100">
+            <button onclick="saveRoomContent()" class="bg-forest/10 text-forest px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest/20 flex items-center gap-2"><i class="fas fa-save"></i> Save Room Content</button>
           </div>
         </div>
 
@@ -833,13 +897,25 @@ const STATUS_CSS = {
   declined:'b-decl', completed_stayed:'b-comp'
 };
 
+const ROOM_LIST = ['Silayan','Sinta','Tahanan','Barkada'];
+const ROOM_DEFAULT_CONTENT = {
+  Silayan: {display_name:'Silayan', subtitle:'Pool View Suite', tag:'Pool View',
+    features:['<i class="fas fa-bed text-gold"></i> 1 Queen Bed','<i class="fas fa-bath text-gold"></i> Bathtub','<i class="fas fa-users text-gold"></i> 2–3 Adults','<i class="fas fa-swimming-pool text-gold"></i> Pool Access']},
+  Sinta: {display_name:'Sinta', subtitle:'2nd Floor Retreat', tag:'2nd Floor',
+    features:['<i class="fas fa-bed text-gold"></i> 1 Queen Bed','<i class="fas fa-snowflake text-gold"></i> AC + Fan','<i class="fas fa-users text-gold"></i> 2–3 Adults','<i class="fas fa-wifi text-gold"></i> Free WiFi']},
+  Tahanan: {display_name:'Tahanan', subtitle:'Family Suite', tag:'Family',
+    features:['<i class="fas fa-bed text-gold"></i> 2 Queen Beds','<i class="fas fa-home text-gold"></i> Suite Style','<i class="fas fa-users text-gold"></i> 4–6 Adults','<i class="fas fa-snowflake text-gold"></i> Air Conditioned']},
+  Barkada: {display_name:'Barkada', subtitle:'Group Escape', tag:'Group',
+    features:['<i class="fas fa-bed text-gold"></i> 2 Queen + 2 Single','<i class="fas fa-users text-gold"></i> 8–10 Adults','<i class="fas fa-snowflake text-gold"></i> Air Conditioned','<i class="fas fa-door-open text-gold"></i> Spacious']},
+};
+
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
 let allBookings=[],allExpenses=[],allStaff=[],allTasks=[],
     allInventory=[],allMaintenance=[],allAssets=[],allInquiries=[],
     allVouchers=[],expCategories=[],roomPricing=[],pricingRules=[],
-    roomImages=[];
+    roomImages=[],roomContent=[];
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
 let calFilterDate=null;
 let sessionExpiry=null;
@@ -1312,14 +1388,16 @@ async function sendConfirmEmail(b){
   const{data:s}=await db.from('site_settings').select('*');
   const cfg=Object.fromEntries((s||[]).map(x=>[x.setting_key,x.setting_value]));
   const ph=cfg.contact_phone||'0917 565 7918';
+  const siteName=cfg.site_name||'Balay Maysa Resort';
+  const addr=cfg.contact_address||'Blk 8 Lot 12 M.Cuenco St., Caloocan North';
   const calStart=(b.check_in_date||'').replace(/-/g,'');
   const calEnd=(b.check_out_date||'').replace(/-/g,'');
-  const calUrl=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Balay Maysa '+b.booking_ref)}&dates=${calStart}/${calEnd}&location=${encodeURIComponent('Blk 8 Lot 12 M.Cuenco St., Caloocan North')}`;
+  const calUrl=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(siteName+' '+b.booking_ref)}&dates=${calStart}/${calEnd}&location=${encodeURIComponent(addr)}`;
   const html=`<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
-<div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1><p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">🎉 Booking Confirmed!</p></div>
+<div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">${siteName}</h1><p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">🎉 Booking Confirmed!</p></div>
 <div style="padding:40px;">
   <p>Hello <strong>${esc(b.guest_name)}</strong>,</p>
-  <p style="color:#666;line-height:1.7;">Congratulations! Your booking at <strong>Balay Maysa Resort</strong> is officially <strong style="color:#2d5a3b;">CONFIRMED</strong>. We look forward to welcoming you!</p>
+  <p style="color:#666;line-height:1.7;">Congratulations! Your booking at <strong>${siteName}</strong> is officially <strong style="color:#2d5a3b;">CONFIRMED</strong>. We look forward to welcoming you!</p>
   <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
     <table style="width:100%;font-size:14px;border-collapse:collapse;">
       <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">${b.booking_ref}</td></tr>
@@ -1332,18 +1410,23 @@ async function sendConfirmEmail(b){
   </div>
   <div style="text-align:center;margin:24px 0;"><a href="${calUrl}" style="background:#2d5a3b;color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;">📅 Add to Google Calendar</a></div>
   <div style="background:#fef9ee;border-radius:12px;padding:18px 24px;">
-    <p style="margin:0;color:#92400e;font-size:13px;"><strong>📍</strong> Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North</p>
+    <p style="margin:0;color:#92400e;font-size:13px;"><strong>📍</strong> ${addr}</p>
     <p style="margin:6px 0 0;color:#92400e;font-size:13px;"><strong>📞</strong> <a href="tel:${ph.replace(/\s/g,'')}" style="color:#92400e;">${ph}</a></p>
   </div>
 </div>
-<div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
+<div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">${siteName} · ${addr}</p></div>
 </div>`;
-  await sendEmail(b.guest_email,`✅ Booking Confirmed – ${b.booking_ref} – Balay Maysa`,html);
+  await sendEmail(b.guest_email,`✅ Booking Confirmed – ${b.booking_ref} – ${siteName}`,html);
 }
 
 async function sendDeclineEmail(b){
-  const html=`<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;"><div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1></div><div style="padding:40px;"><p>Hello <strong>${esc(b.guest_name)}</strong>,</p><p style="color:#666;line-height:1.7;">We regret that your booking request (<strong>${b.booking_ref}</strong>) could not be accommodated. Please contact us to explore other dates or arrangements.</p><p style="color:#666;font-size:13px;">📞 <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a> · ✉️ <a href="mailto:balaymaysa@gmail.com" style="color:#2d5a3b;">balaymaysa@gmail.com</a></p></div></div>`;
-  await sendEmail(b.guest_email,`Balay Maysa – Booking Update (${b.booking_ref})`,html);
+  const{data:s}=await db.from('site_settings').select('*');
+  const cfg=Object.fromEntries((s||[]).map(x=>[x.setting_key,x.setting_value]));
+  const siteName=cfg.site_name||'Balay Maysa Resort';
+  const ph=cfg.contact_phone||'0917 565 7918';
+  const email=cfg.contact_email||'balaymaysa@gmail.com';
+  const html=`<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;"><div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">${siteName}</h1></div><div style="padding:40px;"><p>Hello <strong>${esc(b.guest_name)}</strong>,</p><p style="color:#666;line-height:1.7;">We regret that your booking request (<strong>${b.booking_ref}</strong>) could not be accommodated. Please contact us to explore other dates or arrangements.</p><p style="color:#666;font-size:13px;">📞 <a href="tel:${ph.replace(/\s/g,'')}" style="color:#2d5a3b;">${ph}</a> · ✉️ <a href="mailto:${email}" style="color:#2d5a3b;">${email}</a></p></div></div>`;
+  await sendEmail(b.guest_email,`${siteName} – Booking Update (${b.booking_ref})`,html);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1792,50 +1875,175 @@ async function loadContent(){
   try{
     const{data}=await db.from('site_settings').select('*');
     const s=Object.fromEntries((data||[]).map(x=>[x.setting_key,x.setting_value]));
+    // Branding
+    document.getElementById('cms_siteName').value  =s.site_name||'';
+    document.getElementById('cms_logoUrl').value   =s.logo_url||'';
+    previewImg('cms_logoUrl','logoPreview',true);
+    // Hero
     document.getElementById('cms_tagline').value   =s.hero_tagline||'';
     document.getElementById('cms_title').value     =s.hero_title||'';
     document.getElementById('cms_subtitle').value  =s.hero_subtitle||'';
+    document.getElementById('cms_heroImg').value   =s.hero_bg_image||'';
+    document.getElementById('cms_heroVideo').value =s.hero_video_url||'';
+    previewImg('cms_heroImg','heroImgPreview',true);
+    // About + stats
+    document.getElementById('cms_aboutTitle').value=s.about_title||'';
     document.getElementById('cms_about').value     =s.about_text||'';
+    document.getElementById('cms_stat1Num').value  =s.stat1_num||'';
+    document.getElementById('cms_stat1Label').value=s.stat1_label||'';
+    document.getElementById('cms_stat2Num').value  =s.stat2_num||'';
+    document.getElementById('cms_stat2Label').value=s.stat2_label||'';
+    document.getElementById('cms_stat3Num').value  =s.stat3_num||'';
+    document.getElementById('cms_stat3Label').value=s.stat3_label||'';
+    // Section titles
+    document.getElementById('cms_roomsTitle').value  =s.rooms_title||'';
+    document.getElementById('cms_contactTitle').value=s.contact_title||'';
+    document.getElementById('cms_footerText').value  =s.footer_text||'';
+    // Contact
     document.getElementById('cms_phone').value     =s.contact_phone||'';
     document.getElementById('cms_email').value     =s.contact_email||'';
     document.getElementById('cms_address').value   =s.contact_address||'';
+    // Payment
+    document.getElementById('cms_paymentAccName').value=s.payment_account_name||'';
+    document.getElementById('cms_bankTitle').value =s.bank_title||'';
     document.getElementById('cms_bankName').value  =s.bank_account_name||'';
     document.getElementById('cms_bankNum').value   =s.bank_account_number||'';
     document.getElementById('cms_ewallet').value   =s.contact_phone||'';
     document.getElementById('cms_depositPct').value=s.deposit_percentage||'50';
+    // Policies
     document.getElementById('cms_checkin').value   =s.checkin_time||'';
     document.getElementById('cms_checkout').value  =s.checkout_time||'';
     document.getElementById('cms_rules').value     =s.house_rules||'';
     document.getElementById('cms_cancel').value    =s.cancellation_policy||'';
+    // Inquiry section
+    document.getElementById('cms_inqEyebrow').value=s.inquiry_eyebrow||'';
+    document.getElementById('cms_inqTitle').value  =s.inquiry_title||'';
+    document.getElementById('cms_inqDesc').value   =s.inquiry_desc||'';
+    // Terms
     document.getElementById('cms_terms').value     =s.terms_content||'';
+    // Promo
     document.getElementById('cms_promoText').value =s.promo_banner_text||'';
     document.getElementById('cms_promoActive').value=s.promo_banner_active||'false';
-    await loadRoomImages();
+
+    await Promise.all([loadRoomImages(),loadRoomContent()]);
   }catch(e){console.error(e);}
+}
+
+function previewImg(inputId,imgId,initial=false){
+  const url=document.getElementById(inputId).value.trim();
+  const img=document.getElementById(imgId);
+  if(url){ img.src=url; img.classList.remove('hidden'); }
+  else if(!initial){ img.classList.add('hidden'); }
+  else { img.classList.toggle('hidden',!url); }
 }
 
 async function saveAllSettings(){
   const updates=[
+    // Branding
+    {setting_key:'site_name',          setting_value:document.getElementById('cms_siteName').value},
+    {setting_key:'logo_url',           setting_value:document.getElementById('cms_logoUrl').value},
+    // Hero
     {setting_key:'hero_tagline',        setting_value:document.getElementById('cms_tagline').value},
     {setting_key:'hero_title',          setting_value:document.getElementById('cms_title').value},
     {setting_key:'hero_subtitle',       setting_value:document.getElementById('cms_subtitle').value},
+    {setting_key:'hero_bg_image',       setting_value:document.getElementById('cms_heroImg').value},
+    {setting_key:'hero_video_url',      setting_value:document.getElementById('cms_heroVideo').value},
+    // About + stats
+    {setting_key:'about_title',         setting_value:document.getElementById('cms_aboutTitle').value},
     {setting_key:'about_text',          setting_value:document.getElementById('cms_about').value},
+    {setting_key:'stat1_num',           setting_value:document.getElementById('cms_stat1Num').value},
+    {setting_key:'stat1_label',         setting_value:document.getElementById('cms_stat1Label').value},
+    {setting_key:'stat2_num',           setting_value:document.getElementById('cms_stat2Num').value},
+    {setting_key:'stat2_label',         setting_value:document.getElementById('cms_stat2Label').value},
+    {setting_key:'stat3_num',           setting_value:document.getElementById('cms_stat3Num').value},
+    {setting_key:'stat3_label',         setting_value:document.getElementById('cms_stat3Label').value},
+    // Section titles
+    {setting_key:'rooms_title',         setting_value:document.getElementById('cms_roomsTitle').value},
+    {setting_key:'contact_title',       setting_value:document.getElementById('cms_contactTitle').value},
+    {setting_key:'footer_text',         setting_value:document.getElementById('cms_footerText').value},
+    // Contact
     {setting_key:'contact_phone',       setting_value:document.getElementById('cms_phone').value},
     {setting_key:'contact_email',       setting_value:document.getElementById('cms_email').value},
     {setting_key:'contact_address',     setting_value:document.getElementById('cms_address').value},
+    // Payment
+    {setting_key:'payment_account_name',setting_value:document.getElementById('cms_paymentAccName').value},
+    {setting_key:'bank_title',          setting_value:document.getElementById('cms_bankTitle').value},
     {setting_key:'bank_account_name',   setting_value:document.getElementById('cms_bankName').value},
     {setting_key:'bank_account_number', setting_value:document.getElementById('cms_bankNum').value},
     {setting_key:'deposit_percentage',  setting_value:document.getElementById('cms_depositPct').value},
+    // Policies
     {setting_key:'checkin_time',        setting_value:document.getElementById('cms_checkin').value},
     {setting_key:'checkout_time',       setting_value:document.getElementById('cms_checkout').value},
     {setting_key:'house_rules',         setting_value:document.getElementById('cms_rules').value},
     {setting_key:'cancellation_policy', setting_value:document.getElementById('cms_cancel').value},
+    // Inquiry
+    {setting_key:'inquiry_eyebrow',     setting_value:document.getElementById('cms_inqEyebrow').value},
+    {setting_key:'inquiry_title',       setting_value:document.getElementById('cms_inqTitle').value},
+    {setting_key:'inquiry_desc',        setting_value:document.getElementById('cms_inqDesc').value},
+    // Terms
     {setting_key:'terms_content',       setting_value:document.getElementById('cms_terms').value},
+    // Promo
     {setting_key:'promo_banner_text',   setting_value:document.getElementById('cms_promoText').value},
     {setting_key:'promo_banner_active', setting_value:document.getElementById('cms_promoActive').value},
   ].map(u=>({...u,updated_at:new Date().toISOString(),updated_by:'superadmin'}));
   try{const{error}=await db.from('site_settings').upsert(updates,{onConflict:'setting_key'});if(error)throw error;toast('All settings saved! Changes are now live on the booking page.','success');}
   catch(e){console.error(e);toast('Failed to save settings.','error');}
+}
+
+// ── Room Content (names, subtitles, tags, feature lists) ──
+async function loadRoomContent(){
+  try{const{data}=await db.from('room_content').select('*');roomContent=data||[];}catch(e){roomContent=[];}
+  renderRoomContent();
+}
+function renderRoomContent(){
+  const grid=document.getElementById('roomContentGrid'); if(!grid) return;
+  const map={}; roomContent.forEach(r=>{map[r.room_type]=r;});
+  grid.innerHTML=ROOM_LIST.map(room=>{
+    const d=map[room]||{};
+    const def=ROOM_DEFAULT_CONTENT[room];
+    const name=d.display_name||def.display_name;
+    const subtitle=d.subtitle||def.subtitle;
+    const tag=d.tag||def.tag;
+    let features=def.features;
+    if(d.features){ try{ const f=typeof d.features==='string'?JSON.parse(d.features):d.features; if(Array.isArray(f)&&f.length) features=f; }catch(e){} }
+    return `<div class="border border-gray-100 rounded-xl p-4">
+      <p class="font-semibold text-gray-700 text-sm mb-3">${room}</p>
+      <div class="space-y-2">
+        <div><label class="fi-label text-xs">Display Name</label><input type="text" class="fi text-sm" data-rc="${room}" data-rc-field="display_name" value="${esc(name)}"/></div>
+        <div><label class="fi-label text-xs">Subtitle</label><input type="text" class="fi text-sm" data-rc="${room}" data-rc-field="subtitle" value="${esc(subtitle)}"/></div>
+        <div><label class="fi-label text-xs">Badge Tag</label><input type="text" class="fi text-sm" data-rc="${room}" data-rc-field="tag" value="${esc(tag)}"/></div>
+        <div><label class="fi-label text-xs">Features <span class="text-gray-400 font-normal">(one per line, Font Awesome HTML allowed, e.g. &lt;i class="fas fa-bed text-gold"&gt;&lt;/i&gt; 1 Queen Bed)</span></label>
+          <textarea class="fi text-sm" rows="4" data-rc="${room}" data-rc-field="features">${esc(features.join('\n'))}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function saveRoomContent(){
+  const map={};
+  document.querySelectorAll('[data-rc]').forEach(el=>{
+    const room=el.dataset.rc, field=el.dataset.rcField;
+    if(!map[room]) map[room]={};
+    map[room][field]=el.value;
+  });
+  try{
+    const rows=ROOM_LIST.map(room=>{
+      const d=map[room]||{};
+      const features=(d.features||'').split('\n').map(s=>s.trim()).filter(Boolean);
+      return {
+        room_type:room,
+        display_name:d.display_name||ROOM_DEFAULT_CONTENT[room].display_name,
+        subtitle:d.subtitle||ROOM_DEFAULT_CONTENT[room].subtitle,
+        tag:d.tag||ROOM_DEFAULT_CONTENT[room].tag,
+        features:JSON.stringify(features.length?features:ROOM_DEFAULT_CONTENT[room].features),
+        updated_at:new Date().toISOString()
+      };
+    });
+    const{error}=await db.from('room_content').upsert(rows,{onConflict:'room_type'});
+    if(error) throw error;
+    toast('Room content saved! Live on booking page.','success');
+    await loadRoomContent();
+  }catch(e){console.error(e);toast('Failed to save room content.','error');}
 }
 
 // ── Room Images ────────────────────────────────────────
@@ -1896,7 +2104,15 @@ function esc(str){if(!str)return'';return String(str).replace(/[&<>]/g,m=>m==='&
 function setT(id,v){if(v===undefined||v===null)return;const el=document.getElementById(id);if(el)el.textContent=v;}
 function fmtDate(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});}
 function fmtDateTime(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}
-async function sendEmail(to,subject,html){if(!to)return false;try{return true;}catch(e){return false;}} // stub — real sending goes through admin.html or future edge fn
+async function sendEmail(to,subject,html){
+  if(!to) return false;
+  try{
+    if(typeof emailjs!=='undefined' && emailjs.send){
+      await emailjs.send('service_t13ealt','template_s17clcj',{to_email:to,subject,message_html:html,to_name:to.split('@')[0]});
+    }
+    return true;
+  }catch(e){ console.warn('Email send failed:',e); return false; }
+}
 function toast(msg,type='success'){const t=document.getElementById('toast');t.classList.remove('success','error','info','hidden');t.classList.add(type);document.getElementById('toastMsg').textContent=msg;document.getElementById('toastIcon').className=type==='success'?'fas fa-check-circle':type==='error'?'fas fa-exclamation-circle':'fas fa-info-circle';clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.add('hidden'),5000);}
 function setBtnLoad(textId,spinId,on,label){const t=document.getElementById(textId);const s=document.getElementById(spinId);if(t)t.textContent=on?'Saving…':label;if(s)s.classList.toggle('hidden',!on);}
 function dlCSV(data,filename){const csv=data.map(row=>row.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();}
