@@ -145,6 +145,10 @@
       </button>
       <button class="nav-item" onclick="showView('maintenance')" id="nav-maintenance"><i class="fas fa-wrench"></i> Maintenance</button>
       <button class="nav-item" onclick="showView('assets')" id="nav-assets"><i class="fas fa-building"></i> Assets</button>
+      <button class="nav-item" onclick="showView('announcements')" id="nav-announcements">
+        <i class="fas fa-bullhorn"></i> Announcements
+        <span id="announceBadge" class="ml-auto bg-gold text-white text-xs px-1.5 py-0.5 rounded-full hidden">0</span>
+      </button>
 
       <p class="nav-group-label">Settings</p>
       <button class="nav-item" onclick="showView('content')" id="nav-content"><i class="fas fa-pen-nib"></i> Content & CMS</button>
@@ -430,6 +434,22 @@
           <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Due for Maintenance</p><p class="text-2xl font-bold text-yellow-600" id="assetDue">–</p></div>
         </div>
         <div class="sc overflow-hidden"><table class="tbl w-full"><thead><tr><th>Asset</th><th>Category</th><th>Purchase Price</th><th>Current Value</th><th>Location</th><th>Status</th><th>Next Maint.</th><th>Actions</th></tr></thead><tbody id="assetsTable"><tr><td colspan="8" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody></table></div>
+      </div>
+
+      <!-- ═══ ANNOUNCEMENTS / SHARED NOTICE BOARD ═══ -->
+      <div id="view-announcements" class="view">
+        <div class="flex items-center justify-between mb-5">
+          <div><h2 class="font-heading text-3xl text-gray-800 font-light">Announcements</h2><p class="text-sm text-gray-400">A shared notice board with the Admin panel — post reminders, the team can mark them done.</p></div>
+        </div>
+        <div class="sc p-5 mb-5">
+          <label class="fi-label">Post a new announcement</label>
+          <div class="flex gap-2">
+            <input type="text" id="ann_message" class="fi" placeholder="e.g. Pool maintenance Friday morning, please prep towels for 3pm check-in"/>
+            <label class="flex items-center gap-2 text-sm text-gray-500 whitespace-nowrap px-2"><input type="checkbox" id="ann_pinned" class="w-4 h-4 accent-gold"/> Pin</label>
+            <button onclick="postAnnouncement()" class="bg-forest text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-forest-dark whitespace-nowrap">Post</button>
+          </div>
+        </div>
+        <div id="announcementsList" class="space-y-3"><p class="text-center text-gray-300 py-8">Loading…</p></div>
       </div>
 
       <!-- ═══ CONTENT & CMS ═══ -->
@@ -947,7 +967,7 @@ const ROOM_DEFAULT_CONTENT = {
 let allBookings=[],allExpenses=[],allStaff=[],allTasks=[],
     allInventory=[],allMaintenance=[],allAssets=[],allInquiries=[],
     allVouchers=[],expCategories=[],roomPricing=[],pricingRules=[],
-    roomImages=[],roomContent=[];
+    roomImages=[],roomContent=[],allAnnouncements=[];
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
 let calFilterDate=null;
 let sessionExpiry=null;
@@ -1014,7 +1034,8 @@ function showView(name){
     vouchers:loadVouchers, finances:loadPL, expenses:loadExpenses,
     pricing:loadPricing, staff:loadStaff, tasks:loadTasks,
     inventory:loadInventory, maintenance:loadMaintenance,
-    assets:loadAssets, content:loadContent, reports:()=>{}
+    assets:loadAssets, content:loadContent, reports:()=>{},
+    announcements:loadAnnouncements
   };
   if(loaders[name]) loaders[name]();
 }
@@ -1026,7 +1047,7 @@ async function initDashboard(){
   document.getElementById('dashDate').textContent=
     new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   await Promise.all([loadAllBookings(true),loadAllExpenses(true),
-    loadCategories(),loadInquiries(true),loadVouchers(true)]);
+    loadCategories(),loadInquiries(true),loadVouchers(true),loadAnnouncements()]);
   refreshDashboard();
 }
 
@@ -1403,10 +1424,53 @@ async function updateBookingStatus(id,newStatus){
     // Send email if confirming
     if(newStatus==='confirmed') await sendConfirmEmail(b);
     if(newStatus==='declined')  await sendDeclineEmail(b);
+    // Notify the in-house Admin so they see it immediately (with a
+    // Google Calendar link for confirmations).
+    await notifyAdmin(b,newStatus);
     toast('Status updated!','success');
     closeModal('bookingModal');
     await loadAllBookings();
   }catch(e){console.error(e);toast('Failed.','error');}
+}
+
+// Push a notification to the in-house Admin panel about a booking status
+// change made by Super Admin (confirm / decline / cancel / etc). Includes
+// payment info and, for confirmed bookings, a ready-made Google Calendar
+// link the Admin can tap to save the stay.
+async function notifyAdmin(b,newStatus){
+  const paymentLabel = (b.remaining_balance||0)>0
+    ? `Balance due on arrival: ₱${(b.remaining_balance||0).toLocaleString()}`
+    : 'Fully paid ✓';
+  const typeMap = {
+    confirmed:'booking_confirmed',
+    declined:'booking_thrown',
+    cancelled:'booking_thrown',
+    fully_paid:'payment_received',
+    confirmed_balance_due:'payment_received',
+  };
+  const titleMap = {
+    confirmed:`✅ Booking Confirmed — ${b.guest_name}`,
+    declined:`❌ Booking Declined — ${b.guest_name}`,
+    cancelled:`🚫 Booking Cancelled — ${b.guest_name}`,
+    fully_paid:`💰 Fully Paid — ${b.guest_name}`,
+    confirmed_balance_due:`💰 Payment Update — ${b.guest_name}`,
+  };
+  const type = typeMap[newStatus] || 'general';
+  const title = titleMap[newStatus] || `Booking Update — ${b.guest_name}`;
+  const calStart = (b.check_in_date||'').replace(/-/g,'');
+  const calEnd    = (b.check_out_date||'').replace(/-/g,'');
+  const calUrl = (calStart && calEnd) ? `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Balay Maysa – '+b.guest_name+' ('+b.booking_ref+')')}&dates=${calStart}/${calEnd}&details=${encodeURIComponent(paymentLabel+' · Room: '+(b.room_type||'')+' · Pax: '+(b.pax_count||b.adults||''))}&location=${encodeURIComponent('Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North')}` : null;
+  try{
+    await db.from('notifications').insert({
+      type, title,
+      message: `${b.room_type||''} · ${fmtDate(b.check_in_date)} → ${fmtDate(b.check_out_date)} · ${paymentLabel}`,
+      booking_ref: b.booking_ref,
+      booking_id: b.id,
+      payload: { calendar_url: calUrl, status: newStatus, room_type:b.room_type, check_in:b.check_in_date, check_out:b.check_out_date, total_amount:b.total_amount, deposit_amount:b.deposit_amount, remaining_balance:b.remaining_balance, payment_type:b.payment_type, guest_name:b.guest_name, guest_phone:b.guest_phone },
+      target: 'admin',
+      created_by: 'superadmin',
+    });
+  }catch(e){ console.warn('Could not push notification to Admin:',e); }
 }
 
 async function saveAdminNotes(id){
@@ -1575,8 +1639,8 @@ function openVoucherModal(id=null){
     document.getElementById('v_code').value=v.code;
     document.getElementById('v_discount').value=v.discount_amount||v.discount_percent||'';
     document.getElementById('v_limit').value=v.usage_limit||1;
-    document.getElementById('v_from').value=v.valid_from?v.valid_from.slice(0,16):'';
-    document.getElementById('v_to').value=v.valid_to?v.valid_to.slice(0,16):'';
+    document.getElementById('v_from').value=isoToLocalDatetime(v.valid_from);
+    document.getElementById('v_to').value=isoToLocalDatetime(v.valid_to);
     document.getElementById('v_active').checked=v.is_active;
     document.getElementById('vModalTitle').textContent='Edit Voucher';
   }
@@ -1599,8 +1663,8 @@ async function saveVoucher(){
   const data={
     code, discount_amount:disc, discount_percent:0,
     usage_limit:parseInt(document.getElementById('v_limit').value)||1,
-    valid_from:document.getElementById('v_from').value||null,
-    valid_to:document.getElementById('v_to').value||null,
+    valid_from:localDatetimeToISO(document.getElementById('v_from').value),
+    valid_to:localDatetimeToISO(document.getElementById('v_to').value),
     is_active:document.getElementById('v_active').checked,
   };
   setBtnLoad('vSaveText','vSaveSpin',true,'Saving…');
@@ -1856,7 +1920,7 @@ async function loadInventory(){
 }
 function openInventoryModal(){['inv_id','inv_name','inv_unit','inv_qty','inv_min','inv_price','inv_supplier'].forEach(f=>document.getElementById(f).value='');document.getElementById('invModalTitle').textContent='Add Item';document.getElementById('inventoryModal').classList.remove('hidden');}
 async function saveInventoryItem(){const name=document.getElementById('inv_name').value.trim();if(!name){toast('Name required.','error');return;}const id=document.getElementById('inv_id').value;const data={item_name:name,category:document.getElementById('inv_cat').value,unit:document.getElementById('inv_unit').value,quantity:parseFloat(document.getElementById('inv_qty').value)||0,min_stock:parseFloat(document.getElementById('inv_min').value)||0,unit_price:parseInt(document.getElementById('inv_price').value)||0,supplier:document.getElementById('inv_supplier').value,updated_at:new Date().toISOString()};try{if(id)await db.from('inventory').update(data).eq('id',id);else await db.from('inventory').insert(data);toast('Saved!','success');closeModal('inventoryModal');await loadInventory();}catch(e){toast('Failed.','error');}}
-async function adjStock(id,name,cur){const nq=prompt(`Adjust stock for "${name}" (current: ${cur}):`,cur);if(nq===null)return;await db.from('inventory').update({quantity:parseFloat(nq),updated_at:new Date().toISOString()}).eq('id',id);toast('Stock updated!','success');await loadInventory();}
+async function adjStock(id,name,cur){const nq=prompt(`Adjust stock for "${name}" (current: ${cur}):`,cur);if(nq===null)return;const newQty=parseFloat(nq)||0;const change=newQty-(parseFloat(cur)||0);await db.from('inventory').update({quantity:newQty,updated_at:new Date().toISOString()}).eq('id',id);try{await db.from('inventory_log').insert({item_id:id,item_name:name,change_amount:change,new_quantity:newQty,reason:'Adjusted by Super Admin',logged_by:'superadmin'});}catch(e){}toast('Stock updated!','success');await loadInventory();}
 async function delInv(id){if(!confirm('Delete?'))return;await db.from('inventory').delete().eq('id',id);toast('Deleted.','success');await loadInventory();}
 
 // ═══════════════════════════════════════════════════════
@@ -1899,6 +1963,55 @@ async function loadAssets(){
 function openAssetModal(){['ast_id','ast_name','ast_cat','ast_loc','ast_price','ast_life','ast_nextmaint'].forEach(f=>document.getElementById(f).value='');document.getElementById('ast_date').value=new Date().toISOString().split('T')[0];document.getElementById('assetModal').classList.remove('hidden');}
 async function saveAsset(){const name=document.getElementById('ast_name').value.trim();if(!name){toast('Name required.','error');return;}const price=parseInt(document.getElementById('ast_price').value)||0;const life=parseInt(document.getElementById('ast_life').value)||60;const today=new Date();const pd=new Date(document.getElementById('ast_date').value);const mu=Math.max(0,(today.getFullYear()-pd.getFullYear())*12+(today.getMonth()-pd.getMonth()));const cv=Math.max(0,Math.round(price-(price/life)*mu));try{await db.from('assets').insert({asset_name:name,category:document.getElementById('ast_cat').value,location:document.getElementById('ast_loc').value,purchase_date:document.getElementById('ast_date').value,purchase_price:price,useful_life_months:life,current_value:cv,next_maintenance:document.getElementById('ast_nextmaint').value||null,status:document.getElementById('ast_status').value});toast('Asset added!','success');closeModal('assetModal');await loadAssets();}catch(e){toast('Failed.','error');}}
 async function delAsset(id){if(!confirm('Delete?'))return;await db.from('assets').delete().eq('id',id);toast('Deleted.','success');await loadAssets();}
+
+// ═══════════════════════════════════════════════════════
+// ANNOUNCEMENTS — shared notice board with Admin panel
+// ═══════════════════════════════════════════════════════
+async function loadAnnouncements(){
+  try{
+    const{data}=await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
+    allAnnouncements=data||[];
+    renderAnnouncements();
+    const unack=allAnnouncements.filter(a=>!a.acknowledged&&a.posted_by==='admin').length;
+    const b=document.getElementById('announceBadge');
+    if(b){ if(unack>0){b.textContent=unack;b.classList.remove('hidden');} else b.classList.add('hidden'); }
+  }catch(e){console.error(e);}
+}
+function renderAnnouncements(){
+  const list=document.getElementById('announcementsList'); if(!list) return;
+  if(!allAnnouncements.length){ list.innerHTML='<p class="text-center text-gray-300 py-8">No announcements yet. Post one above to get started.</p>'; return; }
+  list.innerHTML=allAnnouncements.map(a=>{
+    const who = a.posted_by==='superadmin' ? '👑 You (Super Admin)' : '🧑‍💼 Admin (Staff)';
+    return `<div class="sc p-4 flex items-start gap-3 ${a.pinned?'border-l-4 border-gold':''}">
+      <div class="flex-1">
+        <p class="text-sm text-gray-800">${a.pinned?'📌 ':''}${esc(a.message)}</p>
+        <p class="text-xs text-gray-400 mt-1">${who} · ${fmtDateTime(a.created_at)} ${a.acknowledged?'· <span class="text-forest">✓ Acknowledged</span>':''}</p>
+      </div>
+      <div class="flex gap-2 flex-shrink-0">
+        ${!a.acknowledged?`<button onclick="toggleAnnouncementAck('${a.id}',true)" class="text-xs text-forest hover:underline">Mark Done</button>`:`<button onclick="toggleAnnouncementAck('${a.id}',false)" class="text-xs text-gray-400 hover:underline">Undo</button>`}
+        <button onclick="deleteAnnouncement('${a.id}')" class="text-xs text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function postAnnouncement(){
+  const msg=document.getElementById('ann_message').value.trim();
+  if(!msg){toast('Write a message first.','error');return;}
+  try{
+    await db.from('announcements').insert({message:msg,posted_by:'superadmin',pinned:document.getElementById('ann_pinned').checked,acknowledged:false});
+    document.getElementById('ann_message').value='';
+    document.getElementById('ann_pinned').checked=false;
+    toast('Posted! Visible to Admin instantly.','success');
+    await loadAnnouncements();
+  }catch(e){console.error(e);toast('Failed to post.','error');}
+}
+async function toggleAnnouncementAck(id,ack){
+  try{await db.from('announcements').update({acknowledged:ack}).eq('id',id);await loadAnnouncements();}catch(e){}
+}
+async function deleteAnnouncement(id){
+  if(!confirm('Delete this announcement?'))return;
+  try{await db.from('announcements').delete().eq('id',id);toast('Deleted.','success');await loadAnnouncements();}catch(e){}
+}
 
 // ═══════════════════════════════════════════════════════
 // CONTENT & CMS — all changes reflect on index.html
@@ -2236,6 +2349,32 @@ function esc(str){if(!str)return'';return String(str).replace(/[&<>]/g,m=>m==='&
 function setT(id,v){if(v===undefined||v===null)return;const el=document.getElementById(id);if(el)el.textContent=v;}
 function fmtDate(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});}
 function fmtDateTime(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+
+// ── Timezone-safe <input type="datetime-local"> <-> ISO (UTC) helpers ──
+// A datetime-local input gives e.g. "2026-06-15T10:00" with NO timezone —
+// the browser/user means this in THEIR LOCAL time (PHT, UTC+8). If sent to
+// Supabase as-is, Postgres treats it as UTC, shifting it 8 hours off from
+// what was intended (this was the voucher "valid until" bug). These helpers
+// convert explicitly so the stored timestamptz always reflects the time the
+// admin actually entered, in their local timezone.
+function localDatetimeToISO(val){
+  if(!val) return null;
+  // `new Date('2026-06-15T10:00')` is parsed as LOCAL time by JS — exactly
+  // what we want — then .toISOString() converts it to the correct UTC instant.
+  const d = new Date(val);
+  if(isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+function isoToLocalDatetime(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '';
+  // Build a local "YYYY-MM-DDTHH:mm" string from the Date's LOCAL fields
+  // (not UTC fields) so the datetime-local input shows the time in the
+  // admin's own timezone — matching what they originally entered.
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 async function sendEmail(to,subject,html){
   if(!to) return false;
   try{
@@ -2265,6 +2404,34 @@ const expMF=document.getElementById('expMonthFilter'); if(expMF)expMF.value=new 
 
 // Auto-refresh every 60s
 setInterval(()=>{if(sessionStorage.getItem('bm_sa')&&sessionExpiry&&Date.now()<sessionExpiry){loadAllBookings(true);loadInquiries(true);}},60000);
+
+// ═══════════════════════════════════════════════════════
+// REALTIME — shared inventory + notifications from Admin
+// ═══════════════════════════════════════════════════════
+// Inventory: if Admin (in-house staff) adjusts stock, reflect it here
+// instantly without waiting for the 60s refresh.
+db.channel('sa-inventory-sync')
+  .on('postgres_changes',{event:'*',schema:'public',table:'inventory'},()=>{
+    if(document.getElementById('tab-inventory') && !document.getElementById('tab-inventory').classList.contains('hidden')) loadInventory();
+    else loadInventory(); // keep allInventory fresh even off-tab for low-stock badge
+  })
+  .subscribe();
+
+// Notifications: Admin → Super Admin (e.g. guest checked in, low stock flagged)
+db.channel('sa-notifications')
+  .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'target=eq.superadmin'},(payload)=>{
+    const n=payload.new;
+    toast(`📣 ${n.title}`,'info');
+  })
+  .subscribe();
+
+// Announcements: live-refresh the shared notice board when Admin posts/acks
+db.channel('sa-announcements')
+  .on('postgres_changes',{event:'*',schema:'public',table:'announcements'},()=>{
+    if(document.getElementById('view-announcements')?.classList.contains('active')) loadAnnouncements();
+    else loadAnnouncements(); // keep badge fresh
+  })
+  .subscribe();
 </script>
 </body>
 </html>
