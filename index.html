@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Balay Maysa Resort – Private Tropical Retreat</title>
+  <link rel="icon" id="favicon" href="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=64&q=80"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -20,32 +21,44 @@
     #navbar.scrolled{background:white!important;box-shadow:0 2px 24px rgba(0,0,0,.08);}
     #navbar.scrolled .nav-link,#navbar.scrolled .nav-logo{color:#2d5a3b!important;}
     #navbar.scrolled .nav-cta{background:#2d5a3b!important;color:white!important;}
+    #navLogoImg{height:38px;width:auto;object-fit:contain;display:none;}
+    #navLogoImg.show{display:inline-block;}
     /* ── HERO ────────────────────────────────────────── */
-    .hero-bg{background:linear-gradient(135deg,rgba(30,61,40,.72),rgba(45,90,59,.52) 50%,rgba(201,160,61,.18)),url('https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1800&q=80') center/cover no-repeat;min-height:100vh;}
+    .hero-bg{background:linear-gradient(135deg,rgba(30,61,40,.72),rgba(45,90,59,.52) 50%,rgba(201,160,61,.18)),url('https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1800&q=80') center/cover no-repeat;min-height:100vh;position:relative;overflow:hidden;}
+    .hero-bg video.heroVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+    .hero-bg .hero-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(30,61,40,.72),rgba(45,90,59,.52) 50%,rgba(201,160,61,.18));z-index:1;}
+    .hero-bg .hero-content{position:relative;z-index:2;}
     .hero-text-glow{text-shadow:0 2px 40px rgba(0,0,0,.4);}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+    .fade-up{animation:fadeUp .8s ease both;}
+    .fade-up-1{animation-delay:.05s;}.fade-up-2{animation-delay:.18s;}.fade-up-3{animation-delay:.32s;}.fade-up-4{animation-delay:.46s;}
+    /* ── SCROLL REVEAL ───────────────────────────────── */
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+    .reveal.in{opacity:1;transform:translateY(0);}
     /* ── ROOM SLIDER ─────────────────────────────────── */
-    .room-card{transition:transform .3s,box-shadow .3s;}
-    .room-card:hover{transform:translateY(-5px);box-shadow:0 20px 60px rgba(45,90,59,.15);}
+    .room-card{transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;}
+    .room-card:hover{transform:translateY(-6px);box-shadow:0 24px 64px rgba(45,90,59,.18);}
     .rslider{position:relative;overflow:hidden;height:220px;background:#1a2e21;}
     .rslides{display:flex;height:100%;transition:transform .5s ease;will-change:transform;}
     .rslide{flex-shrink:0;width:100%;height:100%;background-size:cover;background-position:center;}
     .rslide video{width:100%;height:100%;object-fit:cover;display:block;}
-    .sbtn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:white;border:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;z-index:5;transition:background .2s;}
-    .sbtn:hover{background:rgba(0,0,0,.75);}
+    .sbtn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:white;border:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;z-index:5;transition:background .2s, transform .2s;}
+    .sbtn:hover{background:rgba(0,0,0,.75);transform:translateY(-50%) scale(1.1);}
     .sbtn.prev{left:8px;}.sbtn.next{right:8px;}
     .sdots{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5;}
-    .sdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);cursor:pointer;transition:background .2s;}
-    .sdot.on{background:white;}
+    .sdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);cursor:pointer;transition:background .2s, transform .2s;}
+    .sdot.on{background:white;transform:scale(1.25);}
     /* ── FORMS ───────────────────────────────────────── */
-    .fi{width:100%;border:1.5px solid #d4d0ca;border-radius:10px;padding:11px 16px;font-size:15px;font-family:'Inter',sans-serif;background:white;color:#1a1a1a;transition:border-color .2s;outline:none;}
+    .fi{width:100%;border:1.5px solid #d4d0ca;border-radius:10px;padding:11px 16px;font-size:15px;font-family:'Inter',sans-serif;background:white;color:#1a1a1a;transition:border-color .2s,box-shadow .2s;outline:none;}
     .fi:focus{border-color:#2d5a3b;box-shadow:0 0 0 3px rgba(45,90,59,.1);}
     .fi.err{border-color:#ef4444!important;}
     .fi-label{display:block;font-size:13px;font-weight:500;color:#444;margin-bottom:6px;}
     .errmsg{font-size:11px;color:#ef4444;margin-top:3px;display:none;}
     .errmsg.show{display:block;}
     /* ── TOAST ───────────────────────────────────────── */
-    #toast{position:fixed;bottom:28px;right:28px;z-index:9999;padding:14px 22px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px;max-width:380px;}
+    #toast{position:fixed;bottom:28px;right:28px;z-index:9999;padding:14px 22px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px;max-width:380px;transform:translateY(20px) scale(.96);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s;}
     #toast.hidden{display:none!important;}
+    #toast.show{transform:translateY(0) scale(1);opacity:1;}
     #toast.success{background:#2d5a3b;color:white;}
     #toast.error{background:#c0392b;color:white;}
     /* ── SPINNER ─────────────────────────────────────── */
@@ -55,12 +68,14 @@
     .ornament{display:flex;align-items:center;gap:16px;}
     .ornament::before,.ornament::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,#c9a03d,transparent);}
     /* ── STEPS ───────────────────────────────────────── */
-    .step{display:none;}.step.active{display:block;}
+    .step{display:none;}
+    .step.active{display:block;animation:stepIn .4s ease both;}
+    @keyframes stepIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:translateX(0);}}
     .sdot2{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;transition:all .3s;flex-shrink:0;}
-    .sdot2.done{background:#2d5a3b;color:white;}.sdot2.active{background:#c9a03d;color:white;}.sdot2.pend{background:#e5e3df;color:#999;}
-    .sline{width:40px;height:2px;background:#e5e3df;flex-shrink:0;}.sline.done{background:#2d5a3b;}
+    .sdot2.done{background:#2d5a3b;color:white;}.sdot2.active{background:#c9a03d;color:white;box-shadow:0 0 0 4px rgba(201,160,61,.2);}.sdot2.pend{background:#e5e3df;color:#999;}
+    .sline{width:40px;height:2px;background:#e5e3df;flex-shrink:0;transition:background .4s;}.sline.done{background:#2d5a3b;}
     /* ── PRICE BOX ───────────────────────────────────── */
-    .price-box{background:linear-gradient(135deg,#1e3d28,#2d5a3b);border-radius:16px;padding:22px;color:white;}
+    .price-box{background:linear-gradient(135deg,#1e3d28,#2d5a3b);border-radius:16px;padding:22px;color:white;animation:fadeUp .4s ease both;}
     /* ── UPLOAD ──────────────────────────────────────── */
     .upload-area{border:2px dashed #d4d0ca;border-radius:12px;padding:30px;text-align:center;transition:all .2s;cursor:pointer;}
     .upload-area:hover,.upload-area.over{border-color:#2d5a3b;background:rgba(45,90,59,.04);}
@@ -69,9 +84,9 @@
     .qtab{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border:1.5px solid #d4d0ca;color:#666;}
     .qtab.on{background:#2d5a3b;color:white;border-color:#2d5a3b;}
     /* ── PACKAGE CARDS ───────────────────────────────── */
-    .pkg{border:2px solid #e5e3df;border-radius:16px;padding:18px;cursor:pointer;transition:all .2s;background:white;position:relative;}
-    .pkg:hover{border-color:#c9a03d;box-shadow:0 4px 20px rgba(45,90,59,.1);}
-    .pkg.on{border-color:#2d5a3b;background:#f0fdf4;}
+    .pkg{border:2px solid #e5e3df;border-radius:16px;padding:18px;cursor:pointer;transition:all .2s;background:white;position:relative;animation:fadeUp .35s ease both;}
+    .pkg:hover{border-color:#c9a03d;box-shadow:0 4px 20px rgba(45,90,59,.1);transform:translateY(-2px);}
+    .pkg.on{border-color:#2d5a3b;background:#f0fdf4;box-shadow:0 4px 18px rgba(45,90,59,.12);}
     .pkg.rec::before{content:'⭐ Recommended';position:absolute;top:-11px;left:14px;background:#c9a03d;color:white;font-size:10px;font-weight:600;padding:2px 10px;border-radius:999px;}
     /* ── ROOM SELECTOR ───────────────────────────────── */
     .rsel{border:2px solid #e5e3df;border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .2s;background:white;}
@@ -81,7 +96,8 @@
     .addon:hover{border-color:#c9a03d;}.addon.on{border-color:#2d5a3b;background:#f0fdf4;}
     /* ── CALENDAR ────────────────────────────────────── */
     .cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-    .cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:500;}
+    .cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:500;transition:transform .15s;}
+    .cday.avail:hover{transform:scale(1.08);}
     .cday.past{background:#f3f4f6;color:#c0bfbd;}.cday.booked{background:#fee2e2;color:#991b1b;cursor:not-allowed;}
     .cday.today{background:#2d5a3b;color:white;font-weight:700;}.cday.avail{background:#f0fdf4;color:#2d5a3b;}.cday.empty{background:transparent;}
     /* ── VOUCHER ─────────────────────────────────────── */
@@ -90,9 +106,14 @@
     /* ── TERMS MODAL ─────────────────────────────────── */
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px;}
     .overlay.hidden{display:none!important;}
-    .mbox{background:white;border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;}
+    .mbox{background:white;border-radius:20px;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;animation:popIn .25s ease both;}
+    @keyframes popIn{from{opacity:0;transform:scale(.96) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
     /* ── INQUIRY CARD ────────────────────────────────── */
-    .inq-card{background:linear-gradient(135deg,rgba(201,160,61,.09),rgba(201,160,61,.03));border:2px solid rgba(201,160,61,.4);border-radius:20px;padding:28px;}
+    .inq-card{background:linear-gradient(135deg,rgba(201,160,61,.09),rgba(201,160,61,.03));border:2px solid rgba(201,160,61,.4);border-radius:24px;padding:32px;}
+    /* ── BUTTON SHEEN ────────────────────────────────── */
+    .btn-sheen{position:relative;overflow:hidden;}
+    .btn-sheen::after{content:'';position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .6s ease;}
+    .btn-sheen:hover::after{left:125%;}
   </style>
 </head>
 <body>
@@ -105,12 +126,16 @@
 <!-- NAVBAR -->
 <nav id="navbar" class="fixed top-0 left-0 right-0 z-40 px-6 py-4" style="background:transparent;">
   <div class="max-w-6xl mx-auto flex items-center justify-between">
-    <a href="#" class="nav-logo font-heading text-2xl font-semibold text-white tracking-wide" id="siteTitle">Balay Maysa</a>
+    <a href="#" class="flex items-center gap-2">
+      <img id="navLogoImg" src="" alt="Logo"/>
+      <span class="nav-logo font-heading text-2xl font-semibold text-white tracking-wide" id="siteTitle">Balay Maysa</span>
+    </a>
     <div class="hidden md:flex items-center gap-8">
       <a href="#rooms"   class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rooms</a>
       <a href="#pricing" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rates</a>
       <a href="#booking" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Book Now</a>
       <a href="lookup.html" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">My Booking</a>
+      <a href="#inquiry" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Inquire</a>
       <a href="#contact" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Contact</a>
       <a href="#booking" class="nav-cta bg-gold text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-gold-light transition-colors">Reserve</a>
     </div>
@@ -121,41 +146,44 @@
     <a href="#pricing"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Rates</a>
     <a href="#booking"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Book Now</a>
     <a href="lookup.html" class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">My Booking</a>
+    <a href="#inquiry"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Inquire</a>
     <a href="#contact"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Contact</a>
   </div>
 </nav>
 
 <!-- HERO -->
-<section class="hero-bg flex flex-col items-center justify-center text-center px-6 relative">
-  <div class="max-w-4xl mx-auto py-44">
-    <p class="text-gold font-body text-sm tracking-widest uppercase mb-4 opacity-90" id="heroTagline">Private Resort · Caloocan, Philippines</p>
-    <h1 class="font-heading text-6xl md:text-8xl text-white hero-text-glow font-light mb-6 leading-tight" id="heroTitle">Balay Maysa</h1>
-    <p class="text-white/80 text-lg md:text-xl max-w-xl mx-auto mb-10 font-light leading-relaxed" id="heroSubtitle">A hidden tropical sanctuary where lush gardens, private pools, and warm Filipino hospitality await your family.</p>
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <a href="#booking" class="bg-gold hover:bg-gold-light text-white font-medium px-8 py-4 rounded-full transition-all text-sm tracking-wide shadow-lg">Book Your Stay</a>
-      <a href="#rooms"   class="border border-white/60 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all text-sm tracking-wide">Explore Rooms</a>
+<section class="hero-bg flex flex-col items-center justify-center text-center px-6 relative" id="heroSection">
+  <video class="heroVideo hidden" id="heroVideo" autoplay muted loop playsinline></video>
+  <div class="hero-overlay"></div>
+  <div class="hero-content max-w-4xl mx-auto py-44">
+    <p class="text-gold font-body text-sm tracking-widest uppercase mb-4 opacity-90 fade-up fade-up-1" id="heroTagline">Private Resort · Caloocan, Philippines</p>
+    <h1 class="font-heading text-6xl md:text-8xl text-white hero-text-glow font-light mb-6 leading-tight fade-up fade-up-2" id="heroTitle">Balay Maysa</h1>
+    <p class="text-white/80 text-lg md:text-xl max-w-xl mx-auto mb-10 font-light leading-relaxed fade-up fade-up-3" id="heroSubtitle">A hidden tropical sanctuary where lush gardens, private pools, and warm Filipino hospitality await your family.</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center fade-up fade-up-4">
+      <a href="#booking" class="btn-sheen bg-gold hover:bg-gold-light text-white font-medium px-8 py-4 rounded-full transition-all text-sm tracking-wide shadow-lg">Book Your Stay</a>
+      <a href="#rooms"   class="btn-sheen border border-white/60 text-white hover:bg-white/10 font-medium px-8 py-4 rounded-full transition-all text-sm tracking-wide">Explore Rooms</a>
     </div>
   </div>
-  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/60 animate-bounce"><i class="fas fa-chevron-down text-xl"></i></div>
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/60 animate-bounce z-10"><i class="fas fa-chevron-down text-xl"></i></div>
 </section>
 
 <!-- INTRO -->
 <section class="py-20 bg-cream">
-  <div class="max-w-4xl mx-auto px-6 text-center">
+  <div class="max-w-4xl mx-auto px-6 text-center reveal">
     <p class="ornament text-gold/60 text-xs tracking-widest uppercase mb-8">Welcome</p>
-    <h2 class="font-heading text-5xl md:text-6xl text-forest font-light mb-6">Your Private <em>Paradise</em></h2>
+    <h2 class="font-heading text-5xl md:text-6xl text-forest font-light mb-6" id="aboutTitle">Your Private <em>Paradise</em></h2>
     <p class="text-text-muted leading-relaxed text-lg max-w-2xl mx-auto" id="aboutText">Nestled in Congress Village, Caloocan North, Balay Maysa is a haven of tranquility. Whether you're celebrating with family or escaping with friends, our resort offers intimate spaces designed for unforgettable memories.</p>
     <div class="grid grid-cols-3 gap-8 mt-16 max-w-lg mx-auto">
-      <div class="text-center"><div class="text-3xl font-heading text-forest font-semibold">4</div><div class="text-xs text-text-muted mt-1 uppercase tracking-wide">Unique Rooms</div></div>
-      <div class="text-center border-x border-gold/30"><div class="text-3xl font-heading text-forest font-semibold">100%</div><div class="text-xs text-text-muted mt-1 uppercase tracking-wide">Private</div></div>
-      <div class="text-center"><div class="text-3xl font-heading text-forest font-semibold">24/7</div><div class="text-xs text-text-muted mt-1 uppercase tracking-wide">Support</div></div>
+      <div class="text-center"><div class="text-3xl font-heading text-forest font-semibold" id="stat1Num">4</div><div class="text-xs text-text-muted mt-1 uppercase tracking-wide" id="stat1Label">Unique Rooms</div></div>
+      <div class="text-center border-x border-gold/30"><div class="text-3xl font-heading text-forest font-semibold" id="stat2Num">100%</div><div class="text-xs text-text-muted mt-1 uppercase tracking-wide" id="stat2Label">Private</div></div>
+      <div class="text-center"><div class="text-3xl font-heading text-forest font-semibold" id="stat3Num">24/7</div><div class="text-xs text-text-muted mt-1 uppercase tracking-wide" id="stat3Label">Support</div></div>
     </div>
   </div>
 </section>
 
 <!-- AVAILABILITY CALENDAR -->
 <section class="py-14 bg-white">
-  <div class="max-w-2xl mx-auto px-6">
+  <div class="max-w-2xl mx-auto px-6 reveal">
     <div class="text-center mb-8">
       <p class="text-gold text-xs tracking-widest uppercase mb-2">Live Availability</p>
       <h2 class="font-heading text-4xl text-forest font-light">Check Open Dates</h2>
@@ -183,14 +211,14 @@
 <!-- ROOMS — sliders load images dynamically from room_images table; fallback hardcoded -->
 <section id="rooms" class="py-20 bg-cream">
   <div class="max-w-6xl mx-auto px-6">
-    <div class="text-center mb-14">
+    <div class="text-center mb-14 reveal">
       <p class="text-gold text-xs tracking-widest uppercase mb-3">Accommodations</p>
-      <h2 class="font-heading text-5xl text-forest font-light">Our Rooms</h2>
+      <h2 class="font-heading text-5xl text-forest font-light" id="roomsTitle">Our Rooms</h2>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="roomCardsGrid">
 
       <!-- Silayan -->
-      <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md">
+      <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md reveal" data-room-card="Silayan">
         <div class="rslider" id="slider-Silayan">
           <div class="rslides" id="slides-Silayan">
             <!-- dynamic images injected by JS; these are fallbacks -->
@@ -204,21 +232,21 @@
         </div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div><h3 class="font-heading text-3xl text-forest font-medium">Silayan</h3><p class="text-text-muted text-sm mt-0.5">Pool View Suite</p></div>
-            <span class="bg-forest/10 text-forest text-xs px-3 py-1 rounded-full font-medium mt-1">Pool View</span>
+            <div><h3 class="font-heading text-3xl text-forest font-medium" data-room-name="Silayan">Silayan</h3><p class="text-text-muted text-sm mt-0.5" data-room-subtitle="Silayan">Pool View Suite</p></div>
+            <span class="bg-forest/10 text-forest text-xs px-3 py-1 rounded-full font-medium mt-1" data-room-tag="Silayan">Pool View</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
+          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted" data-room-features="Silayan">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i>1 Queen Bed</div>
             <div class="flex items-center gap-2"><i class="fas fa-bath text-gold"></i>Bathtub</div>
             <div class="flex items-center gap-2"><i class="fas fa-users text-gold"></i>2–3 Adults</div>
             <div class="flex items-center gap-2"><i class="fas fa-swimming-pool text-gold"></i>Pool Access</div>
           </div>
-          <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Book This Room</a>
+          <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors btn-sheen">Book This Room</a>
         </div>
       </div>
 
       <!-- Sinta -->
-      <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md">
+      <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md reveal" data-room-card="Sinta">
         <div class="rslider" id="slider-Sinta">
           <div class="rslides" id="slides-Sinta">
             <div class="rslide" style="background-image:url('https://images.unsplash.com/photo-1505693314120-0d443867891c?w=800&q=80')"></div>
@@ -231,21 +259,21 @@
         </div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div><h3 class="font-heading text-3xl text-forest font-medium">Sinta</h3><p class="text-text-muted text-sm mt-0.5">2nd Floor Retreat</p></div>
-            <span class="bg-gold/10 text-yellow-700 text-xs px-3 py-1 rounded-full font-medium mt-1">2nd Floor</span>
+            <div><h3 class="font-heading text-3xl text-forest font-medium" data-room-name="Sinta">Sinta</h3><p class="text-text-muted text-sm mt-0.5" data-room-subtitle="Sinta">2nd Floor Retreat</p></div>
+            <span class="bg-gold/10 text-yellow-700 text-xs px-3 py-1 rounded-full font-medium mt-1" data-room-tag="Sinta">2nd Floor</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
+          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted" data-room-features="Sinta">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i>1 Queen Bed</div>
             <div class="flex items-center gap-2"><i class="fas fa-snowflake text-gold"></i>AC + Fan</div>
             <div class="flex items-center gap-2"><i class="fas fa-users text-gold"></i>2–3 Adults</div>
             <div class="flex items-center gap-2"><i class="fas fa-wifi text-gold"></i>Free WiFi</div>
           </div>
-          <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Book This Room</a>
+          <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors btn-sheen">Book This Room</a>
         </div>
       </div>
 
       <!-- Tahanan -->
-      <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md">
+      <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md reveal" data-room-card="Tahanan">
         <div class="rslider" id="slider-Tahanan">
           <div class="rslides" id="slides-Tahanan">
             <div class="rslide" style="background-image:url('https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80')"></div>
@@ -258,21 +286,21 @@
         </div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div><h3 class="font-heading text-3xl text-forest font-medium">Tahanan</h3><p class="text-text-muted text-sm mt-0.5">Family Suite</p></div>
-            <span class="bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full font-medium mt-1">Family</span>
+            <div><h3 class="font-heading text-3xl text-forest font-medium" data-room-name="Tahanan">Tahanan</h3><p class="text-text-muted text-sm mt-0.5" data-room-subtitle="Tahanan">Family Suite</p></div>
+            <span class="bg-blue-50 text-blue-600 text-xs px-3 py-1 rounded-full font-medium mt-1" data-room-tag="Tahanan">Family</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
+          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted" data-room-features="Tahanan">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i>2 Queen Beds</div>
             <div class="flex items-center gap-2"><i class="fas fa-home text-gold"></i>Suite Style</div>
             <div class="flex items-center gap-2"><i class="fas fa-users text-gold"></i>4–6 Adults</div>
             <div class="flex items-center gap-2"><i class="fas fa-snowflake text-gold"></i>Air Conditioned</div>
           </div>
-          <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Book This Room</a>
+          <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors btn-sheen">Book This Room</a>
         </div>
       </div>
 
       <!-- Barkada -->
-      <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md">
+      <div class="room-card bg-white rounded-2xl overflow-hidden shadow-md reveal" data-room-card="Barkada">
         <div class="rslider" id="slider-Barkada">
           <div class="rslides" id="slides-Barkada">
             <div class="rslide" style="background-image:url('https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&q=80')"></div>
@@ -285,16 +313,16 @@
         </div>
         <div class="p-7">
           <div class="flex items-start justify-between mb-3">
-            <div><h3 class="font-heading text-3xl text-forest font-medium">Barkada</h3><p class="text-text-muted text-sm mt-0.5">Group Escape</p></div>
-            <span class="bg-purple-50 text-purple-600 text-xs px-3 py-1 rounded-full font-medium mt-1">Group</span>
+            <div><h3 class="font-heading text-3xl text-forest font-medium" data-room-name="Barkada">Barkada</h3><p class="text-text-muted text-sm mt-0.5" data-room-subtitle="Barkada">Group Escape</p></div>
+            <span class="bg-purple-50 text-purple-600 text-xs px-3 py-1 rounded-full font-medium mt-1" data-room-tag="Barkada">Group</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted">
+          <div class="grid grid-cols-2 gap-3 mt-4 text-sm text-text-muted" data-room-features="Barkada">
             <div class="flex items-center gap-2"><i class="fas fa-bed text-gold"></i>2 Queen + 2 Single</div>
             <div class="flex items-center gap-2"><i class="fas fa-users text-gold"></i>8–10 Adults</div>
             <div class="flex items-center gap-2"><i class="fas fa-snowflake text-gold"></i>Air Conditioned</div>
             <div class="flex items-center gap-2"><i class="fas fa-door-open text-gold"></i>Spacious</div>
           </div>
-          <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Book This Room</a>
+          <a href="#booking" class="mt-5 block text-center bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors btn-sheen">Book This Room</a>
         </div>
       </div>
 
@@ -304,7 +332,7 @@
 
 <!-- PRICING TABLE — fully dynamic from group_pricing table -->
 <section id="pricing" class="py-16 bg-white">
-  <div class="max-w-5xl mx-auto px-6">
+  <div class="max-w-5xl mx-auto px-6 reveal">
     <div class="text-center mb-10">
       <p class="text-gold text-xs tracking-widest uppercase mb-3">Group Rates</p>
       <h2 class="font-heading text-5xl text-forest font-light">Pricing Guide</h2>
@@ -341,7 +369,7 @@
 
 <!-- BOOKING SECTION -->
 <section id="booking" class="py-24 bg-cream">
-  <div class="max-w-2xl mx-auto px-6">
+  <div class="max-w-2xl mx-auto px-6 reveal">
     <div class="text-center mb-10">
       <p class="text-gold text-xs tracking-widest uppercase mb-3">Reservations</p>
       <h2 class="font-heading text-5xl text-forest font-light mb-2">Book Your Stay</h2>
@@ -411,13 +439,16 @@
           <p class="text-xs text-text-muted mt-2">* Infants below 3 years are not billed.</p>
         </div>
         <div id="dayNotice" class="hidden mb-4 p-3 rounded-lg text-xs font-medium"></div>
-        <button onclick="goStep(2)" class="w-full bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl text-sm">Continue to Package →</button>
+        <button onclick="goStep(2)" class="w-full bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl text-sm btn-sheen">Continue to Package →</button>
       </div>
 
       <!-- ══ STEP 2: Package + Room + Add-ons ══ -->
       <div class="step hidden" id="step-2">
         <h3 class="font-heading text-2xl text-forest mb-1">Choose Your Package</h3>
         <p class="text-text-muted text-sm mb-5" id="step2Msg">Recommended package for your pax count:</p>
+        <div id="pkgEmptyMsg" class="hidden mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+          <i class="fas fa-info-circle mr-1"></i> No matching package was found automatically — please pick one below, or go back and adjust your guest count / dates.
+        </div>
         <div id="pkgCards" class="space-y-3 mb-6"></div>
         <!-- Room picker (shown when < 4 rooms) -->
         <div id="roomArea" class="hidden mb-6">
@@ -454,7 +485,7 @@
         </div>
         <div class="flex gap-3">
           <button onclick="goStep(1)" class="px-6 py-4 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">← Back</button>
-          <button onclick="goStep(3)" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl text-sm">Continue to Payment →</button>
+          <button onclick="goStep(3)" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl text-sm btn-sheen">Continue to Payment →</button>
         </div>
       </div>
 
@@ -498,7 +529,7 @@
             <img id="gcash-qr" src="" alt="GCash QR" class="w-24 h-24 rounded-xl bg-white object-contain border"/>
             <div>
               <p class="font-semibold text-blue-700 mb-1">GCash</p>
-              <p class="text-sm text-blue-600">Name: <strong>Balay Maysa Resort</strong></p>
+              <p class="text-sm text-blue-600">Name: <strong id="gcashAccName">Balay Maysa Resort</strong></p>
               <p class="text-sm text-blue-600">Number: <strong id="gcash_phone">0917 565 7918</strong></p>
               <p class="text-xs text-blue-500 mt-1">Send exactly: <strong id="gcash-amount">₱0</strong></p>
             </div>
@@ -510,7 +541,7 @@
             <img id="maya-qr" src="" alt="Maya QR" class="w-24 h-24 rounded-xl bg-white object-contain border"/>
             <div>
               <p class="font-semibold text-green-700 mb-1">Maya</p>
-              <p class="text-sm text-green-600">Name: <strong>Balay Maysa Resort</strong></p>
+              <p class="text-sm text-green-600">Name: <strong id="mayaAccName">Balay Maysa Resort</strong></p>
               <p class="text-sm text-green-600">Number: <strong id="maya_phone">0917 565 7918</strong></p>
               <p class="text-xs text-green-500 mt-1">Send exactly: <strong id="maya-amount">₱0</strong></p>
             </div>
@@ -519,7 +550,7 @@
         <!-- Bank -->
         <div id="pay-bank" class="paymethod hidden mb-4">
           <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
-            <p class="font-semibold text-gray-700 mb-2">Bank Transfer – BDO</p>
+            <p class="font-semibold text-gray-700 mb-2" id="bankTitle">Bank Transfer – BDO</p>
             <p class="text-sm text-gray-600">Account Name: <strong id="bankName">Balay Maysa Resort</strong></p>
             <p class="text-sm text-gray-600">Account No.: <strong id="bankNum">—</strong></p>
             <p class="text-xs text-gray-400 mt-2">Use your booking reference as the payment note.</p>
@@ -557,7 +588,7 @@
           <label class="fi-label">Voucher Code <span class="text-xs text-text-muted font-normal">(optional)</span></label>
           <div class="flex gap-2">
             <input type="text" id="voucher_code" class="fi" placeholder="Enter code" style="text-transform:uppercase"/>
-            <button onclick="applyVoucher()" class="px-4 py-3 bg-gold text-white rounded-xl text-sm font-medium hover:bg-gold-light whitespace-nowrap transition-colors">Apply</button>
+            <button onclick="applyVoucher()" class="px-4 py-3 bg-gold text-white rounded-xl text-sm font-medium hover:bg-gold-light whitespace-nowrap transition-colors btn-sheen">Apply</button>
           </div>
           <div id="voucherStatus" class="hidden mt-2 p-3 rounded-lg text-xs font-medium"></div>
         </div>
@@ -579,7 +610,7 @@
         </div>
         <div class="flex gap-3">
           <button onclick="goStep(2)" class="px-6 py-4 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">← Back</button>
-          <button onclick="submitBooking()" id="submitBtn" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl flex items-center justify-center gap-2 text-sm">
+          <button onclick="submitBooking()" id="submitBtn" class="flex-1 bg-forest hover:bg-forest-dark text-white font-medium py-4 rounded-xl flex items-center justify-center gap-2 text-sm btn-sheen">
             <span id="submitText">Submit Booking</span>
             <div id="submitSpin" class="spin hidden"></div>
           </button>
@@ -587,7 +618,7 @@
         <p class="text-center text-text-muted text-xs mt-3">Payment verified within 24 hrs · Confirmation sent to your email.</p>
       </div>
 
-      <!-- ══ STEP 4: Confirmation + Inquiry Form ══ -->
+      <!-- ══ STEP 4: Confirmation ══ -->
       <div class="step hidden" id="step-4">
         <div class="text-center">
           <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -602,65 +633,10 @@
             <p class="text-xs text-text-muted">Track anytime at <a href="lookup.html" class="text-forest underline">lookup.html</a> using this reference + your email.</p>
           </div>
 
-          <div class="space-y-3 mb-10">
-            <a href="lookup.html" class="block bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Track Booking Status</a>
+          <div class="space-y-3">
+            <a href="lookup.html" class="block bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors btn-sheen">Track Booking Status</a>
             <button onclick="resetForm()" class="block w-full border border-gray-200 text-gray-600 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">Make Another Booking</button>
           </div>
-
-          <!-- ═══════════════════════════════════════════
-               INQUIRY FORM — Small Gatherings
-               Separate from booking. Sends to Super Admin only.
-               ═══════════════════════════════════════════ -->
-          <div class="inq-card text-left mt-2">
-            <div class="flex items-start gap-3 mb-5">
-              <div class="w-11 h-11 bg-gold/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i class="fas fa-paper-plane text-gold text-lg"></i>
-              </div>
-              <div>
-                <p class="font-heading text-2xl text-forest font-medium leading-tight">Booking for a Small Gathering?</p>
-                <p class="text-sm text-text-muted mt-1">
-                  Send us an inquiry and we'll craft a custom package — or call us at
-                  <a id="inqPhoneLink" href="tel:09175657918" class="font-semibold text-forest hover:underline">0917 565 7918</a>.
-                </p>
-              </div>
-            </div>
-            <div class="space-y-3">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label class="fi-label text-xs">Full Name <span class="text-red-500">*</span></label>
-                  <input type="text" id="inq_name" class="fi text-sm" placeholder="Your name"/>
-                </div>
-                <div>
-                  <label class="fi-label text-xs">Phone Number <span class="text-red-500">*</span></label>
-                  <input type="tel" id="inq_phone" class="fi text-sm" placeholder="09XX XXX XXXX"/>
-                </div>
-              </div>
-              <div>
-                <label class="fi-label text-xs">Email Address</label>
-                <input type="email" id="inq_email" class="fi text-sm" placeholder="your@email.com"/>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="fi-label text-xs">Adults</label>
-                  <input type="number" id="inq_adults" class="fi text-sm" value="2" min="1"/>
-                </div>
-                <div>
-                  <label class="fi-label text-xs">Children</label>
-                  <input type="number" id="inq_children" class="fi text-sm" value="0" min="0"/>
-                </div>
-              </div>
-              <div>
-                <label class="fi-label text-xs">Message / Preferred Dates</label>
-                <textarea id="inq_message" class="fi text-sm" rows="3" placeholder="Tell us about your event, preferred dates, and any special requests…"></textarea>
-              </div>
-              <button onclick="submitInquiry()" id="inqBtn" class="w-full bg-gold hover:bg-gold-light text-white py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                <span id="inqText">Send Inquiry to Balay Maysa</span>
-                <div id="inqSpin" class="spin hidden"></div>
-              </button>
-              <p class="text-xs text-text-muted text-center">We'll reply by phone or email — usually within a few hours.</p>
-            </div>
-          </div>
-
         </div>
       </div>
 
@@ -668,11 +644,70 @@
   </div>
 </section>
 
+<!-- ═══════════════════════════════════════════
+     INQUIRY SECTION — Small Gatherings
+     Now its own standalone section, separate from booking flow.
+     ═══════════════════════════════════════════ -->
+<section id="inquiry" class="py-20 bg-white">
+  <div class="max-w-2xl mx-auto px-6 reveal">
+    <div class="inq-card">
+      <div class="flex items-start gap-3 mb-5">
+        <div class="w-12 h-12 bg-gold/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+          <i class="fas fa-paper-plane text-gold text-lg"></i>
+        </div>
+        <div>
+          <p class="text-gold text-xs tracking-widest uppercase mb-1" id="inqEyebrow">Small Gatherings</p>
+          <p class="font-heading text-3xl text-forest font-medium leading-tight" id="inqTitle">Planning a Small Gathering?</p>
+          <p class="text-sm text-text-muted mt-1" id="inqDesc">
+            Send us an inquiry and we'll craft a custom package — or call us at
+            <a id="inqPhoneLink" href="tel:09175657918" class="font-semibold text-forest hover:underline">0917 565 7918</a>.
+          </p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="fi-label text-xs">Full Name <span class="text-red-500">*</span></label>
+            <input type="text" id="inq_name" class="fi text-sm" placeholder="Your name"/>
+          </div>
+          <div>
+            <label class="fi-label text-xs">Phone Number <span class="text-red-500">*</span></label>
+            <input type="tel" id="inq_phone" class="fi text-sm" placeholder="09XX XXX XXXX"/>
+          </div>
+        </div>
+        <div>
+          <label class="fi-label text-xs">Email Address</label>
+          <input type="email" id="inq_email" class="fi text-sm" placeholder="your@email.com"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="fi-label text-xs">Adults</label>
+            <input type="number" id="inq_adults" class="fi text-sm" value="2" min="1"/>
+          </div>
+          <div>
+            <label class="fi-label text-xs">Children</label>
+            <input type="number" id="inq_children" class="fi text-sm" value="0" min="0"/>
+          </div>
+        </div>
+        <div>
+          <label class="fi-label text-xs">Message / Preferred Dates</label>
+          <textarea id="inq_message" class="fi text-sm" rows="3" placeholder="Tell us about your event, preferred dates, and any special requests…"></textarea>
+        </div>
+        <button onclick="submitInquiry()" id="inqBtn" class="w-full bg-gold hover:bg-gold-light text-white py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 btn-sheen">
+          <span id="inqText">Send Inquiry to Balay Maysa</span>
+          <div id="inqSpin" class="spin hidden"></div>
+        </button>
+        <p class="text-xs text-text-muted text-center">We'll reply by phone or email — usually within a few hours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CONTACT -->
 <section id="contact" class="py-20 bg-forest">
-  <div class="max-w-4xl mx-auto px-6 text-center">
+  <div class="max-w-4xl mx-auto px-6 text-center reveal">
     <p class="text-gold text-xs tracking-widest uppercase mb-3">Get in Touch</p>
-    <h2 class="font-heading text-5xl text-white font-light mb-10">Contact Us</h2>
+    <h2 class="font-heading text-5xl text-white font-light mb-10" id="contactTitle">Contact Us</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div class="text-white/80">
         <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4"><i class="fas fa-map-marker-alt text-gold"></i></div>
@@ -716,7 +751,7 @@
     <span class="text-white/20">·</span>
     <button onclick="openTerms()" class="text-white/50 text-xs hover:text-white/80">Terms & Conditions</button>
   </div>
-  <p class="text-white/40 text-xs">© 2026 Balay Maysa Resort. All rights reserved.</p>
+  <p class="text-white/40 text-xs" id="footerCopy">© 2026 Balay Maysa Resort. All rights reserved.</p>
 </footer>
 
 <!-- TOAST -->
@@ -757,7 +792,7 @@
       <p class="text-xs text-gray-400 pt-2">By submitting a booking, you agree to the current Terms & Conditions.</p>
     </div>
     <div class="p-6 border-t border-gray-100">
-      <button onclick="closeTerms()" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark">I Understand & Accept</button>
+      <button onclick="closeTerms()" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark btn-sheen">I Understand & Accept</button>
     </div>
   </div>
 </div>
@@ -774,6 +809,18 @@ const EJS_SID  = 'service_t13ealt';
 const EJS_TMPL = 'template_s17clcj';
 const SA_EMAIL = 'balaymaysa@gmail.com';
 const db = window.supabase.createClient(SB_URL, SB_ANON);
+
+// Fallback room defaults (used if room_content table is empty)
+const ROOM_DEFAULTS = {
+  Silayan: {name:'Silayan', subtitle:'Pool View Suite', tag:'Pool View',
+    features:['<i class="fas fa-bed text-gold"></i> 1 Queen Bed','<i class="fas fa-bath text-gold"></i> Bathtub','<i class="fas fa-users text-gold"></i> 2–3 Adults','<i class="fas fa-swimming-pool text-gold"></i> Pool Access']},
+  Sinta: {name:'Sinta', subtitle:'2nd Floor Retreat', tag:'2nd Floor',
+    features:['<i class="fas fa-bed text-gold"></i> 1 Queen Bed','<i class="fas fa-snowflake text-gold"></i> AC + Fan','<i class="fas fa-users text-gold"></i> 2–3 Adults','<i class="fas fa-wifi text-gold"></i> Free WiFi']},
+  Tahanan: {name:'Tahanan', subtitle:'Family Suite', tag:'Family',
+    features:['<i class="fas fa-bed text-gold"></i> 2 Queen Beds','<i class="fas fa-home text-gold"></i> Suite Style','<i class="fas fa-users text-gold"></i> 4–6 Adults','<i class="fas fa-snowflake text-gold"></i> Air Conditioned']},
+  Barkada: {name:'Barkada', subtitle:'Group Escape', tag:'Group',
+    features:['<i class="fas fa-bed text-gold"></i> 2 Queen + 2 Single','<i class="fas fa-users text-gold"></i> 8–10 Adults','<i class="fas fa-snowflake text-gold"></i> Air Conditioned','<i class="fas fa-door-open text-gold"></i> Spacious']},
+};
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -806,7 +853,8 @@ async function boot() {
     loadGroupPricing(),
     loadAddonPricing(),
     loadBookedDates(),
-    loadRoomImages()
+    loadRoomImages(),
+    loadRoomContent()
   ]);
   initSliders();
   renderCalendar();
@@ -814,9 +862,10 @@ async function boot() {
   renderAddonsBar();
   setDateMin();
   startSliderAuto();
+  initRevealObserver();
 }
 
-// ── Settings (hero text, contact, bank, terms, promo) ──
+// ── Settings (hero text, contact, bank, terms, promo, branding) ──
 async function loadSettings() {
   try {
     const { data } = await db.from('site_settings').select('*');
@@ -827,13 +876,51 @@ async function loadSettings() {
 }
 
 function applySettings() {
+  // Branding
+  setT('siteTitle', cfg.site_name);
+  if (cfg.site_name) document.title = cfg.site_name + ' – Private Tropical Retreat';
+  if (cfg.logo_url) {
+    const navLogo = document.getElementById('navLogoImg');
+    navLogo.src = cfg.logo_url; navLogo.classList.add('show');
+    const fav = document.getElementById('favicon'); if (fav) fav.href = cfg.logo_url;
+    // hide text title if logo present and user wants logo-only — keep both for safety
+  }
+  // Hero
   setT('heroTagline',  cfg.hero_tagline);
   setT('heroTitle',    cfg.hero_title);
   setT('heroSubtitle', cfg.hero_subtitle);
+  if (cfg.hero_bg_image) {
+    document.getElementById('heroSection').style.backgroundImage =
+      `linear-gradient(135deg,rgba(30,61,40,.72),rgba(45,90,59,.52) 50%,rgba(201,160,61,.18)), url('${cfg.hero_bg_image}')`;
+    document.getElementById('heroSection').style.backgroundSize = 'cover';
+    document.getElementById('heroSection').style.backgroundPosition = 'center';
+  }
+  if (cfg.hero_video_url) {
+    const v = document.getElementById('heroVideo');
+    v.src = cfg.hero_video_url; v.classList.remove('hidden');
+  }
+  // About
+  setT('aboutTitleRaw'); // noop placeholder
+  if (cfg.about_title) document.getElementById('aboutTitle').innerHTML = cfg.about_title;
   setT('aboutText',    cfg.about_text);
+  setT('stat1Num', cfg.stat1_num); setT('stat1Label', cfg.stat1_label);
+  setT('stat2Num', cfg.stat2_num); setT('stat2Label', cfg.stat2_label);
+  setT('stat3Num', cfg.stat3_num); setT('stat3Label', cfg.stat3_label);
+  // Section titles
+  setT('roomsTitle',  cfg.rooms_title);
+  setT('contactTitle',cfg.contact_title);
+  // Inquiry section
+  setT('inqEyebrow', cfg.inquiry_eyebrow);
+  setT('inqTitle',   cfg.inquiry_title);
+  if (cfg.inquiry_desc) {
+    const ph = cfg.contact_phone || '0917 565 7918';
+    document.getElementById('inqDesc').innerHTML = cfg.inquiry_desc.replace('{phone}', `<a id="inqPhoneLink" href="tel:${ph.replace(/\s/g,'')}" class="font-semibold text-forest hover:underline">${ph}</a>`);
+  }
+  // Contact
   setT('contactAddr',  cfg.contact_address);
   setT('cancelText',   cfg.cancellation_policy);
   setT('rulesText',    cfg.house_rules);
+  setT('footerCopy',   cfg.footer_text);
   if (cfg.checkin_time || cfg.checkout_time)
     setT('cicoText', `Check-in: ${cfg.checkin_time||'2:00 PM'} · Check-out: ${cfg.checkout_time||'12:00 NN'}`);
   // Phone links
@@ -849,9 +936,15 @@ function applySettings() {
     const e=cfg.contact_email,m='mailto:'+e;
     link('contactEmail',e,m); link('footerEmail',e,m);
   }
-  // Bank details
+  // Bank / e-wallet account names
+  if (cfg.payment_account_name) {
+    setT('gcashAccName', cfg.payment_account_name);
+    setT('mayaAccName',  cfg.payment_account_name);
+    setT('bankName',     cfg.payment_account_name);
+  }
   if (cfg.bank_account_name)   setT('bankName', cfg.bank_account_name);
   if (cfg.bank_account_number) setT('bankNum',  cfg.bank_account_number);
+  if (cfg.bank_title) setT('bankTitle', cfg.bank_title);
   // Promo banner
   if (cfg.promo_banner_active==='true' && cfg.promo_banner_text) {
     setT('promoBannerText', cfg.promo_banner_text);
@@ -876,14 +969,41 @@ function applySettings() {
   }
 }
 
-function setT(id,v){ if(!v)return; const el=document.getElementById(id); if(el)el.textContent=v; }
+function setT(id,v){ if(v===undefined||v===null||v==='')return; const el=document.getElementById(id); if(el)el.textContent=v; }
 function link(id,text,href){ const el=document.getElementById(id); if(el){el.textContent=text;el.href=href;} }
+
+// ── Room content (names, subtitles, tags, features) — editable in CMS ──
+async function loadRoomContent() {
+  try {
+    const { data } = await db.from('room_content').select('*');
+    const map = {};
+    (data||[]).forEach(r=>{ map[r.room_type]=r; });
+    Object.keys(ROOM_DEFAULTS).forEach(room=>{
+      const d = map[room] || {};
+      const def = ROOM_DEFAULTS[room];
+      const name = d.display_name || def.name;
+      const subtitle = d.subtitle || def.subtitle;
+      const tag = d.tag || def.tag;
+      let features = def.features;
+      if (d.features) {
+        try { const f = typeof d.features==='string'?JSON.parse(d.features):d.features; if(Array.isArray(f)&&f.length) features=f; } catch(e){}
+      }
+      document.querySelectorAll(`[data-room-name="${room}"]`).forEach(el=>el.textContent=name);
+      document.querySelectorAll(`[data-room-subtitle="${room}"]`).forEach(el=>el.textContent=subtitle);
+      document.querySelectorAll(`[data-room-tag="${room}"]`).forEach(el=>el.textContent=tag);
+      document.querySelectorAll(`[data-room-features="${room}"]`).forEach(el=>{
+        el.innerHTML = features.map(f=>`<div class="flex items-center gap-2">${f}</div>`).join('');
+      });
+    });
+  } catch(e) { /* keep defaults */ }
+}
 
 // ── Group pricing ──────────────────────────────────────
 async function loadGroupPricing() {
   try {
     const { data } = await db.from('group_pricing').select('*').eq('is_active',true).order('pax_min');
     grpPricing = data||[];
+    if (!grpPricing.length) throw new Error('empty');
   } catch(e) {
     // Hardcoded fallback matching official rates
     grpPricing = [
@@ -951,6 +1071,16 @@ async function loadRoomImages() {
       }).join('');
     });
   } catch(e) { /* keep fallback slides */ }
+}
+
+// ═══════════════════════════════════════════════════════
+// SCROLL REVEAL ANIMATIONS
+// ═══════════════════════════════════════════════════════
+function initRevealObserver() {
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  },{threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1125,18 +1255,32 @@ function livePhoneCheck() {
 // ═══════════════════════════════════════════════════════
 // STEP 2: PACKAGE & ROOM SELECTION
 // ═══════════════════════════════════════════════════════
+// In-memory map of package id -> package object, so onclick handlers
+// don't need to embed JSON (which previously could break rendering
+// and silently prevent the package cards / Step 3 progression).
+let pkgMap = {};
+
 function buildPackageCards() {
   const pax=calcPax();
   const ci=document.getElementById('check_in').value;
   const dt=getDayType(ci);
   const nights=calcNights();
-  const pkgs=grpPricing.filter(p=>p.day_type===dt);
-  const rec=pkgs.find(p=>pax>=p.pax_min&&pax<=p.pax_max);
+
+  // Defensive: if grpPricing failed to load for this day type, fall back to ALL pricing
+  let pkgs = grpPricing.filter(p=>p.day_type===dt);
+  if (!pkgs.length) pkgs = grpPricing; // last resort so user is never stuck with zero cards
+
+  const rec = pkgs.find(p=>pax>=p.pax_min && pax<=p.pax_max);
 
   document.getElementById('step2Msg').textContent=
     `${pax} pax · ${dt==='weekend'?'Weekend (Fri–Sat)':'Weekday (Sun–Thu)'} rate · Your recommended package is highlighted.`;
 
-  document.getElementById('pkgCards').innerHTML = pkgs.map(pkg=>{
+  const pkgEmpty = document.getElementById('pkgEmptyMsg');
+  pkgEmpty.classList.toggle('hidden', !!rec);
+
+  pkgMap = {};
+  document.getElementById('pkgCards').innerHTML = pkgs.map((pkg,idx)=>{
+    pkgMap[pkg.id]=pkg;
     const isRec=rec&&pkg.id===rec.id;
     const nightTotal=nights>0?`<p class="text-xs text-gray-400 mt-0.5">${nights}n = ₱${(pkg.price*nights).toLocaleString()}</p>`:'';
     const badges=[
@@ -1144,7 +1288,7 @@ function buildPackageCards() {
       pkg.free_ac_living?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>':'',
       pkg.free_extra_mattresses>0?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${pkg.free_extra_mattresses} mattresses</span>`:'',
     ].filter(Boolean).join('');
-    return `<div class="pkg${isRec?' rec on':''}" id="pkg-${pkg.id}" onclick='pickPkg(${JSON.stringify(pkg)})'>
+    return `<div class="pkg${isRec?' rec on':''}" id="pkg-${pkg.id}" style="animation-delay:${idx*0.05}s" onclick="pickPkgById('${pkg.id}')">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-3">
           <p class="font-semibold text-gray-800 text-sm">${pkg.pax_min}–${pkg.pax_max} pax · ${pkg.rooms_included} room${pkg.rooms_included>1?'s':''}</p>
@@ -1159,7 +1303,13 @@ function buildPackageCards() {
     </div>`;
   }).join('');
 
-  if(rec) pickPkg(rec);
+  if(rec) pickPkgById(rec.id);
+  else if(pkgs.length) pickPkgById(pkgs[0].id); // ensure SOMETHING is always selected
+}
+
+function pickPkgById(id){
+  const pkg = pkgMap[id]; if(!pkg) return;
+  pickPkg(pkg);
 }
 
 function pickPkg(pkg) {
@@ -1187,7 +1337,10 @@ function buildRoomPicker(pkg) {
   const mandatory=pkg.rooms_included>=2?['Barkada']:[];
   const choose=pkg.rooms_included-mandatory.length;
   const choosable=ROOMS.filter(r=>!mandatory.includes(r.id));
-  selRooms=[...mandatory];
+
+  // Preserve previously selected rooms if still valid for this package, else reset
+  const prevChosen = selRooms.filter(r=>r!=='Barkada' && choosable.some(c=>c.id===r));
+  selRooms=[...mandatory, ...prevChosen.slice(0,choose)];
 
   document.getElementById('roomPickLabel').textContent=
     `Select ${choose} Room${choose>1?'s':''}${mandatory.length?' (Barkada already included)':''}:`;
@@ -1200,12 +1353,15 @@ function buildRoomPicker(pkg) {
         <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Included</span>
       </div>`;
     }),
-    ...choosable.map(r=>`<div class="rsel" id="rsel-${r.id}" onclick="toggleRoom('${r.id}',${choose})">
+    ...choosable.map(r=>{
+      const isOn = selRooms.includes(r.id);
+      return `<div class="rsel${isOn?' on':''}" id="rsel-${r.id}" onclick="toggleRoom('${r.id}',${choose})">
       <div class="flex justify-between items-center">
         <p class="font-medium text-sm text-gray-800">${r.label}</p>
         <p class="text-xs text-gray-400">${r.cap}</p>
       </div>
-    </div>`),
+    </div>`;
+    }),
   ].join('');
 }
 
@@ -1233,6 +1389,9 @@ function buildAddonCards(){
       <span class="text-sm font-bold text-forest flex-shrink-0">+₱${a.price.toLocaleString()}${u}</span>
     </div>`;
   }).join('');
+  // restore visibility of qty inputs for already-selected addons
+  document.getElementById('petQtyArea').classList.toggle('hidden',!selAddons['pet_fee']);
+  document.getElementById('spaHrsArea').classList.toggle('hidden',!selAddons['pool_spa']);
 }
 
 function toggleAddon(key){
@@ -1533,7 +1692,7 @@ function buildGuestEmail(name,ref,ci,co,nights,pax,fullPay){
   const addOnStr=Object.keys(selAddons).map(k=>addons.find(a=>a.key===k)?.label).filter(Boolean).join(', ')||'None';
   return `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
 <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
-  <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1>
+  <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">${cfg.site_name||'Balay Maysa Resort'}</h1>
   <p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">Booking Request Received ✅</p>
 </div>
 <div style="padding:40px;">
@@ -1555,7 +1714,7 @@ function buildGuestEmail(name,ref,ci,co,nights,pax,fullPay){
   <p style="color:#666;font-size:13px;">Track your booking anytime: <a href="https://balay-maysaa.vercel.app/lookup.html" style="color:#2d5a3b;font-weight:600;">balay-maysaa.vercel.app/lookup.html</a><br/>Use reference <strong>${ref}</strong> + your email.</p>
   <p style="color:#666;font-size:13px;margin-top:8px;">Questions? Call <a href="tel:${ph.replace(/\s/g,'')}" style="color:#2d5a3b;">${ph}</a></p>
 </div>
-<div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
+<div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">${cfg.site_name||'Balay Maysa Resort'} · ${cfg.contact_address||'Congress Village, Caloocan North'}</p></div>
 </div>`;
 }
 
@@ -1584,7 +1743,7 @@ function buildAdminEmail(name,email,phone,ref,ci,co,pax,fullPay,payRef,proofUrl)
 
 // ═══════════════════════════════════════════════════════
 // INQUIRY FORM — sends to Super Admin panel + email
-// Separate from booking; appears on Step 4 only
+// Standalone section now (id="inquiry")
 // ═══════════════════════════════════════════════════════
 async function submitInquiry(){
   const name   =document.getElementById('inq_name').value.trim();
@@ -1655,11 +1814,13 @@ async function sendEmail(to,subject,html){
 }
 function toast(msg,type='success'){
   const t=document.getElementById('toast');
-  t.classList.remove('success','error','hidden'); t.classList.add(type);
+  t.classList.remove('success','error','hidden','show'); t.classList.add(type);
   setT('toastMsg',msg);
   document.getElementById('toastIcon').className=type==='success'?'fas fa-check-circle':'fas fa-exclamation-circle';
+  // force a frame for animation
+  requestAnimationFrame(()=>t.classList.add('show'));
   clearTimeout(window._toastT);
-  window._toastT=setTimeout(()=>t.classList.add('hidden'),5500);
+  window._toastT=setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.classList.add('hidden'),300); },5500);
 }
 function resetForm(){
   selPkg=null;selRooms=[];selAddons={};addonQtys={};
