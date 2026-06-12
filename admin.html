@@ -63,6 +63,7 @@
     </div>
     <nav class="flex-1 px-3 py-3 overflow-y-auto space-y-0.5">
       <button class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard"><i class="fas fa-chart-bar"></i> Dashboard</button>
+      <button class="nav-item" onclick="showTab('notifications')" id="nav-notifications"><i class="fas fa-bell"></i> Notifications <span id="notifBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
       <button class="nav-item" onclick="showTab('verification')" id="nav-verification"><i class="fas fa-file-invoice-dollar"></i> Verification <span id="verifBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
       <button class="nav-item" onclick="showTab('confirmed')" id="nav-confirmed"><i class="fas fa-check-circle"></i> Confirmed</button>
       <button class="nav-item" onclick="showTab('all')" id="nav-all"><i class="fas fa-list"></i> All Bookings</button>
@@ -70,7 +71,8 @@
       <button class="nav-item" onclick="showTab('guestlog')" id="nav-guestlog"><i class="fas fa-clipboard-list"></i> Guest Log</button>
       <button class="nav-item" onclick="showTab('walkin')" id="nav-walkin"><i class="fas fa-walking"></i> Walk-in Booking</button>
       <button class="nav-item" onclick="showTab('personnel')" id="nav-personnel"><i class="fas fa-users"></i> Personnel</button>
-      <button class="nav-item" onclick="showTab('inventory')" id="nav-inventory"><i class="fas fa-boxes-stacked"></i> Inventory</button>
+      <button class="nav-item" onclick="showTab('inventory')" id="nav-inventory"><i class="fas fa-boxes-stacked"></i> Inventory <span id="invBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
+      <button class="nav-item" onclick="showTab('announcements')" id="nav-announcements"><i class="fas fa-bullhorn"></i> Announcements <span id="annBadge" class="ml-auto bg-gold text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
       <button class="nav-item" onclick="showTab('inquiries')" id="nav-inquiries"><i class="fas fa-envelope"></i> Inquiries <span id="inqBadge" class="ml-auto bg-gold text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
     </nav>
     <div class="p-4 border-t border-white/10">
@@ -123,6 +125,15 @@
           <div id="tasksList" class="space-y-2 text-sm"></div>
         </div>
       </div>
+    </div>
+
+    <!-- ===== NOTIFICATIONS ===== -->
+    <div id="tab-notifications" class="tab-view hidden">
+      <div class="flex items-center justify-between mb-5">
+        <div><h2 class="font-heading text-3xl text-gray-800 font-light">Notifications</h2><p class="text-gray-400 text-xs">Updates from Super Admin — booking confirmations, payments, and more.</p></div>
+        <button onclick="markAllNotifsRead()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50">Mark all as read</button>
+      </div>
+      <div id="notificationsList" class="space-y-3"><p class="text-center text-gray-300 py-8">Loading...</p></div>
     </div>
 
     <!-- ===== VERIFICATION ===== -->
@@ -322,21 +333,42 @@
 
     <!-- ===== INVENTORY ===== -->
     <div id="tab-inventory" class="tab-view hidden">
-      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Inventory</h2>
-      <div id="lowStockBanner" class="hidden mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800"><i class="fas fa-exclamation-triangle mr-2"></i><span id="lowStockMsg">–</span></div>
-      <div class="sc overflow-hidden">
-        <table class="w-full">
-          <thead><tr class="bg-gray-50 border-b border-gray-100">
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Item</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Category</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Qty</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Min</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Unit</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Status</th>
-          </tr></thead>
-          <tbody id="inventoryTable"><tr><td colspan="6" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
-        </table>
+      <div class="flex items-center justify-between mb-5">
+        <div><h2 class="font-heading text-3xl text-gray-800 font-light">Inventory</h2><p class="text-gray-400 text-xs">Shared with Super Admin — updates here reflect there instantly, and vice versa.</p></div>
       </div>
+      <div id="lowStockBanner" class="hidden mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800"><i class="fas fa-exclamation-triangle mr-2"></i><span id="lowStockMsg">–</span></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="sc overflow-hidden">
+          <table class="w-full">
+            <thead><tr class="bg-gray-50 border-b border-gray-100">
+              <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Item</th>
+              <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Qty</th>
+              <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Status</th>
+              <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Update Stock</th>
+            </tr></thead>
+            <tbody id="inventoryTable"><tr><td colspan="4" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="sc p-5">
+          <h3 class="font-semibold text-gray-700 text-sm mb-3">Recent Stock Changes</h3>
+          <div id="inventoryLog" class="space-y-2 text-sm"><p class="text-gray-300 text-xs">Loading...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ANNOUNCEMENTS ===== -->
+    <div id="tab-announcements" class="tab-view hidden">
+      <div class="flex items-center justify-between mb-5">
+        <div><h2 class="font-heading text-3xl text-gray-800 font-light">Announcements</h2><p class="text-gray-400 text-xs">Shared notice board with Super Admin — post shift notes, mark reminders done.</p></div>
+      </div>
+      <div class="sc p-5 mb-5">
+        <label class="fi-label">Post a note for the next shift / Super Admin</label>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input type="text" id="ann_message" class="fi" placeholder="e.g. Room Tahanan AC remote needs new batteries"/>
+          <button onclick="postAnnouncement()" class="bg-forest text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-forest-dark whitespace-nowrap">Post</button>
+        </div>
+      </div>
+      <div id="announcementsList" class="space-y-3"><p class="text-center text-gray-300 py-8">Loading...</p></div>
     </div>
 
     <!-- ===== INQUIRIES ===== -->
@@ -411,6 +443,7 @@ const STATUS_LABELS = {pending_payment_verification:'Pending Payment',deposit_pa
 const STATUS_CSS    = {pending_payment_verification:'b-pending',deposit_paid_waiting_confirmation:'b-pending',confirmed:'b-confirmed',confirmed_balance_due:'b-confirmed',fully_paid:'b-paid',cancelled:'b-declined',declined:'b-declined',completed_stayed:'badge bg-purple-100 text-purple-700'};
 
 let allBookings = [], allStaff = [], allTasks = [], allInventory = [], allInquiries = [], allMaintenance = [];
+let allNotifications = [], allAnnouncements = [], allInventoryLog = [];
 let opCalYear = new Date().getFullYear(), opCalMonth = new Date().getMonth();
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -422,13 +455,14 @@ function doLogin() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('adminPanel').classList.remove('hidden');
     showTab('dashboard'); loadAll();
+    subscribeRealtime();
     showToast('Welcome!', 'success');
   } else {
     const e = document.getElementById('loginErr'); e.classList.remove('hidden'); setTimeout(()=>e.classList.add('hidden'),3000);
   }
 }
 function doLogout() { sessionStorage.removeItem('bm_admin'); location.reload(); }
-if (sessionStorage.getItem('bm_admin')==='1') { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); showTab('dashboard'); loadAll(); }
+if (sessionStorage.getItem('bm_admin')==='1') { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); showTab('dashboard'); loadAll(); subscribeRealtime(); }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function showTab(name) {
@@ -436,20 +470,23 @@ function showTab(name) {
   document.getElementById('tab-'+name).classList.remove('hidden');
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   const nb = document.getElementById('nav-'+name); if(nb) nb.classList.add('active');
-  const tabLoaders = { dashboard:renderDashboard, verification:renderVerification, confirmed:renderConfirmed, all:()=>renderAll(allBookings), calendar:renderOpCal, guestlog:renderRecentLogs, personnel:renderPersonnel, inventory:renderInventory, inquiries:renderInquiries };
+  const tabLoaders = { dashboard:renderDashboard, notifications:renderNotifications, verification:renderVerification, confirmed:renderConfirmed, all:()=>renderAll(allBookings), calendar:renderOpCal, guestlog:renderRecentLogs, personnel:renderPersonnel, inventory:renderInventory, announcements:renderAnnouncements, inquiries:renderInquiries };
   if (tabLoaders[name]) tabLoaders[name]();
 }
 
 // ── Load All Data ─────────────────────────────────────────────────────────────
 async function loadAll() {
   try {
-    const [bkRes, sfRes, tkRes, invRes, inqRes, mntRes] = await Promise.all([
+    const [bkRes, sfRes, tkRes, invRes, inqRes, mntRes, notifRes, annRes, invLogRes] = await Promise.all([
       db.from('bookings').select('*').order('created_at',{ascending:false}),
       db.from('staff').select('*').order('name'),
       db.from('staff_tasks').select('*,staff(name)').order('created_at',{ascending:false}),
       db.from('inventory').select('*').order('item_name'),
       db.from('inquiries').select('*').order('created_at',{ascending:false}),
       db.from('maintenance').select('*').order('created_at',{ascending:false}),
+      db.from('notifications').select('*').eq('target','admin').order('created_at',{ascending:false}).limit(50),
+      db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false}),
+      db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(20),
     ]);
     allBookings   = bkRes.data  || [];
     allStaff      = sfRes.data  || [];
@@ -457,6 +494,9 @@ async function loadAll() {
     allInventory  = invRes.data || [];
     allInquiries  = inqRes.data || [];
     allMaintenance= mntRes.data || [];
+    allNotifications = notifRes.data || [];
+    allAnnouncements  = annRes.data || [];
+    allInventoryLog   = invLogRes.data || [];
     updateBadges();
     renderDashboard();
   } catch(e) { console.error(e); showToast('Failed to load data.','error'); }
@@ -467,6 +507,142 @@ function updateBadges() {
   const ub = document.getElementById('verifBadge'); if(vp>0){ub.textContent=vp;ub.classList.remove('hidden');}else ub.classList.add('hidden');
   const ui = allInquiries.filter(i=>i.status==='unread').length;
   const ib = document.getElementById('inqBadge'); if(ui>0){ib.textContent=ui;ib.classList.remove('hidden');}else ib.classList.add('hidden');
+  const un = allNotifications.filter(n=>!n.is_read).length;
+  const nb = document.getElementById('notifBadge'); if(un>0){nb.textContent=un;nb.classList.remove('hidden');}else nb.classList.add('hidden');
+  const low = allInventory.filter(i=>parseFloat(i.quantity||0)<=parseFloat(i.min_stock||0)).length;
+  const invb = document.getElementById('invBadge'); if(low>0){invb.textContent=low;invb.classList.remove('hidden');}else invb.classList.add('hidden');
+  const ua = allAnnouncements.filter(a=>!a.acknowledged&&a.posted_by==='superadmin').length;
+  const ab = document.getElementById('annBadge'); if(ua>0){ab.textContent=ua;ab.classList.remove('hidden');}else ab.classList.add('hidden');
+}
+
+// ── Notifications (from Super Admin) ───────────────────────────────────────────
+function renderNotifications() {
+  const list = document.getElementById('notificationsList');
+  if (!allNotifications.length) { list.innerHTML = '<p class="text-center text-gray-300 py-8">No notifications yet. You\'ll see booking updates from Super Admin here.</p>'; return; }
+  list.innerHTML = allNotifications.map(n=>{
+    const payload = n.payload || {};
+    const calUrl = payload.calendar_url;
+    const iconMap = { booking_confirmed:'✅', booking_thrown:'❌', payment_received:'💰', guest_checked_in:'🏠', low_stock:'📦', announcement:'📣', task_assigned:'📌' };
+    const icon = iconMap[n.type] || '🔔';
+    return `<div class="sc p-4 ${!n.is_read?'border-l-4 border-gold':''}">
+      <div class="flex justify-between items-start gap-3">
+        <div class="flex-1">
+          <p class="font-semibold text-sm text-gray-800">${icon} ${esc(n.title)}</p>
+          ${n.message?`<p class="text-xs text-gray-500 mt-1">${esc(n.message)}</p>`:''}
+          ${payload.guest_phone?`<p class="text-xs text-gray-400 mt-1"><i class="fas fa-phone text-gold mr-1"></i>${esc(payload.guest_phone)}</p>`:''}
+          <p class="text-xs text-gray-400 mt-1">${fmtDateTime(n.created_at)}</p>
+        </div>
+        ${!n.is_read?`<button onclick="markNotifRead('${n.id}')" class="text-xs text-gray-400 hover:text-gray-600 flex-shrink-0">Mark read</button>`:''}
+      </div>
+      ${calUrl?`<div class="mt-3 flex flex-wrap gap-2">
+        <a href="${calUrl}" target="_blank" onclick="markCalendarSynced('${n.id}','${payload.booking_id||''}')" class="text-xs bg-forest text-white px-3 py-1.5 rounded-lg hover:bg-forest-dark inline-flex items-center gap-1"><i class="fas fa-calendar-plus"></i> ${n.calendar_added?'Added to Calendar ✓':'Add to Google Calendar'}</a>
+        ${n.booking_ref?`<button onclick="openBookingModal('${payload.booking_id}')" class="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50">View Booking</button>`:''}
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+async function markNotifRead(id) {
+  await db.from('notifications').update({is_read:true}).eq('id',id);
+  allNotifications = allNotifications.map(n=>n.id===id?{...n,is_read:true}:n);
+  updateBadges(); renderNotifications();
+}
+async function markAllNotifsRead() {
+  const unread = allNotifications.filter(n=>!n.is_read);
+  if (!unread.length) return;
+  await db.from('notifications').update({is_read:true}).eq('target','admin').eq('is_read',false);
+  allNotifications = allNotifications.map(n=>({...n,is_read:true}));
+  updateBadges(); renderNotifications();
+  showToast('All notifications marked as read.','success');
+}
+// "Add to Google Calendar" opens in a new tab (manual save) — we just
+// remember it was clicked so the button shows "Added ✓" afterwards.
+async function markCalendarSynced(notifId, bookingId) {
+  allNotifications = allNotifications.map(n=>n.id===notifId?{...n,calendar_added:true}:n);
+  renderNotifications();
+  if (bookingId) { try { await db.from('bookings').update({calendar_synced:true}).eq('id',bookingId); } catch(e){} }
+}
+
+// ── Announcements (shared notice board with Super Admin) ───────────────────────
+function renderAnnouncements() {
+  const list = document.getElementById('announcementsList');
+  if (!allAnnouncements.length) { list.innerHTML = '<p class="text-center text-gray-300 py-8">No announcements yet. Post one above to share with Super Admin.</p>'; return; }
+  list.innerHTML = allAnnouncements.map(a=>{
+    const who = a.posted_by==='superadmin' ? '👑 Super Admin (Boss)' : '🧑‍💼 You (Admin)';
+    return `<div class="sc p-4 flex items-start gap-3 ${a.pinned?'border-l-4 border-gold':''}">
+      <div class="flex-1">
+        <p class="text-sm text-gray-800">${a.pinned?'📌 ':''}${esc(a.message)}</p>
+        <p class="text-xs text-gray-400 mt-1">${who} · ${fmtDateTime(a.created_at)} ${a.acknowledged?'· <span class="text-forest">✓ Done</span>':''}</p>
+      </div>
+      <div class="flex gap-2 flex-shrink-0">
+        ${!a.acknowledged?`<button onclick="toggleAnnouncementAck('${a.id}',true)" class="text-xs text-forest hover:underline">Mark Done</button>`:`<button onclick="toggleAnnouncementAck('${a.id}',false)" class="text-xs text-gray-400 hover:underline">Undo</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+async function postAnnouncement() {
+  const msg = document.getElementById('ann_message').value.trim();
+  if (!msg) { showToast('Write a message first.','error'); return; }
+  try {
+    await db.from('announcements').insert({message:msg, posted_by:'admin', pinned:false, acknowledged:false});
+    document.getElementById('ann_message').value = '';
+    showToast('Posted! Visible to Super Admin instantly.','success');
+    await refreshAnnouncements();
+  } catch(e) { console.error(e); showToast('Failed to post.','error'); }
+}
+async function toggleAnnouncementAck(id, ack) {
+  try { await db.from('announcements').update({acknowledged:ack}).eq('id',id); await refreshAnnouncements(); } catch(e){}
+}
+async function refreshAnnouncements() {
+  const { data } = await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
+  allAnnouncements = data || [];
+  updateBadges(); renderAnnouncements();
+}
+
+// ── Notify Super Admin (boss) of something happening on the ground ─────────────
+async function notifySuperAdmin(type, title, message, extra={}) {
+  try {
+    await db.from('notifications').insert({ type, title, message, payload: extra, target:'superadmin', created_by:'admin' });
+  } catch(e) { console.warn('Could not notify Super Admin:', e); }
+}
+
+// ── Realtime: instant sync with Super Admin panel ───────────────────────────────
+function subscribeRealtime() {
+  // New notifications addressed to Admin → toast + refresh badge/list
+  db.channel('admin-notifications')
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'notifications', filter:'target=eq.admin'}, (payload)=>{
+      const n = payload.new;
+      allNotifications = [n, ...allNotifications];
+      updateBadges();
+      if (document.getElementById('tab-notifications') && !document.getElementById('tab-notifications').classList.contains('hidden')) renderNotifications();
+      showToast(`🔔 ${n.title}`,'info');
+    })
+    .subscribe();
+
+  // Inventory changes from Super Admin (or this panel) → live refresh
+  db.channel('admin-inventory-sync')
+    .on('postgres_changes', {event:'*', schema:'public', table:'inventory'}, async ()=>{
+      const { data } = await db.from('inventory').select('*').order('item_name');
+      allInventory = data || [];
+      updateBadges();
+      if (document.getElementById('tab-inventory') && !document.getElementById('tab-inventory').classList.contains('hidden')) renderInventory();
+    })
+    .subscribe();
+
+  // Inventory log → refresh recent activity feed
+  db.channel('admin-inventory-log')
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'inventory_log'}, async ()=>{
+      const { data } = await db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(20);
+      allInventoryLog = data || [];
+      if (document.getElementById('tab-inventory') && !document.getElementById('tab-inventory').classList.contains('hidden')) renderInventory();
+    })
+    .subscribe();
+
+  // Announcements from Super Admin → live refresh
+  db.channel('admin-announcements')
+    .on('postgres_changes', {event:'*', schema:'public', table:'announcements'}, async ()=>{
+      await refreshAnnouncements();
+    })
+    .subscribe();
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -726,6 +902,7 @@ async function submitGuestLog() {
     });
     if (error) throw error;
     showToast('Guest check-in logged!','success');
+    await notifySuperAdmin('guest_checked_in', `🏠 Guest Checked In — ${ref}`, `${names.length} guest(s) logged in. ${document.getElementById('gl_deposit').value>0?'Security deposit: ₱'+document.getElementById('gl_deposit').value:''}`, {booking_ref:ref});
     ['gl_ref','gl_names','gl_notes'].forEach(f=>document.getElementById(f).value='');
     document.getElementById('gl_agree').checked=false;
     document.getElementById('gl_bookingInfo').classList.add('hidden');
@@ -835,18 +1012,76 @@ function renderInventory() {
   if (low.length>0) { banner.classList.remove('hidden'); document.getElementById('lowStockMsg').textContent=`${low.length} item(s) below minimum stock: ${low.map(i=>i.item_name).join(', ')}`; }
   else banner.classList.add('hidden');
   const tbl = document.getElementById('inventoryTable');
-  tbl.innerHTML = allInventory.length===0 ? `<tr><td colspan="6" class="tc text-center text-gray-300 py-8">No inventory. Add items in Super Admin.</td></tr>` :
+  tbl.innerHTML = allInventory.length===0 ? `<tr><td colspan="4" class="tc text-center text-gray-300 py-8">No inventory. Add items in Super Admin.</td></tr>` :
     allInventory.map(i=>{
       const isLow = parseFloat(i.quantity||0)<=parseFloat(i.min_stock||0);
       return `<tr class="${isLow?'bg-amber-50':'hover:bg-gray-50'}">
-        <td class="tc font-medium ${isLow?'text-amber-700':''}">${esc(i.item_name)} ${isLow?'<span class="text-xs text-red-500 ml-1">⚠ LOW</span>':''}</td>
-        <td class="tc text-xs text-gray-500">${i.category||'—'}</td>
-        <td class="tc font-bold ${isLow?'text-red-600':'text-gray-800'}">${i.quantity||0} ${i.unit||''}</td>
-        <td class="tc text-xs text-gray-400">${i.min_stock||0} ${i.unit||''}</td>
-        <td class="tc text-xs text-gray-500">${i.unit||'—'}</td>
+        <td class="tc font-medium ${isLow?'text-amber-700':''}">${esc(i.item_name)} ${isLow?'<span class="text-xs text-red-500 ml-1">⚠ LOW</span>':''}<p class="text-xs text-gray-400">${i.category||'—'}</p></td>
+        <td class="tc font-bold ${isLow?'text-red-600':'text-gray-800'}">${i.quantity||0} ${i.unit||''}<p class="text-xs text-gray-400 font-normal">min ${i.min_stock||0}</p></td>
         <td class="tc"><span class="badge ${isLow?'b-declined':'b-confirmed'} text-xs">${isLow?'Low Stock':'OK'}</span></td>
+        <td class="tc">
+          <div class="flex gap-2">
+            <button onclick="adjustInventory('${i.id}','${esc(i.item_name)}',${i.quantity||0},'use')" class="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 flex items-center gap-1"><i class="fas fa-minus"></i> Use</button>
+            <button onclick="adjustInventory('${i.id}','${esc(i.item_name)}',${i.quantity||0},'restock')" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Restock</button>
+          </div>
+        </td>
       </tr>`;
     }).join('');
+
+  // Recent stock changes feed
+  const logEl = document.getElementById('inventoryLog');
+  if (logEl) {
+    logEl.innerHTML = allInventoryLog.length===0 ? '<p class="text-gray-300 text-xs">No stock changes logged yet.</p>' :
+      allInventoryLog.map(l=>{
+        const isUse = l.change_amount < 0;
+        const who = l.logged_by==='superadmin' ? 'Super Admin' : 'Admin';
+        return `<div class="flex justify-between items-start p-2.5 bg-gray-50 rounded-xl">
+          <div>
+            <p class="text-sm text-gray-700">${esc(l.item_name||'Item')} <span class="${isUse?'text-red-600':'text-green-600'} font-semibold">${isUse?'':'+'}${l.change_amount}</span></p>
+            <p class="text-xs text-gray-400">${l.reason||(isUse?'Used':'Restocked')} · by ${who} · ${fmtDateTime(l.created_at)}</p>
+          </div>
+          <span class="text-xs font-medium text-gray-500">→ ${l.new_quantity}</span>
+        </div>`;
+      }).join('');
+  }
+}
+
+// Simple "Use" / "Restock" prompt — friendly for non-technical staff.
+// Logs every change to inventory_log so both panels see an audit trail,
+// and updates the shared `inventory` table (Realtime pushes the change
+// to Super Admin instantly).
+async function adjustInventory(id, name, currentQty, mode) {
+  const verb = mode==='use' ? 'use' : 'add (restock)';
+  const amountStr = prompt(`How many ${name} did you ${verb}?`, mode==='use'?'1':'');
+  if (amountStr===null) return;
+  const amount = parseFloat(amountStr);
+  if (!amount || amount<=0) { showToast('Enter a number greater than 0.','error'); return; }
+
+  const change = mode==='use' ? -Math.abs(amount) : Math.abs(amount);
+  const newQty = Math.max(0, (parseFloat(currentQty)||0) + change);
+
+  try {
+    await db.from('inventory').update({ quantity:newQty, updated_at:new Date().toISOString() }).eq('id', id);
+    await db.from('inventory_log').insert({
+      item_id:id, item_name:name, change_amount:change, new_quantity:newQty,
+      reason: mode==='use' ? 'Used by Admin' : 'Restocked by Admin',
+      logged_by:'admin',
+    });
+    showToast(`${name} updated: ${newQty} left.`,'success');
+
+    // If this just dropped below minimum, let the boss know.
+    const item = allInventory.find(i=>i.id===id);
+    if (item && newQty<=(item.min_stock||0) && (parseFloat(currentQty)||0)>(item.min_stock||0)) {
+      await notifySuperAdmin('low_stock', `📦 Low Stock — ${name}`, `${name} is now at ${newQty} ${item.unit||''} (minimum: ${item.min_stock||0}).`, {item_id:id});
+    }
+
+    const { data } = await db.from('inventory').select('*').order('item_name');
+    allInventory = data || [];
+    const { data: logData } = await db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(20);
+    allInventoryLog = logData || [];
+    updateBadges();
+    renderInventory();
+  } catch(e) { console.error(e); showToast('Failed to update stock.','error'); }
 }
 
 // ── Inquiries ─────────────────────────────────────────────────────────────────
@@ -953,6 +1188,7 @@ async function savePayment() {
     }).eq('id', id);
     if (error) throw error;
     showToast(`Payment of ₱${amount.toLocaleString()} recorded. ${newBalance===0?'Fully paid!':'Balance: ₱'+newBalance.toLocaleString()}`,'success');
+    await notifySuperAdmin('payment_received', `💰 Payment Recorded — ${b.guest_name}`, `₱${amount.toLocaleString()} via ${method}${ref?' (ref: '+ref+')':''}. ${newBalance===0?'Booking is now fully paid.':'Remaining balance: ₱'+newBalance.toLocaleString()+'.'}`, {booking_id:id, booking_ref:b.booking_ref, guest_phone:b.guest_phone});
     closeModal('paymentModal');
     closeModal('bookingModal');
     await loadAll();
