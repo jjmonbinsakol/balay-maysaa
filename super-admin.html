@@ -86,7 +86,7 @@
 </head>
 <body>
 
-<!-- ═══════════════ LOGIN ═══════════════ -->
+<!-- ═══════════════ LOGIN (OTP) ═══════════════ -->
 <div id="loginScreen" class="min-h-screen flex items-center justify-center px-4" style="background:linear-gradient(135deg,#1e3d28,#2d5a3b 60%,#3d7a52);">
   <div class="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-sm">
     <div class="text-center mb-8">
@@ -94,11 +94,36 @@
       <h1 class="font-heading text-3xl text-forest font-light mb-1">Balay Maysa</h1>
       <p class="text-xs text-gray-400 uppercase tracking-widest">Super Admin</p>
     </div>
-    <div class="mb-4"><label class="block text-xs font-medium text-gray-500 mb-1.5">Username</label><input id="loginUser" type="text" class="fi" placeholder="superadmin" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-    <div class="mb-6"><label class="block text-xs font-medium text-gray-500 mb-1.5">Password</label><input id="loginPass" type="password" class="fi" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-    <p id="loginErr" class="hidden text-red-500 text-xs mb-3 text-center">Invalid credentials.</p>
-    <button onclick="doLogin()" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark">Access Dashboard</button>
-    <p class="text-center mt-4 text-xs text-gray-400"><a href="admin.html" class="hover:text-forest">← Back to Admin Panel</a></p>
+
+    <!-- Step 1: enter email, request code -->
+    <div id="otpStepEmail">
+      <p class="text-sm text-gray-500 mb-4 text-center">Enter your admin email to receive a one-time login code.</p>
+      <div class="mb-4"><label class="block text-xs font-medium text-gray-500 mb-1.5">Email</label><input id="otpEmail" type="email" class="fi" placeholder="you@example.com" onkeydown="if(event.key==='Enter')requestOtp()"/></div>
+      <p id="otpEmailErr" class="hidden text-red-500 text-xs mb-3 text-center"></p>
+      <button onclick="requestOtp()" id="otpSendBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center justify-center gap-2">
+        <span id="otpSendText">Send Code</span><div class="spin hidden" id="otpSendSpin"></div>
+      </button>
+    </div>
+
+    <!-- Step 2: enter 6-digit code -->
+    <div id="otpStepCode" class="hidden">
+      <p class="text-sm text-gray-500 mb-1 text-center">We sent a 6-digit code to</p>
+      <p class="text-sm font-semibold text-gray-800 mb-4 text-center" id="otpEmailDisplay">–</p>
+      <div class="mb-4">
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">Verification Code</label>
+        <input id="otpCode" type="text" inputmode="numeric" maxlength="6" class="fi text-center text-2xl tracking-widest font-mono" placeholder="000000" onkeydown="if(event.key==='Enter')verifyOtp()"/>
+      </div>
+      <p id="otpCodeErr" class="hidden text-red-500 text-xs mb-3 text-center"></p>
+      <button onclick="verifyOtp()" id="otpVerifyBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center justify-center gap-2 mb-3">
+        <span id="otpVerifyText">Verify &amp; Log In</span><div class="spin hidden" id="otpVerifySpin"></div>
+      </button>
+      <div class="flex justify-between items-center text-xs">
+        <button onclick="backToEmailStep()" class="text-gray-400 hover:text-gray-600">← Use a different email</button>
+        <button onclick="requestOtp(true)" id="otpResendBtn" class="text-forest hover:underline">Resend code</button>
+      </div>
+    </div>
+
+    <p class="text-center mt-6 text-xs text-gray-400"><a href="admin.html" class="hover:text-forest">← Back to Admin Panel</a></p>
   </div>
 </div>
 
@@ -152,6 +177,7 @@
 
       <p class="nav-group-label">Settings</p>
       <button class="nav-item" onclick="showView('content')" id="nav-content"><i class="fas fa-pen-nib"></i> Content & CMS</button>
+      <button class="nav-item" onclick="showView('emails')" id="nav-emails"><i class="fas fa-envelope-open-text"></i> Email Templates</button>
       <button class="nav-item" onclick="showView('reports')" id="nav-reports"><i class="fas fa-file-chart-column"></i> Reports</button>
     </nav>
     <div class="p-3 border-t border-white/10">
@@ -570,10 +596,19 @@
             <p class="text-xs text-gray-400 mt-2">This content appears in the Terms modal on the booking page.</p>
           </div>
           <!-- Promo Banner -->
-          <div class="sc p-6 md:col-span-2"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-bullhorn text-gold text-sm"></i>Promo Banner</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-bullhorn text-gold text-sm"></i>Promo Banner</h3>
+            <div class="grid grid-cols-1 gap-4">
               <div><label class="fi-label">Banner Text</label><input type="text" id="cms_promoText" class="fi" placeholder="e.g. Book now and get 10% off!"/></div>
               <div><label class="fi-label">Active?</label><select id="cms_promoActive" class="fi"><option value="false">No – Hidden</option><option value="true">Yes – Show on website</option></select></div>
+            </div>
+          </div>
+          <!-- Social Media Links -->
+          <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-share-nodes text-gold text-sm"></i>Social Media Links</h3>
+            <p class="text-xs text-gray-400 mb-3">Buttons appear in the Contact section. Leave blank to hide a platform.</p>
+            <div class="space-y-3">
+              <div><label class="fi-label"><i class="fa-brands fa-facebook mr-1"></i> Facebook Page URL</label><input type="url" id="cms_socialFacebook" class="fi" placeholder="https://facebook.com/balaymaysa"/></div>
+              <div><label class="fi-label"><i class="fa-brands fa-facebook-messenger mr-1"></i> Messenger Link</label><input type="url" id="cms_socialMessenger" class="fi" placeholder="https://m.me/balaymaysa"/></div>
+              <div><label class="fi-label"><i class="fa-brands fa-instagram mr-1"></i> Instagram URL</label><input type="url" id="cms_socialInstagram" class="fi" placeholder="https://instagram.com/balaymaysa"/></div>
             </div>
           </div>
         </div>
@@ -593,7 +628,7 @@
         </div>
 
         <!-- Room Images Manager -->
-        <div class="sc overflow-hidden">
+        <div class="sc overflow-hidden mb-5">
           <div class="p-5 border-b border-gray-100 flex items-center justify-between">
             <div><h3 class="font-semibold text-gray-700">Room Images Manager</h3><p class="text-xs text-gray-400 mt-0.5">Images added here replace the slider photos on the booking page.</p></div>
             <button onclick="openRoomImageModal()" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Add Image / Video</button>
@@ -602,9 +637,89 @@
             <p class="text-gray-400 text-sm col-span-4">Loading…</p>
           </div>
         </div>
+
+        <!-- Amenities Manager -->
+        <div class="sc overflow-hidden">
+          <div class="p-5 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-700">Amenities</h3>
+            <p class="text-xs text-gray-400 mt-0.5">This list appears as the "Resort Amenities" grid on the booking page. Add, edit, reorder, or remove items.</p>
+          </div>
+          <div class="p-5">
+            <div><label class="fi-label">Section Title</label><input type="text" id="cms_amenitiesTitle" class="fi mb-4" placeholder="Resort Amenities"/></div>
+            <div id="amenitiesListEditor" class="space-y-2 mb-3">
+              <p class="text-gray-400 text-sm">Loading…</p>
+            </div>
+            <button onclick="addAmenityRow()" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Add Amenity</button>
+            <p class="text-xs text-gray-400 mt-3">Icon names use <a href="https://fontawesome.com/search?o=r&m=free" target="_blank" class="text-forest underline">Font Awesome</a> free icon names without the "fa-" prefix removed, e.g. <code>bed</code>, <code>water-ladder</code>, <code>square-parking</code>.</p>
+            <button onclick="saveAmenities()" class="mt-4 bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-save"></i> Save Amenities</button>
+          </div>
+          <div class="p-5 border-t border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+              <div><h4 class="font-semibold text-gray-700 text-sm">Amenity Photos</h4><p class="text-xs text-gray-400 mt-0.5">Shown as a gallery below the amenities list.</p></div>
+              <button onclick="openAmenityImageModal()" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Add Photo</button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-3" id="amenityImagesGrid">
+              <p class="text-gray-400 text-sm col-span-6">Loading…</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- ═══ REPORTS ═══ -->
+      <!-- ═══ EMAIL TEMPLATES ═══ -->
+      <div id="view-emails" class="view">
+        <div class="mb-5">
+          <h2 class="font-heading text-3xl text-gray-800 font-light">Email Templates</h2>
+          <p class="text-sm text-gray-400">Edit the emails guests receive automatically. Use the placeholders shown below — they'll be replaced with real booking details when each email is sent.</p>
+        </div>
+        <div class="sc p-4 mb-5 bg-blue-50 border border-blue-100">
+          <p class="text-xs text-blue-700"><strong>Available placeholders:</strong> <code>{{guest_name}}</code> <code>{{booking_ref}}</code> <code>{{room_type}}</code> <code>{{check_in}}</code> <code>{{check_out}}</code> <code>{{total_amount}}</code> <code>{{deposit_amount}}</code> <code>{{remaining_balance}}</code> <code>{{pax_count}}</code> <code>{{calendar_url}}</code> — amounts are pre-formatted (no ₱ sign, add it yourself), dates are YYYY-MM-DD, and <code>{{calendar_url}}</code> is a ready Google Calendar link.</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Pending -->
+          <div class="sc p-6">
+            <div class="flex items-center justify-between mb-3">
+              <div><h3 class="font-semibold text-gray-700">📩 Booking Received (Pending)</h3><p class="text-xs text-gray-400 mt-0.5">Sent immediately when a guest submits a booking with payment proof.</p></div>
+            </div>
+            <div class="mb-3"><label class="fi-label">Subject</label><input type="text" id="et_pending_subject" class="fi"/></div>
+            <div><label class="fi-label">Body (HTML)</label><textarea id="et_pending_body" class="fi font-mono text-xs" rows="10"></textarea></div>
+            <div class="flex gap-2 mt-3">
+              <button onclick="saveEmailTemplate('booking_pending')" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save</button>
+              <button onclick="sendTestEmail('booking_pending')" class="border border-gray-200 px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Send test to myself</button>
+              <button onclick="resetEmailTemplate('booking_pending')" class="text-xs text-gray-400 hover:text-red-500 ml-auto self-center">Reset to default</button>
+            </div>
+          </div>
+
+          <!-- Confirmed -->
+          <div class="sc p-6">
+            <div class="flex items-center justify-between mb-3">
+              <div><h3 class="font-semibold text-gray-700">🎉 Booking Confirmed</h3><p class="text-xs text-gray-400 mt-0.5">Sent when you click "Confirm" on a pending booking.</p></div>
+            </div>
+            <div class="mb-3"><label class="fi-label">Subject</label><input type="text" id="et_confirmed_subject" class="fi"/></div>
+            <div><label class="fi-label">Body (HTML)</label><textarea id="et_confirmed_body" class="fi font-mono text-xs" rows="10"></textarea></div>
+            <div class="flex gap-2 mt-3">
+              <button onclick="saveEmailTemplate('booking_confirmed')" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save</button>
+              <button onclick="sendTestEmail('booking_confirmed')" class="border border-gray-200 px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Send test to myself</button>
+              <button onclick="resetEmailTemplate('booking_confirmed')" class="text-xs text-gray-400 hover:text-red-500 ml-auto self-center">Reset to default</button>
+            </div>
+          </div>
+
+          <!-- Declined -->
+          <div class="sc p-6">
+            <div class="flex items-center justify-between mb-3">
+              <div><h3 class="font-semibold text-gray-700">Booking Declined</h3><p class="text-xs text-gray-400 mt-0.5">Sent when you click "Decline" on a pending booking. The dates become available again.</p></div>
+            </div>
+            <div class="mb-3"><label class="fi-label">Subject</label><input type="text" id="et_declined_subject" class="fi"/></div>
+            <div><label class="fi-label">Body (HTML)</label><textarea id="et_declined_body" class="fi font-mono text-xs" rows="10"></textarea></div>
+            <div class="flex gap-2 mt-3">
+              <button onclick="saveEmailTemplate('booking_declined')" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save</button>
+              <button onclick="sendTestEmail('booking_declined')" class="border border-gray-200 px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Send test to myself</button>
+              <button onclick="resetEmailTemplate('booking_declined')" class="text-xs text-gray-400 hover:text-red-500 ml-auto self-center">Reset to default</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="view-reports" class="view">
         <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Reports & Export</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
@@ -915,22 +1030,47 @@
   </div>
 </div>
 
+<!-- Amenity Image Modal -->
+<div id="amenityImageModal" class="modal hidden">
+  <div class="mbox">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+      <h3 class="font-heading text-xl text-forest font-light">Add Amenity Photo</h3>
+      <button onclick="closeModal('amenityImageModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="fi-label">Upload Photo *</label>
+        <input type="hidden" id="ai_url"/>
+        <img id="aiImgPreview" class="cms-thumb mb-2 hidden"/>
+        <div class="upload-zone" onclick="document.getElementById('aiFile').click()">
+          <i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-1"></i>
+          <p class="text-xs text-gray-500" id="aiUploadLabel">Click to upload</p>
+        </div>
+        <input type="file" id="aiFile" class="hidden" accept="image/*" onchange="handleMediaUpload(this,'ai_url','aiImgPreview','aiUploadLabel','amenity-media')"/>
+      </div>
+      <div><label class="fi-label">Display Order</label><input type="number" id="ai_order" class="fi" value="0" min="0"/></div>
+      <div class="flex gap-3 mt-2">
+        <button onclick="closeModal('amenityImageModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
+        <button onclick="saveAmenityImage()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save Photo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
 const SB_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
-const SA_USER = 'superadmin';
-const SA_PASS = 'SecurePass2026';
+const SEND_EMAIL_URL = `${SB_URL}/functions/v1/send-email`;
+// Only these emails can request a Super Admin OTP login code.
+// Add/remove trusted admin emails here.
+const SUPERADMIN_EMAILS = ['balaymaysa@gmail.com'];
 const SESSION_MS = 2 * 60 * 60 * 1000;
 const WARN_MS    = 10 * 60 * 1000;
 const db = window.supabase.createClient(SB_URL, SB_ANON);
-const EJS_SID  = 'service_t13ealt';
-const EJS_TMPL = 'template_s17clcj';
-if (typeof emailjs !== 'undefined') emailjs.init('yupgCoqLB4unb0OAz');
 
 const STATUS_LABELS = {
   pending_payment_verification:'Pending Verification',
@@ -974,27 +1114,96 @@ let sessionExpiry=null;
 let charts={};
 
 // ═══════════════════════════════════════════════════════
-// AUTH
+// AUTH — email + one-time code (OTP), via send-email Edge Function
 // ═══════════════════════════════════════════════════════
-function doLogin() {
-  const u=document.getElementById('loginUser').value.trim();
-  const p=document.getElementById('loginPass').value;
-  if(u===SA_USER&&p===SA_PASS){
+let _otpEmail = null;
+let _otpResendCooldown = false;
+
+function showOtpErr(elId, msg){
+  const e=document.getElementById(elId);
+  e.textContent=msg; e.classList.remove('hidden');
+  setTimeout(()=>e.classList.add('hidden'),4000);
+}
+
+async function requestOtp(isResend=false){
+  const email = isResend ? _otpEmail : document.getElementById('otpEmail').value.trim().toLowerCase();
+  if(!email){ showOtpErr('otpEmailErr','Please enter your email.'); return; }
+  if(!SUPERADMIN_EMAILS.includes(email)){
+    showOtpErr('otpEmailErr','This email is not authorized for Super Admin access.');
+    return;
+  }
+  if(_otpResendCooldown && isResend) return;
+
+  const sendTextId = isResend ? 'otpResendBtn' : 'otpSendText';
+  const spinId     = isResend ? null : 'otpSendSpin';
+  if(!isResend){ document.getElementById('otpSendText').textContent='Sending…'; document.getElementById('otpSendSpin').classList.remove('hidden'); document.getElementById('otpSendBtn').disabled=true; }
+  else { document.getElementById('otpResendBtn').textContent='Sending…'; document.getElementById('otpResendBtn').disabled=true; }
+
+  try{
+    await callSendEmail({type:'otp', email});
+    _otpEmail = email;
+    document.getElementById('otpEmailDisplay').textContent = email;
+    document.getElementById('otpStepEmail').classList.add('hidden');
+    document.getElementById('otpStepCode').classList.remove('hidden');
+    document.getElementById('otpCode').value='';
+    document.getElementById('otpCode').focus();
+    toast(isResend?'New code sent!':'Code sent! Check your inbox.','success');
+    // 30s resend cooldown
+    _otpResendCooldown=true;
+    document.getElementById('otpResendBtn').disabled=true;
+    let secs=30;
+    const tick=()=>{
+      document.getElementById('otpResendBtn').textContent=`Resend code (${secs}s)`;
+      if(secs<=0){ _otpResendCooldown=false; document.getElementById('otpResendBtn').disabled=false; document.getElementById('otpResendBtn').textContent='Resend code'; return; }
+      secs--; setTimeout(tick,1000);
+    };
+    tick();
+  }catch(e){
+    console.error(e);
+    showOtpErr('otpEmailErr', e.message||'Could not send code. Please try again.');
+    if(isResend){ document.getElementById('otpResendBtn').textContent='Resend code'; document.getElementById('otpResendBtn').disabled=false; }
+  }finally{
+    if(!isResend){ document.getElementById('otpSendText').textContent='Send Code'; document.getElementById('otpSendSpin').classList.add('hidden'); document.getElementById('otpSendBtn').disabled=false; }
+  }
+}
+
+function backToEmailStep(){
+  document.getElementById('otpStepCode').classList.add('hidden');
+  document.getElementById('otpStepEmail').classList.remove('hidden');
+  document.getElementById('otpCode').value='';
+  _otpEmail=null; _otpResendCooldown=false;
+}
+
+async function verifyOtp(){
+  const code = document.getElementById('otpCode').value.trim();
+  if(!/^\d{6}$/.test(code)){ showOtpErr('otpCodeErr','Enter the 6-digit code.'); return; }
+  document.getElementById('otpVerifyText').textContent='Verifying…';
+  document.getElementById('otpVerifySpin').classList.remove('hidden');
+  document.getElementById('otpVerifyBtn').disabled=true;
+  try{
+    const result = await callSendEmail({type:'otp_verify', email:_otpEmail, code});
+    if(!result.valid){ showOtpErr('otpCodeErr', result.reason||'Invalid code.'); return; }
     sessionExpiry=Date.now()+SESSION_MS;
-    sessionStorage.setItem('bm_sa',JSON.stringify({expiry:sessionExpiry}));
+    sessionStorage.setItem('bm_sa',JSON.stringify({expiry:sessionExpiry, email:_otpEmail, token:result.token}));
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('mainPanel').classList.remove('hidden');
     initDashboard(); startSessionTimer();
-    toast('Welcome, Super Admin!','success');
-  } else {
-    const e=document.getElementById('loginErr');
-    e.classList.remove('hidden'); setTimeout(()=>e.classList.add('hidden'),3000);
+    toast(`Welcome, ${_otpEmail}!`,'success');
+  }catch(e){
+    console.error(e);
+    showOtpErr('otpCodeErr', e.message||'Verification failed. Please try again.');
+  }finally{
+    document.getElementById('otpVerifyText').textContent='Verify & Log In';
+    document.getElementById('otpVerifySpin').classList.add('hidden');
+    document.getElementById('otpVerifyBtn').disabled=false;
   }
 }
+
 function doLogout(){ sessionStorage.removeItem('bm_sa'); location.reload(); }
 function extendSession(){
   sessionExpiry=Date.now()+SESSION_MS;
-  sessionStorage.setItem('bm_sa',JSON.stringify({expiry:sessionExpiry}));
+  const _sa=JSON.parse(sessionStorage.getItem('bm_sa')||'{}');
+  sessionStorage.setItem('bm_sa',JSON.stringify({..._sa,expiry:sessionExpiry}));
   document.getElementById('sessionWarning').style.display='none';
   toast('Session extended 2 hours.','success');
 }
@@ -1008,7 +1217,7 @@ function startSessionTimer(){
     sw.style.display=rem<=WARN_MS?'flex':'none';
   },1000);
 }
-// Auto-login
+// Auto-login (if a valid session exists from a previous OTP verification)
 const _sa=sessionStorage.getItem('bm_sa');
 if(_sa){
   const{expiry}=JSON.parse(_sa);
@@ -1035,7 +1244,7 @@ function showView(name){
     pricing:loadPricing, staff:loadStaff, tasks:loadTasks,
     inventory:loadInventory, maintenance:loadMaintenance,
     assets:loadAssets, content:loadContent, reports:()=>{},
-    announcements:loadAnnouncements
+    announcements:loadAnnouncements, emails:loadEmailTemplates
   };
   if(loaders[name]) loaders[name]();
 }
@@ -1479,50 +1688,15 @@ async function saveAdminNotes(id){
   catch(e){toast('Failed.','error');}
 }
 
+// Booking confirmation/decline emails now use the editable templates
+// in `email_templates` (Super Admin → Email Templates), rendered
+// server-side by the send-email Edge Function. See sendBookingEmail().
 async function sendConfirmEmail(b){
-  // Email notification to guest that booking is confirmed — flows through admin action
-  const{data:s}=await db.from('site_settings').select('*');
-  const cfg=Object.fromEntries((s||[]).map(x=>[x.setting_key,x.setting_value]));
-  const ph=cfg.contact_phone||'0917 565 7918';
-  const siteName=cfg.site_name||'Balay Maysa Resort';
-  const addr=cfg.contact_address||'Blk 8 Lot 12 M.Cuenco St., Caloocan North';
-  const calStart=(b.check_in_date||'').replace(/-/g,'');
-  const calEnd=(b.check_out_date||'').replace(/-/g,'');
-  const calUrl=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(siteName+' '+b.booking_ref)}&dates=${calStart}/${calEnd}&location=${encodeURIComponent(addr)}`;
-  const html=`<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
-<div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">${siteName}</h1><p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">🎉 Booking Confirmed!</p></div>
-<div style="padding:40px;">
-  <p>Hello <strong>${esc(b.guest_name)}</strong>,</p>
-  <p style="color:#666;line-height:1.7;">Congratulations! Your booking at <strong>${siteName}</strong> is officially <strong style="color:#2d5a3b;">CONFIRMED</strong>. We look forward to welcoming you!</p>
-  <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
-    <table style="width:100%;font-size:14px;border-collapse:collapse;">
-      <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">${b.booking_ref}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Room(s)</td><td>${b.room_type}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Check-in</td><td>${fmtDate(b.check_in_date)}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Check-out</td><td>${fmtDate(b.check_out_date)}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Guests</td><td>${b.pax_count||b.adults} pax</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Balance Due on Arrival</td><td style="color:#dc2626;font-weight:600;">₱${(b.remaining_balance||0).toLocaleString()}</td></tr>
-    </table>
-  </div>
-  <div style="text-align:center;margin:24px 0;"><a href="${calUrl}" style="background:#2d5a3b;color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;">📅 Add to Google Calendar</a></div>
-  <div style="background:#fef9ee;border-radius:12px;padding:18px 24px;">
-    <p style="margin:0;color:#92400e;font-size:13px;"><strong>📍</strong> ${addr}</p>
-    <p style="margin:6px 0 0;color:#92400e;font-size:13px;"><strong>📞</strong> <a href="tel:${ph.replace(/\s/g,'')}" style="color:#92400e;">${ph}</a></p>
-  </div>
-</div>
-<div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">${siteName} · ${addr}</p></div>
-</div>`;
-  await sendEmail(b.guest_email,`✅ Booking Confirmed – ${b.booking_ref} – ${siteName}`,html);
+  await sendBookingEmail('booking_confirmed', b.id);
 }
 
 async function sendDeclineEmail(b){
-  const{data:s}=await db.from('site_settings').select('*');
-  const cfg=Object.fromEntries((s||[]).map(x=>[x.setting_key,x.setting_value]));
-  const siteName=cfg.site_name||'Balay Maysa Resort';
-  const ph=cfg.contact_phone||'0917 565 7918';
-  const email=cfg.contact_email||'balaymaysa@gmail.com';
-  const html=`<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;"><div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">${siteName}</h1></div><div style="padding:40px;"><p>Hello <strong>${esc(b.guest_name)}</strong>,</p><p style="color:#666;line-height:1.7;">We regret that your booking request (<strong>${b.booking_ref}</strong>) could not be accommodated. Please contact us to explore other dates or arrangements.</p><p style="color:#666;font-size:13px;">📞 <a href="tel:${ph.replace(/\s/g,'')}" style="color:#2d5a3b;">${ph}</a> · ✉️ <a href="mailto:${email}" style="color:#2d5a3b;">${email}</a></p></div></div>`;
-  await sendEmail(b.guest_email,`${siteName} – Booking Update (${b.booking_ref})`,html);
+  await sendBookingEmail('booking_declined', b.id);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2014,8 +2188,244 @@ async function deleteAnnouncement(id){
 }
 
 // ═══════════════════════════════════════════════════════
+// EMAIL TEMPLATES — editable booking emails (pending/confirmed/declined)
+// ═══════════════════════════════════════════════════════
+// Defaults mirror email_otp_migration.sql — used for "Reset to default".
+const EMAIL_TEMPLATE_DEFAULTS = {
+  booking_pending: {
+    subject: 'Balay Maysa — Booking Received ({{booking_ref}})',
+    body_html: `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
+  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
+    <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">🌴 Balay Maysa</h1>
+    <p style="color:#c9a03d;font-size:13px;margin:8px 0 0;">Booking Received</p>
+  </div>
+  <div style="padding:40px;">
+    <p>Hi <strong>{{guest_name}}</strong>,</p>
+    <p style="color:#666;line-height:1.7;">Thanks for booking with Balay Maysa! We have received your reservation and payment proof, and it is now <strong style="color:#c9a03d;">pending review</strong>. We will verify your payment and confirm your booking within 24 hours.</p>
+    <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
+      <table style="width:100%;font-size:14px;border-collapse:collapse;">
+        <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">{{booking_ref}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Room(s)</td><td>{{room_type}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Check-in</td><td>{{check_in}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Check-out</td><td>{{check_out}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Total</td><td>₱{{total_amount}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Amount Paid</td><td>₱{{deposit_amount}}</td></tr>
+      </table>
+    </div>
+    <p style="color:#666;font-size:13px;">We will email you again as soon as your booking is confirmed. If you have questions, feel free to contact us.</p>
+  </div>
+  <div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
+</div>`
+  },
+  booking_confirmed: {
+    subject: '🎉 Balay Maysa — Booking Confirmed ({{booking_ref}})',
+    body_html: `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
+  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
+    <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">🌴 Balay Maysa</h1>
+    <p style="color:#c9a03d;font-size:13px;margin:8px 0 0;">🎉 Booking Confirmed!</p>
+  </div>
+  <div style="padding:40px;">
+    <p>Hi <strong>{{guest_name}}</strong>,</p>
+    <p style="color:#666;line-height:1.7;">Great news! Your booking has been <strong style="color:#2d5a3b;">CONFIRMED</strong>. We look forward to welcoming you at Balay Maysa!</p>
+    <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
+      <table style="width:100%;font-size:14px;border-collapse:collapse;">
+        <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">{{booking_ref}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Room(s)</td><td>{{room_type}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Check-in</td><td>{{check_in}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Check-out</td><td>{{check_out}}</td></tr>
+        <tr><td style="padding:6px 0;color:#666;">Balance on Arrival</td><td style="color:#dc2626;font-weight:600;">₱{{remaining_balance}}</td></tr>
+      </table>
+    </div>
+    <div style="text-align:center;margin:24px 0;"><a href="{{calendar_url}}" style="background:#2d5a3b;color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;">📅 Add to Google Calendar</a></div>
+    <div style="background:#fef9ee;border-radius:12px;padding:18px 24px;"><p style="margin:0;color:#92400e;font-size:13px;"><strong>📍</strong> Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North</p><p style="margin:6px 0 0;color:#92400e;font-size:13px;"><strong>📞</strong> <a href="tel:09175657918" style="color:#92400e;">0917 565 7918</a></p></div>
+  </div>
+  <div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
+</div>`
+  },
+  booking_declined: {
+    subject: 'Balay Maysa — Booking Update ({{booking_ref}})',
+    body_html: `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
+  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
+    <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">🌴 Balay Maysa</h1>
+    <p style="color:#c9a03d;font-size:13px;margin:8px 0 0;">Booking Update</p>
+  </div>
+  <div style="padding:40px;">
+    <p>Hi <strong>{{guest_name}}</strong>,</p>
+    <p style="color:#666;line-height:1.7;">We're sorry — we were unable to confirm your booking <strong>{{booking_ref}}</strong> after reviewing the payment details provided. The reserved dates have now been released.</p>
+    <p style="color:#666;line-height:1.7;">If you believe this is a mistake, or would like help re-booking, please contact us directly and we'll be happy to assist.</p>
+    <div style="background:#fef9ee;border-radius:12px;padding:18px 24px;margin-top:16px;"><p style="margin:0;color:#92400e;font-size:13px;"><strong>📞</strong> <a href="tel:09175657918" style="color:#92400e;">0917 565 7918</a></p></div>
+  </div>
+  <div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
+</div>`
+  }
+};
+
+let emailTemplates = {};
+
+async function loadEmailTemplates(){
+  try{
+    const{data,error}=await db.from('email_templates').select('*');
+    if(error) throw error;
+    emailTemplates = Object.fromEntries((data||[]).map(t=>[t.template_key,t]));
+    ['booking_pending','booking_confirmed','booking_declined'].forEach(key=>{
+      const short = key.replace('booking_','');
+      const tmpl = emailTemplates[key] || EMAIL_TEMPLATE_DEFAULTS[key];
+      const subjEl = document.getElementById(`et_${short}_subject`);
+      const bodyEl = document.getElementById(`et_${short}_body`);
+      if(subjEl) subjEl.value = tmpl.subject;
+      if(bodyEl) bodyEl.value = tmpl.body_html;
+    });
+  }catch(e){console.error('Failed to load email templates:',e);toast('Failed to load email templates.','error');}
+}
+
+async function saveEmailTemplate(key){
+  const short = key.replace('booking_','');
+  const subject = document.getElementById(`et_${short}_subject`).value.trim();
+  const body_html = document.getElementById(`et_${short}_body`).value;
+  if(!subject || !body_html){ toast('Subject and body cannot be empty.','error'); return; }
+  try{
+    const{error}=await db.from('email_templates').upsert({
+      template_key:key, subject, body_html,
+      updated_at:new Date().toISOString(), updated_by:'superadmin'
+    },{onConflict:'template_key'});
+    if(error) throw error;
+    toast('Email template saved!','success');
+    await loadEmailTemplates();
+  }catch(e){console.error('Failed to save email template:',e);toast('Failed: '+(e.message||'check console'),'error');}
+}
+
+function resetEmailTemplate(key){
+  if(!confirm('Reset this template to the default text? Unsaved/saved custom edits will be replaced (click Save afterward to make it permanent).')) return;
+  const short = key.replace('booking_','');
+  const def = EMAIL_TEMPLATE_DEFAULTS[key];
+  document.getElementById(`et_${short}_subject`).value = def.subject;
+  document.getElementById(`et_${short}_body`).value = def.body_html;
+  toast('Reset — remember to click Save to keep this.','info');
+}
+
+// Sends the given template to the currently logged-in Super Admin
+// email, using a small fabricated/sample booking so the layout and
+// placeholder substitution can be previewed end-to-end.
+async function sendTestEmail(key){
+  const sa = JSON.parse(sessionStorage.getItem('bm_sa')||'{}');
+  const to = sa.email;
+  if(!to){ toast('Could not determine your login email.','error'); return; }
+  // Use the most recent real booking as sample data if one exists —
+  // otherwise fall back to a fabricated booking_id (will fail gracefully).
+  try{
+    const{data:sample}=await db.from('bookings').select('id').order('created_at',{ascending:false}).limit(1).maybeSingle();
+    if(!sample){ toast('No bookings exist yet to use as a preview — create a test booking first.','error'); return; }
+    toast('Sending test email…','info');
+    const sent = await sendBookingEmail(key, sample.id, to);
+    toast(sent ? `Test email sent to ${to}!` : 'Failed to send — check Edge Function logs.', sent?'success':'error');
+  }catch(e){console.error(e);toast('Failed to send test email.','error');}
+}
+
+// ═══════════════════════════════════════════════════════
 // CONTENT & CMS — all changes reflect on index.html
 // ═══════════════════════════════════════════════════════
+
+// ── Amenities (editable list shown on the booking page) ────────
+// Mirrors index.html's DEFAULT_AMENITIES — used when site_settings has
+// no amenities_list yet.
+const DEFAULT_AMENITIES_SA = [
+  {icon:'bed',           text:'4 Spacious Bedrooms w/ AC & Private T&B'},
+  {icon:'couch',         text:'Sunken Living Area, 65” TV, Netflix, Videoke w/ 2 wireless mic'},
+  {icon:'dice',          text:'Board games, Card games, Video games'},
+  {icon:'utensils',      text:'12-Seater Dining Table'},
+  {icon:'kitchen-set',   text:'Indoor Kitchen'},
+  {icon:'fire-burner',   text:'Outdoor Kitchen (Ref, Rice cooker, Microwave, Gas stove)'},
+  {icon:'martini-glass', text:'Outdoor Bar Counter'},
+  {icon:'water-ladder',  text:'Salt chlorinated Pool w/ kiddie pool & jacuzzi'},
+  {icon:'square-parking',text:'Gated Parking for 2 Cars, Open Parking for 6 cars'},
+];
+
+function renderAmenitiesEditor(list){
+  const wrap=document.getElementById('amenitiesListEditor');
+  if(!wrap) return;
+  wrap.innerHTML = list.map((a,i)=>`
+    <div class="flex gap-2 items-start" data-amenity-row="${i}">
+      <input type="text" class="fi" style="max-width:140px" placeholder="icon (e.g. bed)" value="${esc(a.icon||'')}" data-amenity-field="icon"/>
+      <input type="text" class="fi flex-1" placeholder="Amenity description" value="${esc(a.text||'')}" data-amenity-field="text"/>
+      <button onclick="removeAmenityRow(${i})" class="w-9 h-9 flex-shrink-0 rounded-lg border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
+    </div>`).join('');
+}
+
+function getAmenitiesFromEditor(){
+  return [...document.querySelectorAll('[data-amenity-row]')].map(row=>({
+    icon: row.querySelector('[data-amenity-field="icon"]').value.trim(),
+    text: row.querySelector('[data-amenity-field="text"]').value.trim(),
+  })).filter(a=>a.text);
+}
+
+function addAmenityRow(){
+  const current = getAmenitiesFromEditor();
+  current.push({icon:'circle-check', text:''});
+  renderAmenitiesEditor(current);
+}
+
+function removeAmenityRow(i){
+  const current = getAmenitiesFromEditor();
+  current.splice(i,1);
+  renderAmenitiesEditor(current);
+}
+
+async function saveAmenities(){
+  const title = document.getElementById('cms_amenitiesTitle').value.trim();
+  const list = getAmenitiesFromEditor();
+  if(!list.length){ toast('Add at least one amenity before saving.','error'); return; }
+  try{
+    const{error}=await db.from('site_settings').upsert([
+      {setting_key:'amenities_title', setting_value:title, updated_at:new Date().toISOString(), updated_by:'superadmin'},
+      {setting_key:'amenities_list',  setting_value:JSON.stringify(list), updated_at:new Date().toISOString(), updated_by:'superadmin'},
+    ],{onConflict:'setting_key'});
+    if(error) throw error;
+    toast('Amenities saved! Live on booking page.','success');
+  }catch(e){console.error(e);toast('Failed to save amenities.','error');}
+}
+
+// ── Amenity gallery photos ──────────────────────────────────────
+let amenityImages=[];
+async function loadAmenityImages(){
+  try{
+    const{data}=await db.from('amenity_images').select('*').order('display_order');
+    amenityImages = data||[];
+    renderAmenityImages();
+  }catch(e){amenityImages=[];}
+}
+function renderAmenityImages(){
+  const grid=document.getElementById('amenityImagesGrid'); if(!grid) return;
+  if(!amenityImages.length){ grid.innerHTML='<p class="text-gray-400 text-sm col-span-6">No photos yet.</p>'; return; }
+  grid.innerHTML=amenityImages.map(img=>`
+    <div class="relative group">
+      <div class="aspect-square rounded-lg overflow-hidden bg-gray-100">
+        <img src="${img.image_url}" class="w-full h-full object-cover" alt="Amenity"/>
+      </div>
+      <button onclick="deleteAmenityImage('${img.id}')" class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">×</button>
+      <p class="text-xs text-gray-400 mt-0.5">Order: ${img.display_order}</p>
+    </div>`).join('');
+}
+function openAmenityImageModal(){
+  document.getElementById('ai_order').value='0';
+  clearMediaField('ai_url','aiImgPreview','aiUploadLabel','Click to upload');
+  document.getElementById('amenityImageModal').classList.remove('hidden');
+}
+async function saveAmenityImage(){
+  const url=document.getElementById('ai_url').value.trim();
+  if(!url){toast('Please upload a photo first.','error');return;}
+  try{
+    const{error}=await db.from('amenity_images').insert({image_url:url,display_order:parseInt(document.getElementById('ai_order').value)||0});
+    if(error)throw error;
+    toast('Photo added! Live on booking page.','success');
+    closeModal('amenityImageModal');
+    await loadAmenityImages();
+  }catch(e){console.error(e);toast('Failed: '+(e.message||'check console'),'error');}
+}
+async function deleteAmenityImage(id){
+  if(!confirm('Remove this photo?'))return;
+  try{await db.from('amenity_images').delete().eq('id',id);toast('Removed.','success');await loadAmenityImages();}catch(e){toast('Failed.','error');}
+}
+
 async function loadContent(){
   try{
     const{data}=await db.from('site_settings').select('*');
@@ -2071,8 +2481,19 @@ async function loadContent(){
     // Promo
     document.getElementById('cms_promoText').value =s.promo_banner_text||'';
     document.getElementById('cms_promoActive').value=s.promo_banner_active||'false';
+    // Social media
+    document.getElementById('cms_socialFacebook').value =s.social_facebook||'';
+    document.getElementById('cms_socialMessenger').value=s.social_messenger||'';
+    document.getElementById('cms_socialInstagram').value=s.social_instagram||'';
+    // Amenities
+    document.getElementById('cms_amenitiesTitle').value = s.amenities_title||'Resort Amenities';
+    let amenitiesList = DEFAULT_AMENITIES_SA;
+    if(s.amenities_list){
+      try{ const parsed=JSON.parse(s.amenities_list); if(Array.isArray(parsed)&&parsed.length) amenitiesList=parsed; }catch(e){}
+    }
+    renderAmenitiesEditor(amenitiesList);
 
-    await Promise.all([loadRoomImages(),loadRoomContent()]);
+    await Promise.all([loadRoomImages(),loadRoomContent(),loadAmenityImages()]);
   }catch(e){console.error(e);}
 }
 
@@ -2211,6 +2632,10 @@ async function saveAllSettings(){
     // Promo
     {setting_key:'promo_banner_text',   setting_value:document.getElementById('cms_promoText').value},
     {setting_key:'promo_banner_active', setting_value:document.getElementById('cms_promoActive').value},
+    // Social media
+    {setting_key:'social_facebook',     setting_value:document.getElementById('cms_socialFacebook').value},
+    {setting_key:'social_messenger',    setting_value:document.getElementById('cms_socialMessenger').value},
+    {setting_key:'social_instagram',    setting_value:document.getElementById('cms_socialInstagram').value},
   ].map(u=>({...u,updated_at:new Date().toISOString(),updated_by:'superadmin'}));
   try{const{error}=await db.from('site_settings').upsert(updates,{onConflict:'setting_key'});if(error)throw error;toast('All settings saved! Changes are now live on the booking page.','success');}
   catch(e){console.error(e);toast('Failed to save settings.','error');}
@@ -2375,17 +2800,29 @@ function isoToLocalDatetime(iso){
   const pad=n=>String(n).padStart(2,'0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-async function sendEmail(to,subject,html){
-  if(!to) return false;
+// Calls the send-email Edge Function. `type` is 'booking_email', 'otp',
+// or 'otp_verify' — see supabase/functions/send-email/index.ts.
+async function callSendEmail(body){
+  const res = await fetch(SEND_EMAIL_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${SB_ANON}`},
+    body: JSON.stringify(body)
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || `Email request failed (${res.status})`);
+  return data;
+}
+
+// Sends a booking email (pending / confirmed / declined) using the
+// editable template stored in `email_templates`. Failures are logged
+// but never block the booking action itself.
+async function sendBookingEmail(templateKey, bookingId, overrideTo){
   try{
-    if(typeof emailjs!=='undefined' && emailjs.send){
-      await emailjs.send(EJS_SID,EJS_TMPL,{to_email:to,subject,message_html:html,to_name:to.split('@')[0]});
-      return true;
-    }
-    console.warn('EmailJS SDK not loaded — email not sent to',to);
-    return false;
+    const result = await callSendEmail({type:'booking_email', template_key:templateKey, booking_id:bookingId, override_to:overrideTo||undefined});
+    if(!result.sent) console.warn('Booking email not sent:', result.reason);
+    return result.sent;
   }catch(e){
-    console.error('Email send failed (check EmailJS template "To Email" is set to {{to_email}}):',e);
+    console.error('Booking email failed:', e);
     return false;
   }
 }
