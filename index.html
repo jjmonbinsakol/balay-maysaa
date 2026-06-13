@@ -58,6 +58,11 @@
     .amenity-item{flex:0 0 auto;width:200px;height:150px;border-radius:12px;overflow:hidden;background:#f3f4f6;scroll-snap-align:start;}
     .amenity-item img{width:100%;height:100%;object-fit:cover;}
     @media (max-width:640px){.amenity-item{width:150px;height:115px;}}
+    /* Social media buttons — rounded-square app-icon style (like
+       Facebook/Instagram/TikTok app icons), shown inside the "Get
+       Social" card in the Contact section. */
+    .social-btn{width:48px;height:48px;border-radius:12px;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.15);transition:transform .2s, box-shadow .2s;flex-shrink:0;}
+    .social-btn:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 6px 14px rgba(0,0,0,.2);}
     /* ── FORMS ───────────────────────────────────────── */
     .fi{width:100%;border:1.5px solid #d4d0ca;border-radius:10px;padding:11px 16px;font-size:15px;font-family:'Inter',sans-serif;background:white;color:#1a1a1a;transition:border-color .2s,box-shadow .2s;outline:none;}
     .fi:focus{border-color:#2d5a3b;box-shadow:0 0 0 3px rgba(45,90,59,.1);}
@@ -830,7 +835,7 @@
         <a id="contactEmail" href="mailto:balaymaysa@gmail.com" class="text-sm hover:text-gold transition-colors">balaymaysa@gmail.com</a>
       </div>
     </div>
-    <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
       <div class="bg-white/5 rounded-xl p-5">
         <p class="text-gold text-xs uppercase tracking-wide mb-2">Check-in / Check-out</p>
         <p class="text-white/80 text-sm" id="cicoText">Check-in: 2:00 PM · Check-out: 12:00 NN</p>
@@ -843,8 +848,11 @@
         <p class="text-gold text-xs uppercase tracking-wide mb-2">Cancellation</p>
         <p class="text-white/80 text-sm" id="cancelText">Downpayment non-refundable. Rebook with 48 hrs notice.</p>
       </div>
+      <div id="socialCard" class="hidden bg-white/5 rounded-xl p-5">
+        <p class="text-gold text-xs uppercase tracking-wide mb-3">Get Social</p>
+        <div id="socialLinks" class="flex items-center gap-3"></div>
+      </div>
     </div>
-    <div id="socialLinks" class="hidden flex items-center justify-center gap-3 mt-10"></div>
   </div>
 </section>
 
@@ -1167,22 +1175,22 @@ function scrollAmenities(dir){
 // in the Contact section. Each row has a label, a Font Awesome icon
 // class, and a URL.
 async function loadSocialLinks(){
+  const card = document.getElementById('socialCard');
   const wrap = document.getElementById('socialLinks');
-  if(!wrap) return;
+  if(!wrap||!card) return;
   try{
     const{data}=await db.from('social_links').select('*').eq('is_active',true).order('display_order');
-    if(!data || !data.length){ wrap.classList.add('hidden'); return; }
-    wrap.classList.remove('hidden');
+    if(!data || !data.length){ card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
     wrap.innerHTML = data.map(l=>{
+      const fallback = `this.outerHTML='<i class=&quot;${esc(l.icon_class||'fa-solid fa-link')} text-forest text-lg&quot;></i>'`;
       const inner = l.logo_url
-        ? `<img src="${esc(l.logo_url)}" alt="${esc(l.label)}" class="w-5 h-5 object-contain"/>`
-        : `<i class="${esc(l.icon_class||'fa-solid fa-link')}"></i>`;
-      return `<a href="${esc(l.url)}" target="_blank" rel="noopener" aria-label="${esc(l.label)}"
-         class="w-10 h-10 rounded-full bg-white/10 hover:bg-gold flex items-center justify-center text-white transition-colors overflow-hidden">
-        ${inner}
-      </a>`;
+        ? `<img src="${esc(l.logo_url)}" alt="${esc(l.label)}" class="w-full h-full object-cover" onerror="${fallback}"/>`
+        : `<i class="${esc(l.icon_class||'fa-solid fa-link')} text-forest text-lg"></i>`;
+      return `<a href="${esc(l.url)}" target="_blank" rel="noopener" aria-label="${esc(l.label)}" title="${esc(l.label)}"
+         class="social-btn">${inner}</a>`;
     }).join('');
-  }catch(e){ wrap.classList.add('hidden'); }
+  }catch(e){ card.classList.add('hidden'); }
 }
 
 // Simple HTML-escape for any guest/CMS-derived text rendered into innerHTML.
