@@ -51,6 +51,13 @@
     .sdots{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5;}
     .sdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);cursor:pointer;transition:background .2s, transform .2s;}
     .sdot.on{background:white;transform:scale(1.25);}
+    /* Amenity photo gallery — horizontal scroll-snap strip showing
+       ~3-5 photos at a time, rest reachable by scroll/arrow buttons. */
+    .amenity-scroll{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none;}
+    .amenity-scroll::-webkit-scrollbar{display:none;}
+    .amenity-item{flex:0 0 auto;width:200px;height:150px;border-radius:12px;overflow:hidden;background:#f3f4f6;scroll-snap-align:start;}
+    .amenity-item img{width:100%;height:100%;object-fit:cover;}
+    @media (max-width:640px){.amenity-item{width:150px;height:115px;}}
     /* ── FORMS ───────────────────────────────────────── */
     .fi{width:100%;border:1.5px solid #d4d0ca;border-radius:10px;padding:11px 16px;font-size:15px;font-family:'Inter',sans-serif;background:white;color:#1a1a1a;transition:border-color .2s,box-shadow .2s;outline:none;}
     .fi:focus{border-color:#2d5a3b;box-shadow:0 0 0 3px rgba(45,90,59,.1);}
@@ -267,8 +274,12 @@
     <div id="amenitiesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-12 reveal">
       <!-- Populated from site_settings.amenities_list (JSON array) via applySettings() -->
     </div>
-    <div id="amenitiesGallery" class="grid grid-cols-2 md:grid-cols-4 gap-3 reveal">
-      <!-- Populated from amenity_images table -->
+    <div class="relative reveal">
+      <div id="amenitiesGallery" class="amenity-scroll">
+        <!-- Populated from amenity_images table -->
+      </div>
+      <button class="sbtn prev" onclick="scrollAmenities(-1)" id="amenGalPrev" style="top:50%;"><i class="fas fa-chevron-left"></i></button>
+      <button class="sbtn next" onclick="scrollAmenities(1)" id="amenGalNext" style="top:50%;"><i class="fas fa-chevron-right"></i></button>
     </div>
   </div>
 </section>
@@ -1125,12 +1136,29 @@ async function loadAmenityImages(){
     const{data}=await db.from('amenity_images').select('*').order('display_order');
     const gallery=document.getElementById('amenitiesGallery');
     if(!gallery) return;
-    if(!data || !data.length){ gallery.innerHTML=''; return; }
+    const prev=document.getElementById('amenGalPrev'), next=document.getElementById('amenGalNext');
+    if(!data || !data.length){
+      gallery.innerHTML='';
+      if(prev) prev.style.display='none';
+      if(next) next.style.display='none';
+      return;
+    }
     gallery.innerHTML=data.map(img=>`
-      <div class="rounded-xl overflow-hidden aspect-square bg-gray-100">
-        <img src="${img.image_url}" alt="Amenity" class="w-full h-full object-cover" loading="lazy"/>
+      <div class="amenity-item">
+        <img src="${img.image_url}" alt="Amenity" loading="lazy"/>
       </div>`).join('');
+    // Only show arrow buttons if there's more content than fits on screen
+    const showArrows = data.length>3;
+    if(prev) prev.style.display = showArrows?'flex':'none';
+    if(next) next.style.display = showArrows?'flex':'none';
   }catch(e){}
+}
+
+function scrollAmenities(dir){
+  const gallery=document.getElementById('amenitiesGallery');
+  if(!gallery) return;
+  const itemWidth = gallery.querySelector('.amenity-item')?.offsetWidth || 200;
+  gallery.scrollBy({left: dir*(itemWidth+12)*2, behavior:'smooth'});
 }
 
 // ── Social media links (Super Admin → site_settings) ───────────
@@ -1145,11 +1173,15 @@ async function loadSocialLinks(){
     const{data}=await db.from('social_links').select('*').eq('is_active',true).order('display_order');
     if(!data || !data.length){ wrap.classList.add('hidden'); return; }
     wrap.classList.remove('hidden');
-    wrap.innerHTML = data.map(l=>`
-      <a href="${esc(l.url)}" target="_blank" rel="noopener" aria-label="${esc(l.label)}"
-         class="w-10 h-10 rounded-full bg-white/10 hover:bg-gold flex items-center justify-center text-white transition-colors">
-        <i class="${esc(l.icon_class)}"></i>
-      </a>`).join('');
+    wrap.innerHTML = data.map(l=>{
+      const inner = l.logo_url
+        ? `<img src="${esc(l.logo_url)}" alt="${esc(l.label)}" class="w-5 h-5 object-contain"/>`
+        : `<i class="${esc(l.icon_class||'fa-solid fa-link')}"></i>`;
+      return `<a href="${esc(l.url)}" target="_blank" rel="noopener" aria-label="${esc(l.label)}"
+         class="w-10 h-10 rounded-full bg-white/10 hover:bg-gold flex items-center justify-center text-white transition-colors overflow-hidden">
+        ${inner}
+      </a>`;
+    }).join('');
   }catch(e){ wrap.classList.add('hidden'); }
 }
 
