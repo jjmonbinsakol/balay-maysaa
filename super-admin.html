@@ -603,13 +603,14 @@
             </div>
           </div>
           <!-- Social Media Links -->
-          <div class="sc p-6"><h3 class="font-semibold text-gray-700 mb-4 flex items-center gap-2"><i class="fas fa-share-nodes text-gold text-sm"></i>Social Media Links</h3>
-            <p class="text-xs text-gray-400 mb-3">Buttons appear in the Contact section. Leave blank to hide a platform.</p>
-            <div class="space-y-3">
-              <div><label class="fi-label"><i class="fa-brands fa-facebook mr-1"></i> Facebook Page URL</label><input type="url" id="cms_socialFacebook" class="fi" placeholder="https://facebook.com/balaymaysa"/></div>
-              <div><label class="fi-label"><i class="fa-brands fa-facebook-messenger mr-1"></i> Messenger Link</label><input type="url" id="cms_socialMessenger" class="fi" placeholder="https://m.me/balaymaysa"/></div>
-              <div><label class="fi-label"><i class="fa-brands fa-instagram mr-1"></i> Instagram URL</label><input type="url" id="cms_socialInstagram" class="fi" placeholder="https://instagram.com/balaymaysa"/></div>
+          <div class="sc p-6 md:col-span-2"><h3 class="font-semibold text-gray-700 mb-1 flex items-center gap-2"><i class="fas fa-share-nodes text-gold text-sm"></i>Social Media Links</h3>
+            <p class="text-xs text-gray-400 mb-4">Buttons appear in the Contact section on the booking page. Add as many platforms as you like — Facebook, Instagram, TikTok, etc.</p>
+            <div id="socialLinksEditor" class="space-y-2 mb-3">
+              <p class="text-gray-400 text-sm">Loading…</p>
             </div>
+            <button onclick="addSocialLinkRow()" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Add Platform</button>
+            <p class="text-xs text-gray-400 mt-3">Icon class uses <a href="https://fontawesome.com/icons?f=brands" target="_blank" class="text-forest underline">Font Awesome brand icons</a>, e.g. <code>fa-brands fa-facebook</code>, <code>fa-brands fa-instagram</code>, <code>fa-brands fa-tiktok</code>, <code>fa-brands fa-facebook-messenger</code>.</p>
+            <button onclick="saveSocialLinks()" class="mt-4 bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-save"></i> Save Social Links</button>
           </div>
         </div>
 
@@ -1064,7 +1065,11 @@
 // ═══════════════════════════════════════════════════════
 const SB_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
-const SEND_EMAIL_URL = `${SB_URL}/functions/v1/send-email`;
+// NOTE: the Edge Function is deployed under the slug "hyper-task" in
+// Supabase (Edge Functions auto-assigns a URL slug on creation that
+// can't be renamed afterward — only the display name can change).
+// The function code itself is still send-email's index.ts.
+const SEND_EMAIL_URL = `${SB_URL}/functions/v1/hyper-task`;
 // Only these emails can request a Super Admin OTP login code.
 // Add/remove trusted admin emails here.
 const SUPERADMIN_EMAILS = ['balaymaysa@gmail.com'];
@@ -2426,6 +2431,65 @@ async function deleteAmenityImage(id){
   try{await db.from('amenity_images').delete().eq('id',id);toast('Removed.','success');await loadAmenityImages();}catch(e){toast('Failed.','error');}
 }
 
+// ── Social Media Links (dynamic list: FB, IG, TikTok, etc.) ─────
+let socialLinksData=[];
+async function loadSocialLinksEditor(){
+  try{
+    const{data}=await db.from('social_links').select('*').order('display_order');
+    socialLinksData = data||[];
+    renderSocialLinksEditor();
+  }catch(e){console.error(e);socialLinksData=[];renderSocialLinksEditor();}
+}
+function renderSocialLinksEditor(){
+  const wrap=document.getElementById('socialLinksEditor');
+  if(!wrap) return;
+  if(!socialLinksData.length){
+    wrap.innerHTML='<p class="text-gray-400 text-sm">No social links yet. Click "Add Platform" below.</p>';
+    return;
+  }
+  wrap.innerHTML = socialLinksData.map((l,i)=>`
+    <div class="flex gap-2 items-start" data-social-row="${i}">
+      <input type="text" class="fi" style="max-width:170px" placeholder="Icon class (fa-brands fa-tiktok)" value="${esc(l.icon_class||'')}" data-social-field="icon_class"/>
+      <input type="text" class="fi" style="max-width:120px" placeholder="Label (TikTok)" value="${esc(l.label||'')}" data-social-field="label"/>
+      <input type="url" class="fi flex-1" placeholder="https://..." value="${esc(l.url||'')}" data-social-field="url"/>
+      <label class="flex items-center gap-1.5 text-xs text-gray-500 px-2 self-center whitespace-nowrap"><input type="checkbox" class="accent-forest" ${l.is_active!==false?'checked':''} data-social-field="is_active"/> Active</label>
+      <button onclick="removeSocialLinkRow(${i})" class="w-9 h-9 flex-shrink-0 rounded-lg border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
+    </div>`).join('');
+}
+function getSocialLinksFromEditor(){
+  return [...document.querySelectorAll('[data-social-row]')].map((row,i)=>({
+    icon_class: row.querySelector('[data-social-field="icon_class"]').value.trim(),
+    label:      row.querySelector('[data-social-field="label"]').value.trim(),
+    url:        row.querySelector('[data-social-field="url"]').value.trim(),
+    is_active:  row.querySelector('[data-social-field="is_active"]').checked,
+    display_order: i,
+  })).filter(l=>l.url && l.icon_class);
+}
+function addSocialLinkRow(){
+  socialLinksData = getSocialLinksFromEditor();
+  socialLinksData.push({icon_class:'fa-brands fa-facebook',label:'',url:'',is_active:true,display_order:socialLinksData.length});
+  renderSocialLinksEditor();
+}
+function removeSocialLinkRow(i){
+  socialLinksData = getSocialLinksFromEditor();
+  socialLinksData.splice(i,1);
+  renderSocialLinksEditor();
+}
+async function saveSocialLinks(){
+  const links = getSocialLinksFromEditor();
+  try{
+    // Replace the whole set — simplest consistent approach for a
+    // small admin-managed list (typically <10 rows).
+    await db.from('social_links').delete().neq('id','00000000-0000-0000-0000-000000000000');
+    if(links.length){
+      const{error}=await db.from('social_links').insert(links);
+      if(error) throw error;
+    }
+    toast('Social links saved! Live on booking page.','success');
+    await loadSocialLinksEditor();
+  }catch(e){console.error(e);toast('Failed to save social links.','error');}
+}
+
 async function loadContent(){
   try{
     const{data}=await db.from('site_settings').select('*');
@@ -2481,10 +2545,8 @@ async function loadContent(){
     // Promo
     document.getElementById('cms_promoText').value =s.promo_banner_text||'';
     document.getElementById('cms_promoActive').value=s.promo_banner_active||'false';
-    // Social media
-    document.getElementById('cms_socialFacebook').value =s.social_facebook||'';
-    document.getElementById('cms_socialMessenger').value=s.social_messenger||'';
-    document.getElementById('cms_socialInstagram').value=s.social_instagram||'';
+    // Social media — dynamic list, loaded separately
+    await loadSocialLinksEditor();
     // Amenities
     document.getElementById('cms_amenitiesTitle').value = s.amenities_title||'Resort Amenities';
     let amenitiesList = DEFAULT_AMENITIES_SA;
@@ -2632,10 +2694,6 @@ async function saveAllSettings(){
     // Promo
     {setting_key:'promo_banner_text',   setting_value:document.getElementById('cms_promoText').value},
     {setting_key:'promo_banner_active', setting_value:document.getElementById('cms_promoActive').value},
-    // Social media
-    {setting_key:'social_facebook',     setting_value:document.getElementById('cms_socialFacebook').value},
-    {setting_key:'social_messenger',    setting_value:document.getElementById('cms_socialMessenger').value},
-    {setting_key:'social_instagram',    setting_value:document.getElementById('cms_socialInstagram').value},
   ].map(u=>({...u,updated_at:new Date().toISOString(),updated_by:'superadmin'}));
   try{const{error}=await db.from('site_settings').upsert(updates,{onConflict:'setting_key'});if(error)throw error;toast('All settings saved! Changes are now live on the booking page.','success');}
   catch(e){console.error(e);toast('Failed to save settings.','error');}
