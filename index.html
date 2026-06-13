@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
     tailwind.config={theme:{extend:{colors:{forest:'#2d5a3b','forest-dark':'#1e3d28',gold:'#c9a03d','gold-light':'#e4c06e',cream:'#faf8f5','text-dark':'#1a1a1a','text-muted':'#666666'},fontFamily:{heading:['"Cormorant Garamond"','serif'],body:['Inter','sans-serif']}}}};
   </script>
@@ -103,6 +102,7 @@
     .cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:500;transition:transform .15s;}
     .cday.avail:hover{transform:scale(1.08);}
     .cday.past{background:#f3f4f6;color:#c0bfbd;}.cday.booked{background:#fee2e2;color:#991b1b;cursor:not-allowed;}
+    .cday.partial{background:#fef3c7;color:#92400e;}
     .cday.today{background:#2d5a3b;color:white;font-weight:700;}.cday.avail{background:#f0fdf4;color:#2d5a3b;}.cday.empty{background:transparent;}
     /* ── VOUCHER ─────────────────────────────────────── */
     .vok{background:#d1fae5;border:1px solid #34d399;color:#065f46;}
@@ -206,6 +206,7 @@
     </a>
     <div class="hidden md:flex items-center gap-8">
       <a href="#rooms"   class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rooms</a>
+      <a href="#amenities" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Amenities</a>
       <a href="#pricing" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rates</a>
       <a href="#booking" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Book Now</a>
       <a href="lookup.html" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">My Booking</a>
@@ -217,6 +218,7 @@
   </div>
   <div id="mobileMenu" class="hidden md:hidden mt-3 bg-white rounded-xl shadow-xl p-4 space-y-1">
     <a href="#rooms"      class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Rooms</a>
+    <a href="#amenities"  class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Amenities</a>
     <a href="#pricing"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Rates</a>
     <a href="#booking"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Book Now</a>
     <a href="lookup.html" class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">My Booking</a>
@@ -255,6 +257,22 @@
   </div>
 </section>
 
+<!-- AMENITIES -->
+<section id="amenities" class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-12 reveal">
+      <p class="ornament text-gold/60 text-xs tracking-widest uppercase mb-3">What's Included</p>
+      <h2 class="font-heading text-4xl md:text-5xl text-forest font-light" id="amenitiesTitle">Resort Amenities</h2>
+    </div>
+    <div id="amenitiesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-12 reveal">
+      <!-- Populated from site_settings.amenities_list (JSON array) via applySettings() -->
+    </div>
+    <div id="amenitiesGallery" class="grid grid-cols-2 md:grid-cols-4 gap-3 reveal">
+      <!-- Populated from amenity_images table -->
+    </div>
+  </div>
+</section>
+
 <!-- AVAILABILITY CALENDAR -->
 <section class="py-14 bg-white">
   <div class="max-w-2xl mx-auto px-6 reveal">
@@ -274,7 +292,8 @@
       <div id="calGrid" class="cgrid"></div>
       <div class="flex gap-4 mt-4 text-xs justify-center flex-wrap">
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-100 border border-green-400 inline-block"></span>Available</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block"></span>Booked</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-100 border border-amber-300 inline-block"></span>Some rooms taken</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block"></span>Fully Booked</div>
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-gray-200 inline-block"></span>Past</div>
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-forest inline-block"></span>Today</div>
       </div>
@@ -495,11 +514,11 @@
           <div class="grid grid-cols-3 gap-4">
             <div>
               <label class="fi-label text-xs">Adults <span class="text-red-500">*</span></label>
-              <input type="number" id="adults" class="fi" value="2" min="1" max="50" oninput="calcPax()"/>
+              <input type="number" id="adults" class="fi" value="2" min="1" max="24" oninput="calcPax()"/>
             </div>
             <div>
               <label class="fi-label text-xs">Children (3+ yrs)</label>
-              <input type="number" id="children_above" class="fi" value="0" min="0" oninput="calcPax()"/>
+              <input type="number" id="children_above" class="fi" value="0" min="0" max="23" oninput="calcPax()"/>
             </div>
             <div>
               <label class="fi-label text-xs">Infants (&lt;3 yrs)</label>
@@ -518,12 +537,12 @@
 
       <!-- ══ STEP 2: Package + Room + Add-ons ══ -->
       <div class="step hidden" id="step-2">
-        <h3 class="font-heading text-2xl text-forest mb-1">Choose Your Package</h3>
-        <p class="text-text-muted text-sm mb-5" id="step2Msg">Recommended package for your pax count:</p>
+        <h3 class="font-heading text-2xl text-forest mb-1">Your Package</h3>
+        <p class="text-text-muted text-sm mb-5" id="step2Msg">Based on your guest count, here's what's included:</p>
         <div id="pkgEmptyMsg" class="hidden mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-          <i class="fas fa-info-circle mr-1"></i> No matching package was found automatically — please pick one below, or go back and adjust your guest count / dates.
+          <i class="fas fa-info-circle mr-1"></i> No matching package was found — please go back and adjust your guest count or dates.
         </div>
-        <div id="pkgCards" class="space-y-3 mb-6"></div>
+        <div id="pkgSummary" class="mb-6"></div>
         <!-- Room picker (shown when < 4 rooms) -->
         <div id="roomArea" class="hidden mb-6">
           <p class="fi-label mb-3" id="roomPickLabel">Select Room(s) <span class="text-red-500">*</span></p>
@@ -536,15 +555,16 @@
         </div>
         <!-- Qty inputs (revealed by addon selection) -->
         <div id="petQtyArea" class="hidden mb-4">
-          <label class="fi-label">Number of Pets</label>
-          <input type="number" id="pet_count" class="fi w-28" value="1" min="1" max="10" oninput="recalc()"/>
+          <label class="fi-label">Number of Pets <span class="text-text-muted text-xs font-normal">(max 2)</span></label>
+          <input type="number" id="pet_count" class="fi w-28" value="1" min="1" max="2" oninput="recalc()"/>
+        </div>
+        <div id="mattressQtyArea" class="hidden mb-4">
+          <label class="fi-label">Extra Mattresses <span class="text-text-muted text-xs font-normal">(1–6)</span></label>
+          <input type="number" id="mattress_count" class="fi w-28" value="1" min="1" max="6" oninput="recalc()"/>
         </div>
         <div id="spaHrsArea" class="hidden mb-4">
           <label class="fi-label">Extra Pool Spa Hours <span class="text-text-muted text-xs font-normal">(₱350/hr)</span></label>
-          <input type="number" id="spa_hours" class="fi w-28" value="1" min="1" max="24" oninput="recalc()"/>
-        </div>
-        <div id="extraPaxNotice" class="hidden mb-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-xs text-yellow-800">
-          <i class="fas fa-info-circle mr-1"></i><span id="extraPaxMsg"></span>
+          <input type="number" id="spa_hours" class="fi w-28" value="1" min="1" oninput="recalc()"/>
         </div>
         <!-- Price box -->
         <div id="priceBox" class="hidden price-box mb-6">
@@ -813,6 +833,7 @@
         <p class="text-white/80 text-sm" id="cancelText">Downpayment non-refundable. Rebook with 48 hrs notice.</p>
       </div>
     </div>
+    <div id="socialLinks" class="hidden flex items-center justify-center gap-3 mt-10"></div>
   </div>
 </section>
 
@@ -876,11 +897,13 @@
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-emailjs.init('yupgCoqLB4unb0OAz');
 const SB_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
-const EJS_SID  = 'service_t13ealt';
-const EJS_TMPL = 'template_s17clcj';
+// NOTE: the Edge Function is deployed under the slug "hyper-task" in
+// Supabase (Edge Functions auto-assigns a URL slug on creation that
+// can't be renamed afterward — only the display name can change).
+// The function code itself is still send-email's index.ts.
+const SEND_EMAIL_URL = `${SB_URL}/functions/v1/hyper-task`;
 const SA_EMAIL = 'balaymaysa@gmail.com';
 const db = window.supabase.createClient(SB_URL, SB_ANON);
 
@@ -929,7 +952,9 @@ async function boot() {
     loadAddonPricing(),
     loadBookedDates(),
     loadRoomImages(),
-    loadRoomContent()
+    loadRoomContent(),
+    loadAmenityImages(),
+    loadSocialLinks()
   ]);
   initSliders();
   renderCalendar();
@@ -1020,6 +1045,12 @@ function applySettings() {
   if (cfg.bank_account_name)   setT('bankName', cfg.bank_account_name);
   if (cfg.bank_account_number) setT('bankNum',  cfg.bank_account_number);
   if (cfg.bank_title) setT('bankTitle', cfg.bank_title);
+  // Amenities
+  setT('amenitiesTitle', cfg.amenities_title);
+  if(cfg.amenities_list) console.log('[Amenities] loaded from site_settings:', cfg.amenities_list);
+  else console.log('[Amenities] cfg.amenities_list is empty — showing 9 default amenities. If you saved a custom list in Super Admin and still see this, check that site_settings has a row with setting_key="amenities_list".');
+  renderAmenities(cfg.amenities_list);
+  // Social media links — loaded separately via loadSocialLinks() in boot()
   // Promo banner
   if (cfg.promo_banner_active==='true' && cfg.promo_banner_text) {
     setT('promoBannerText', cfg.promo_banner_text);
@@ -1046,6 +1077,85 @@ function applySettings() {
 
 function setT(id,v){ if(v===undefined||v===null||v==='')return; const el=document.getElementById(id); if(el)el.textContent=v; }
 function link(id,text,href){ const el=document.getElementById(id); if(el){el.textContent=text;el.href=href;} }
+
+// ── Amenities ────────────────────────────────────────────────
+// Default list shown until Super Admin edits site_settings.amenities_list
+// (a JSON array of {icon, text} objects).
+const DEFAULT_AMENITIES = [
+  {icon:'fa-bed',          text:'4 Spacious Bedrooms w/ AC & Private T&B'},
+  {icon:'fa-couch',        text:'Sunken Living Area, 65” TV, Netflix, Videoke w/ 2 wireless mic'},
+  {icon:'fa-dice',         text:'Board games, Card games, Video games'},
+  {icon:'fa-utensils',     text:'12-Seater Dining Table'},
+  {icon:'fa-kitchen-set',  text:'Indoor Kitchen'},
+  {icon:'fa-fire-burner',  text:'Outdoor Kitchen (Ref, Rice cooker, Microwave, Gas stove)'},
+  {icon:'fa-martini-glass','text':'Outdoor Bar Counter'},
+  {icon:'fa-water-ladder', text:'Salt chlorinated Pool w/ kiddie pool & jacuzzi'},
+  {icon:'fa-square-parking','text':'Gated Parking for 2 Cars, Open Parking for 6 cars'},
+];
+
+function renderAmenities(rawList){
+  let items = DEFAULT_AMENITIES;
+  if(rawList){
+    try{
+      const parsed = typeof rawList==='string' ? JSON.parse(rawList) : rawList;
+      if(Array.isArray(parsed) && parsed.length) items = parsed;
+    }catch(e){ console.warn('Invalid amenities_list JSON, using defaults.'); }
+  }
+  const grid = document.getElementById('amenitiesGrid');
+  if(!grid) return;
+  grid.innerHTML = items.map(a=>{
+    // Super Admin's editor stores icon names WITHOUT the "fa-" prefix
+    // (e.g. "bed"), but some defaults here use "fa-bed". Normalize so
+    // either form works.
+    let icon=(a.icon||'circle-check').trim();
+    if(!icon.startsWith('fa-')) icon='fa-'+icon;
+    return `
+    <div class="flex items-start gap-3 bg-cream rounded-xl p-4">
+      <div class="w-10 h-10 rounded-full bg-forest/10 flex items-center justify-center flex-shrink-0">
+        <i class="fas ${icon} text-forest text-sm"></i>
+      </div>
+      <p class="text-sm text-text-dark leading-snug pt-1.5">${esc(a.text||'')}</p>
+    </div>`;
+  }).join('');
+}
+
+// ── Amenity gallery photos (uploaded via Super Admin) ──────────
+async function loadAmenityImages(){
+  try{
+    const{data}=await db.from('amenity_images').select('*').order('display_order');
+    const gallery=document.getElementById('amenitiesGallery');
+    if(!gallery) return;
+    if(!data || !data.length){ gallery.innerHTML=''; return; }
+    gallery.innerHTML=data.map(img=>`
+      <div class="rounded-xl overflow-hidden aspect-square bg-gray-100">
+        <img src="${img.image_url}" alt="Amenity" class="w-full h-full object-cover" loading="lazy"/>
+      </div>`).join('');
+  }catch(e){}
+}
+
+// ── Social media links (Super Admin → site_settings) ───────────
+// Loads the dynamic social media buttons (Facebook, Instagram, TikTok,
+// etc.) managed in Super Admin → Social Media Links and renders them
+// in the Contact section. Each row has a label, a Font Awesome icon
+// class, and a URL.
+async function loadSocialLinks(){
+  const wrap = document.getElementById('socialLinks');
+  if(!wrap) return;
+  try{
+    const{data}=await db.from('social_links').select('*').eq('is_active',true).order('display_order');
+    if(!data || !data.length){ wrap.classList.add('hidden'); return; }
+    wrap.classList.remove('hidden');
+    wrap.innerHTML = data.map(l=>`
+      <a href="${esc(l.url)}" target="_blank" rel="noopener" aria-label="${esc(l.label)}"
+         class="w-10 h-10 rounded-full bg-white/10 hover:bg-gold flex items-center justify-center text-white transition-colors">
+        <i class="${esc(l.icon_class)}"></i>
+      </a>`).join('');
+  }catch(e){ wrap.classList.add('hidden'); }
+}
+
+// Simple HTML-escape for any guest/CMS-derived text rendered into innerHTML.
+function esc(str){ if(str===undefined||str===null) return ''; return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
 
 // ── Room content (names, subtitles, tags, features) — editable in CMS ──
 async function loadRoomContent() {
@@ -1087,7 +1197,7 @@ async function loadGroupPricing() {
       {id:'wd3',day_type:'weekday',pax_min:13,pax_max:14,rooms_included:3,price:18000,free_pool_spa_hours:1,free_ac_living:false,free_extra_mattresses:0,description:'Barkada + 2 rooms'},
       {id:'wd4',day_type:'weekday',pax_min:15,pax_max:18,rooms_included:4,price:21000,free_pool_spa_hours:1,free_ac_living:true, free_extra_mattresses:0,description:'All 4 rooms + free AC in living area'},
       {id:'wd5',day_type:'weekday',pax_min:19,pax_max:24,rooms_included:4,price:24000,free_pool_spa_hours:1,free_ac_living:true, free_extra_mattresses:6,description:'All 4 rooms + free AC + 6 free extra mattresses'},
-      {id:'we1',day_type:'weekend',pax_min:1, pax_max:10,rooms_included:1,price:12000,free_pool_spa_hours:1,free_ac_living:false,free_extra_mattresses:0,description:'1 room of your choice'},
+      {id:'we1',day_type:'weekend',pax_min:1, pax_max:10,rooms_included:1,price:15000,free_pool_spa_hours:1,free_ac_living:false,free_extra_mattresses:0,description:'1 room of your choice'},
       {id:'we2',day_type:'weekend',pax_min:11,pax_max:12,rooms_included:2,price:18000,free_pool_spa_hours:1,free_ac_living:false,free_extra_mattresses:0,description:'Barkada + 1 room'},
       {id:'we3',day_type:'weekend',pax_min:13,pax_max:14,rooms_included:3,price:21000,free_pool_spa_hours:1,free_ac_living:false,free_extra_mattresses:0,description:'Barkada + 2 rooms'},
       {id:'we4',day_type:'weekend',pax_min:15,pax_max:18,rooms_included:4,price:24000,free_pool_spa_hours:1,free_ac_living:true, free_extra_mattresses:0,description:'All 4 rooms + free AC in living area'},
@@ -1108,7 +1218,6 @@ async function loadAddonPricing() {
       {key:'stove',          label:'Stove',                     description:'Gas stove for cooking',           price:500,  unit:'flat'},
       {key:'pet_fee',        label:'Pet fee',                   description:'Per pet',                         price:300,  unit:'per_unit'},
       {key:'pool_spa',       label:'Pool Spa (extra hrs)',       description:'₱350 per hour',                   price:350,  unit:'per_hour'},
-      {key:'extra_pax',      label:'Extra pax (above 24)',       description:'₱500 per person',                 price:500,  unit:'per_unit'},
       {key:'extra_mattress', label:'Extra mattress',             description:'₱500 per mattress',               price:500,  unit:'per_unit'},
       {key:'ac_living',      label:'AC in living area',         description:'Aircon for common area',           price:1000, unit:'flat'},
     ];
@@ -1118,10 +1227,19 @@ async function loadAddonPricing() {
 // ── Booked dates for calendar ──────────────────────────
 async function loadBookedDates() {
   try {
-    const { data } = await db.from('bookings').select('check_in_date,check_out_date')
+    const { data } = await db.from('bookings').select('check_in_date,check_out_date,rooms_selected,room_type')
       .in('status',['confirmed','confirmed_balance_due','fully_paid',
                     'pending_payment_verification','deposit_paid_waiting_confirmation']);
-    bookedDates = data||[];
+    bookedDates = (data||[]).map(b=>{
+      let rooms=[];
+      try{ rooms = typeof b.rooms_selected==='string' ? JSON.parse(b.rooms_selected) : (b.rooms_selected||[]); }catch(e){}
+      if(!Array.isArray(rooms) || !rooms.length){
+        // Fallback for older rows without rooms_selected: split the
+        // comma-joined room_type string, or treat as whole-resort if empty.
+        rooms = (b.room_type||'').split(',').map(s=>s.trim()).filter(Boolean);
+      }
+      return {check_in_date:b.check_in_date, check_out_date:b.check_out_date, rooms};
+    });
   } catch(e) { bookedDates=[]; }
 }
 
@@ -1218,11 +1336,23 @@ function renderCalendar() {
   const days  = new Date(calY,calM+1,0).getDate();
   const today = new Date().toISOString().split('T')[0];
 
-  const bookedSet = new Set();
+  // Rooms relevant to the guest's current selection. Before a package is
+  // chosen, fall back to "any room" (ALL_ROOMS) so the calendar still
+  // reflects whole-resort availability as a sensible default.
+  const ALL_ROOMS = ['Silayan','Sinta','Tahanan','Barkada'];
+  const relevantRooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
+
+  // For each date, collect which of the relevant rooms are already taken.
+  const takenRoomsByDate = {}; // date -> Set of room names booked that day
   bookedDates.forEach(b => {
     let d = new Date(b.check_in_date+'T00:00:00');
     const e= new Date(b.check_out_date+'T00:00:00');
-    while(d<e){ bookedSet.add(d.toISOString().split('T')[0]); d.setDate(d.getDate()+1); }
+    while(d<e){
+      const ds=d.toISOString().split('T')[0];
+      if(!takenRoomsByDate[ds]) takenRoomsByDate[ds]=new Set();
+      (b.rooms||[]).forEach(r=>takenRoomsByDate[ds].add(r));
+      d.setDate(d.getDate()+1);
+    }
   });
 
   let html='';
@@ -1230,10 +1360,21 @@ function renderCalendar() {
   for(let d=1;d<=days;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     let cls='avail';
-    if(ds<today) cls='past';
-    else if(ds===today) cls='today';
-    else if(bookedSet.has(ds)) cls='booked';
-    html+=`<div class="cday ${cls}" title="${cls==='booked'?'Booked':cls==='past'?'Past':cls==='today'?'Today':'Available'}">${d}</div>`;
+    let label='Available';
+    if(ds<today){ cls='past'; label='Past'; }
+    else if(ds===today){ cls='today'; label='Today'; }
+    else {
+      const taken = takenRoomsByDate[ds];
+      if(taken){
+        // Date is "booked" for the guest's purposes only if ALL of the
+        // rooms they need are already taken on this date.
+        const allTaken = relevantRooms.every(r=>taken.has(r));
+        const someTaken = relevantRooms.some(r=>taken.has(r));
+        if(allTaken){ cls='booked'; label='Fully booked'; }
+        else if(someTaken){ cls='partial'; label='Partially booked — some rooms unavailable'; }
+      }
+    }
+    html+=`<div class="cday ${cls}" title="${label}">${d}</div>`;
   }
   document.getElementById('calGrid').innerHTML=html;
 }
@@ -1272,8 +1413,17 @@ function renderAddonsBar() {
 // PAX & DAY TYPE
 // ═══════════════════════════════════════════════════════
 function calcPax() {
-  const a=parseInt(document.getElementById('adults').value)||0;
-  const c=parseInt(document.getElementById('children_above').value)||0;
+  let a=parseInt(document.getElementById('adults').value)||0;
+  let c=parseInt(document.getElementById('children_above').value)||0;
+  // Strictly cap total billable pax at 24 — Balay Maysa's max capacity.
+  if(a+c>24){
+    // Trim children first, then adults, so the field the guest is
+    // actively editing keeps their typed value where possible.
+    if(c>0) c=Math.max(0,24-a);
+    if(a+c>24) a=24-c;
+  }
+  document.getElementById('adults').value=a;
+  document.getElementById('children_above').value=c;
   const t=a+c;
   document.getElementById('paxDisplay').textContent=t;
   return t;
@@ -1327,72 +1477,70 @@ function livePhoneCheck() {
   document.getElementById('err-phone').classList.toggle('show',v.length>5&&!ok);
 }
 
-// ═══════════════════════════════════════════════════════
-// STEP 2: PACKAGE & ROOM SELECTION
-// ═══════════════════════════════════════════════════════
-// In-memory map of package id -> package object, so onclick handlers
-// don't need to embed JSON (which previously could break rendering
-// and silently prevent the package cards / Step 3 progression).
-let pkgMap = {};
+// Returns the tier (pax_min/pax_max/rooms_included/etc) matching the
+// given pax count. Tier *ranges* are identical across weekday/weekend
+// rows — only `price` differs — so weekday rows define "the tier".
+function findTier(pax){
+  return grpPricing.find(p=>p.day_type==='weekday' && pax>=p.pax_min && pax<=p.pax_max);
+}
+// Looks up the price for a given tier on a given calendar date,
+// using that date's actual day-of-week (per-night pricing).
+function tierPriceForDate(tier, dateStr){
+  const dt = getDayType(dateStr);
+  const row = grpPricing.find(p=>p.day_type===dt && p.pax_min===tier.pax_min && p.pax_max===tier.pax_max);
+  return row ? row.price : tier.price;
+}
 
-function buildPackageCards() {
+function buildPackageSummary() {
   const pax=calcPax();
   const ci=document.getElementById('check_in').value;
-  const dt=getDayType(ci);
   const nights=calcNights();
-
-  // Defensive: if grpPricing failed to load for this day type, fall back to ALL pricing
-  let pkgs = grpPricing.filter(p=>p.day_type===dt);
-  if (!pkgs.length) pkgs = grpPricing; // last resort so user is never stuck with zero cards
-
-  const rec = pkgs.find(p=>pax>=p.pax_min && pax<=p.pax_max);
-
-  document.getElementById('step2Msg').textContent=
-    `${pax} pax · ${dt==='weekend'?'Weekend (Fri–Sat)':'Weekday (Sun–Thu)'} rate · Your recommended package is highlighted.`;
+  const tier = findTier(pax);
 
   const pkgEmpty = document.getElementById('pkgEmptyMsg');
-  pkgEmpty.classList.toggle('hidden', !!rec);
+  pkgEmpty.classList.toggle('hidden', !!tier);
+  if(!tier){ document.getElementById('pkgSummary').innerHTML=''; selPkg=null; return; }
 
-  pkgMap = {};
-  document.getElementById('pkgCards').innerHTML = pkgs.map((pkg,idx)=>{
-    pkgMap[pkg.id]=pkg;
-    const isRec=rec&&pkg.id===rec.id;
-    const nightTotal=nights>0?`<p class="text-xs text-gray-400 mt-0.5">${nights}n = ₱${(pkg.price*nights).toLocaleString()}</p>`:'';
-    const badges=[
-      pkg.free_pool_spa_hours>0?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✓ ${pkg.free_pool_spa_hours}hr pool spa</span>`:'',
-      pkg.free_ac_living?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>':'',
-      pkg.free_extra_mattresses>0?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${pkg.free_extra_mattresses} mattresses</span>`:'',
-    ].filter(Boolean).join('');
-    return `<div class="pkg${isRec?' rec on':''}" id="pkg-${pkg.id}" style="animation-delay:${idx*0.05}s" onclick="pickPkgById('${pkg.id}')">
+  selPkg = tier;
+  buildRoomPicker(tier);
+  buildAddonCards();
+
+  // Per-night breakdown for the summary display
+  let nightRows='';
+  if(ci && nights>0){
+    let d=new Date(ci+'T00:00:00');
+    for(let i=0;i<nights;i++){
+      const ds=d.toISOString().split('T')[0];
+      const dt=getDayType(ds);
+      const price=tierPriceForDate(tier,ds);
+      nightRows+=`<div class="flex justify-between text-xs text-gray-500 py-0.5">
+        <span>${new Date(ds+'T00:00:00').toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric'})} ${dt==='weekend'?'<span class="text-amber-600">(Weekend)</span>':'<span class="text-blue-600">(Weekday)</span>'}</span>
+        <span>₱${price.toLocaleString()}</span>
+      </div>`;
+      d.setDate(d.getDate()+1);
+    }
+  }
+
+  const badges=[
+    tier.free_pool_spa_hours>0?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✓ ${tier.free_pool_spa_hours}hr pool spa</span>`:'',
+    tier.free_ac_living?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>':'',
+    tier.free_extra_mattresses>0?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${tier.free_extra_mattresses} mattresses</span>`:'',
+  ].filter(Boolean).join('');
+
+  document.getElementById('pkgSummary').innerHTML = `
+    <div class="pkg on">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-3">
-          <p class="font-semibold text-gray-800 text-sm">${pkg.pax_min}–${pkg.pax_max} pax · ${pkg.rooms_included} room${pkg.rooms_included>1?'s':''}</p>
-          <p class="text-xs text-text-muted mt-0.5">${pkg.description||''}</p>
+          <p class="font-semibold text-gray-800 text-sm">${tier.pax_min}–${tier.pax_max} pax · ${tier.rooms_included} room${tier.rooms_included>1?'s':''}</p>
+          <p class="text-xs text-text-muted mt-0.5">${tier.description||''}</p>
           ${badges?`<div class="flex flex-wrap gap-1 mt-2">${badges}</div>`:''}
         </div>
-        <div class="text-right flex-shrink-0">
-          <p class="font-bold text-forest">₱${pkg.price.toLocaleString()}/night</p>
-          ${nightTotal}
-        </div>
       </div>
+      ${nightRows?`<div class="mt-3 pt-3 border-t border-gray-100">${nightRows}</div>`:''}
     </div>`;
-  }).join('');
 
-  if(rec) pickPkgById(rec.id);
-  else if(pkgs.length) pickPkgById(pkgs[0].id); // ensure SOMETHING is always selected
-}
-
-function pickPkgById(id){
-  const pkg = pkgMap[id]; if(!pkg) return;
-  pickPkg(pkg);
-}
-
-function pickPkg(pkg) {
-  selPkg=pkg;
-  document.querySelectorAll('.pkg').forEach(c=>c.classList.remove('on'));
-  const el=document.getElementById('pkg-'+pkg.id); if(el) el.classList.add('on');
-  buildRoomPicker(pkg);
   recalc();
+  renderCalendar();
 }
 
 const ROOMS=[
@@ -1449,10 +1597,26 @@ function toggleRoom(id,max){
     if(chosen.length>=max){toast(`Select only ${max} room${max>1?'s':''}!`,'error');return;}
     selRooms.push(id); el.classList.add('on');
   }
+  renderCalendar();
 }
 
 function buildAddonCards(){
-  document.getElementById('addonCards').innerHTML = addons.map(a=>{
+  // Hide "AC in living area" when the selected package already includes
+  // free AC for the common area (15+ pax tiers, rooms_included>=4).
+  // Hide "Extra mattress" when the package already includes free
+  // mattresses (19-24 pax tier = 6 free extra mattresses).
+  const hideKeys=[];
+  if(selPkg && selPkg.free_ac_living) hideKeys.push('ac_living');
+  if(selPkg && selPkg.free_extra_mattresses>0) hideKeys.push('extra_mattress');
+  const visibleAddons = addons.filter(a=>!hideKeys.includes(a.key));
+
+  // If a now-free addon was previously selected, drop it from the
+  // selection so it doesn't silently keep charging.
+  hideKeys.forEach(key=>{
+    if(selAddons[key]){ delete selAddons[key]; delete addonQtys[key]; }
+  });
+
+  document.getElementById('addonCards').innerHTML = visibleAddons.map(a=>{
     const sel=!!selAddons[a.key];
     const u=a.unit==='per_unit'?'/unit':a.unit==='per_hour'?'/hr':'';
     return `<div class="addon${sel?' on':''}" id="addon-${a.key}" onclick="toggleAddon('${a.key}')">
@@ -1467,6 +1631,7 @@ function buildAddonCards(){
   // restore visibility of qty inputs for already-selected addons
   document.getElementById('petQtyArea').classList.toggle('hidden',!selAddons['pet_fee']);
   document.getElementById('spaHrsArea').classList.toggle('hidden',!selAddons['pool_spa']);
+  document.getElementById('mattressQtyArea').classList.toggle('hidden',!selAddons['extra_mattress']);
 }
 
 function toggleAddon(key){
@@ -1477,6 +1642,7 @@ function toggleAddon(key){
   else { selAddons[key]=a.price; addonQtys[key]=1; el.classList.add('on'); chk.checked=true; }
   document.getElementById('petQtyArea').classList.toggle('hidden',!selAddons['pet_fee']);
   document.getElementById('spaHrsArea').classList.toggle('hidden',!selAddons['pool_spa']);
+  document.getElementById('mattressQtyArea').classList.toggle('hidden',!selAddons['extra_mattress']);
   recalc();
 }
 
@@ -1486,26 +1652,43 @@ function toggleAddon(key){
 function recalc(){
   if(!selPkg) return;
   const nights=calcNights(); if(nights<=0) return;
-  const base=selPkg.price*nights;
-  const pax=calcPax();
-  let total=base;
-  let lines=[`<div class="flex justify-between text-white/80"><span>${selPkg.pax_min}–${selPkg.pax_max} pax × ${nights}n</span><span>₱${base.toLocaleString()}</span></div>`];
+  const ci=document.getElementById('check_in').value;
 
-  // Extra pax beyond 24
-  const ep=Math.max(0,pax-24);
-  if(ep>0){
-    const fee=500*ep*nights; total+=fee;
-    lines.push(`<div class="flex justify-between text-yellow-300"><span>Extra pax ×${ep}</span><span>+₱${fee.toLocaleString()}</span></div>`);
-    document.getElementById('extraPaxNotice').classList.remove('hidden');
-    document.getElementById('extraPaxMsg').textContent=`${ep} guest${ep>1?'s':''} over 24-pax limit · ₱${(500*ep).toLocaleString()}/night`;
-  } else { document.getElementById('extraPaxNotice').classList.add('hidden'); }
+  // Sum each night at its own day-of-week rate (per-night pricing).
+  let base=0;
+  let weekdayNights=0, weekendNights=0;
+  if(ci){
+    let d=new Date(ci+'T00:00:00');
+    for(let i=0;i<nights;i++){
+      const ds=d.toISOString().split('T')[0];
+      base += tierPriceForDate(selPkg,ds);
+      if(getDayType(ds)==='weekend') weekendNights++; else weekdayNights++;
+      d.setDate(d.getDate()+1);
+    }
+  }
+
+  let total=base;
+  const nightLabel = [
+    weekdayNights>0?`${weekdayNights} weekday night${weekdayNights>1?'s':''}`:'',
+    weekendNights>0?`${weekendNights} weekend night${weekendNights>1?'s':''}`:'',
+  ].filter(Boolean).join(' + ');
+  let lines=[`<div class="flex justify-between text-white/80"><span>${selPkg.pax_min}–${selPkg.pax_max} pax · ${nightLabel}</span><span>₱${base.toLocaleString()}</span></div>`];
 
   // Add-ons
   Object.entries(selAddons).forEach(([key,price])=>{
     const a=addons.find(x=>x.key===key); if(!a) return;
     let cost=0,lbl=a.label;
-    if(key==='pet_fee'){ const q=parseInt(document.getElementById('pet_count').value)||1; cost=price*q; lbl+=` ×${q}`; }
+    if(key==='pet_fee'){
+      const el=document.getElementById('pet_count');
+      const q=Math.min(2,Math.max(1,parseInt(el.value)||1)); el.value=q;
+      cost=price*q; lbl+=` ×${q}`;
+    }
     else if(key==='pool_spa'){ const h=parseInt(document.getElementById('spa_hours').value)||1; cost=price*h; lbl+=` ×${h}hr`; }
+    else if(key==='extra_mattress'){
+      const el=document.getElementById('mattress_count');
+      const q=Math.min(6,Math.max(1,parseInt(el.value)||1)); el.value=q;
+      cost=price*q; lbl+=` ×${q}`;
+    }
     else { cost=price; }
     total+=cost;
     lines.push(`<div class="flex justify-between text-white/80"><span>${lbl}</span><span>+₱${cost.toLocaleString()}</span></div>`);
@@ -1586,7 +1769,7 @@ function showVStat(el,ok,msg){
 // STEP NAVIGATION
 // ═══════════════════════════════════════════════════════
 function goStep(n){
-  if(n===2){ if(!validateS1()) return; buildPackageCards(); buildAddonCards(); }
+  if(n===2){ if(!validateS1()) return; buildPackageSummary(); }
   if(n===3){ if(!validateS2()) return; fillS3Summary(); }
   [1,2,3,4].forEach(s=>{
     document.getElementById('step-'+s).classList.remove('active');
@@ -1631,7 +1814,7 @@ function fillS3Summary(){
   const ci=document.getElementById('check_in').value;
   const co=document.getElementById('check_out').value;
   const n=calcNights();
-  setT('sumPkg',  `${selPkg.pax_min}–${selPkg.pax_max} pax (${getDayType(ci)})`);
+  setT('sumPkg',  `${selPkg.pax_min}–${selPkg.pax_max} pax · ${selPkg.rooms_included} room${selPkg.rooms_included>1?'s':''}`);
   setT('sumDates',`${fmtDate(ci)} → ${fmtDate(co)} (${n} night${n>1?'s':''})`);
   setT('sumPax',  `${calcPax()} pax`);
   setT('sumRooms', selRooms.join(', ')||'All rooms');
@@ -1703,6 +1886,31 @@ async function submitBooking(){
 
   setBtnLoad(true);
   try {
+    // 0. Re-check availability right before committing — narrows the race
+    // window where two guests could both pass the calendar check and try
+    // to book the same room/date. (A DB-level exclusion constraint is the
+    // fully race-proof fix; this is the client-side last-line check.)
+    {
+      const { data: conflicts } = await db.from('bookings')
+        .select('rooms_selected,room_type,check_in_date,check_out_date')
+        .in('status',['confirmed','confirmed_balance_due','fully_paid',
+                      'pending_payment_verification','deposit_paid_waiting_confirmation'])
+        .lt('check_in_date', co)
+        .gt('check_out_date', ci);
+      const hasConflict = (conflicts||[]).some(b=>{
+        let rooms=[];
+        try{ rooms = typeof b.rooms_selected==='string' ? JSON.parse(b.rooms_selected) : (b.rooms_selected||[]); }catch(e){}
+        if(!Array.isArray(rooms) || !rooms.length) rooms = (b.room_type||'').split(',').map(s=>s.trim()).filter(Boolean);
+        return selRooms.some(r=>rooms.includes(r));
+      });
+      if(hasConflict){
+        toast('Sorry — one of your selected rooms was just booked for these dates. Please pick different dates or rooms.','error');
+        await loadBookedDates(); renderCalendar();
+        setBtnLoad(false);
+        return;
+      }
+    }
+
     // 1. Upload proof to Supabase Storage
     let proofUrl=null;
     try {
@@ -1716,7 +1924,7 @@ async function submitBooking(){
     } catch(e){ console.warn('Proof upload:',e); }
 
     // 2. Insert booking row
-    const {error:dbe}=await db.from('bookings').insert({
+    const {data:insertedRows, error:dbe}=await db.from('bookings').insert({
       booking_ref:     ref,
       guest_name:      name,
       guest_email:     email,
@@ -1746,8 +1954,9 @@ async function submitBooking(){
       booking_type:    'online',
       deposit_deadline:new Date(Date.now()+24*60*60*1000).toISOString(),
       edit_log:        JSON.stringify([{action:'created',at:new Date().toISOString(),by:'guest'}]),
-    });
+    }).select().single();
     if(dbe) throw dbe;
+    const bookingId = insertedRows?.id;
 
     // 3. Mark voucher used
     if(appliedVoucher){
@@ -1755,8 +1964,8 @@ async function submitBooking(){
       await db.from('voucher_usage').insert({voucher_code:appliedVoucher.code,booking_ref:ref});
     }
 
-    // 4. Email guest — pending confirmation
-    await sendEmail(email,`Balay Maysa – Booking Received (${ref})`, buildGuestEmail(name,ref,ci,co,nights,pax,isFull));
+    // 4. Email guest — booking received / pending review (editable template)
+    if(bookingId) await sendBookingEmail('booking_pending', bookingId);
 
     // 5. Email SUPER ADMIN only (not admin.html — super admin verifies first)
     await sendEmail(SA_EMAIL,`🏡 New Booking + Payment – ${ref} – ${name}`, buildAdminEmail(name,email,phone,ref,ci,co,pax,isFull,payRef,proofUrl));
@@ -1784,37 +1993,10 @@ function setBtnLoad(on){
 }
 
 // ─── Email Templates ───────────────────────────────────
-function buildGuestEmail(name,ref,ci,co,nights,pax,fullPay){
-  const ph=cfg.contact_phone||'0917 565 7918';
-  const addOnStr=Object.keys(selAddons).map(k=>addons.find(a=>a.key===k)?.label).filter(Boolean).join(', ')||'None';
-  return `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
-<div style="background:#2d5a3b;padding:32px 40px;text-align:center;">
-  <h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">${cfg.site_name||'Balay Maysa Resort'}</h1>
-  <p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">Booking Request Received ✅</p>
-</div>
-<div style="padding:40px;">
-  <p>Hello <strong>${name}</strong>,</p>
-  <p style="color:#666;line-height:1.7;">Your booking is <strong>pending payment verification</strong>. Our team will review your proof and confirm within 24 hours. You will receive another email once confirmed.</p>
-  <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
-    <h3 style="margin:0 0 14px;color:#2d5a3b;font-family:Georgia,serif;font-weight:400;font-size:18px;">Booking Summary</h3>
-    <table style="width:100%;font-size:14px;border-collapse:collapse;">
-      <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">${ref}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Room(s)</td><td>${selRooms.join(', ')}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Check-in</td><td>${fmtDate(ci)}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Check-out</td><td>${fmtDate(co)} (${nights} night${nights>1?'s':''})</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Guests</td><td>${pax} pax</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Add-ons</td><td>${addOnStr}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Total</td><td style="font-weight:700;">₱${totalAmt.toLocaleString()}</td></tr>
-      <tr><td style="padding:6px 0;color:#666;">Payment</td><td style="color:#2d5a3b;font-weight:600;">${fullPay?'Full Payment':'50% Downpayment — ₱'+depositAmt.toLocaleString()+' paid, ₱'+(totalAmt-depositAmt).toLocaleString()+' balance due on arrival'}</td></tr>
-    </table>
-  </div>
-  <p style="color:#666;font-size:13px;">Track your booking anytime: <a href="https://balay-maysaa.vercel.app/lookup.html" style="color:#2d5a3b;font-weight:600;">balay-maysaa.vercel.app/lookup.html</a><br/>Use reference <strong>${ref}</strong> + your email.</p>
-  <p style="color:#666;font-size:13px;margin-top:8px;">Questions? Call <a href="tel:${ph.replace(/\s/g,'')}" style="color:#2d5a3b;">${ph}</a></p>
-</div>
-<div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">${cfg.site_name||'Balay Maysa Resort'} · ${cfg.contact_address||'Congress Village, Caloocan North'}</p></div>
-</div>`;
-}
-
+// Guest-facing booking emails (received/confirmed/declined) are now
+// built server-side from the editable templates in `email_templates`
+// — see sendBookingEmail(). buildAdminEmail below is for the internal
+// new-booking notification sent to SA_EMAIL only.
 function buildAdminEmail(name,email,phone,ref,ci,co,pax,fullPay,payRef,proofUrl){
   const addOnStr=Object.keys(selAddons).map(k=>addons.find(a=>a.key===k)?.label).filter(Boolean).join(', ')||'None';
   return `<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;">
@@ -1907,9 +2089,35 @@ function fmtDate(d){
   if(!d) return '—';
   return new Date(d+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
 }
+// Internal notification emails (e.g. to SA_EMAIL) — sent via the
+// send-email Edge Function using Balay Maysa's own Gmail account.
 async function sendEmail(to,subject,html){
-  try{ await emailjs.send(EJS_SID,EJS_TMPL,{to_email:to,subject,message_html:html,to_name:to.split('@')[0]}); return true; }
-  catch(e){ console.error('Email err:',e); return false; }
+  try{
+    const res = await fetch(SEND_EMAIL_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${SB_ANON}`},
+      body: JSON.stringify({type:'raw_email', to, subject, html})
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data.sent){ console.error('Email err:', data.error||data.reason); return false; }
+    return true;
+  }catch(e){ console.error('Email err:',e); return false; }
+}
+
+// Guest-facing booking emails (pending / confirmed / declined) — uses
+// the editable template stored in `email_templates` (Super Admin →
+// Email Templates), rendered server-side by the Edge Function.
+async function sendBookingEmail(templateKey, bookingId){
+  try{
+    const res = await fetch(SEND_EMAIL_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${SB_ANON}`},
+      body: JSON.stringify({type:'booking_email', template_key:templateKey, booking_id:bookingId})
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data.sent){ console.warn('Booking email not sent:', data.error||data.reason); return false; }
+    return true;
+  }catch(e){ console.error('Booking email err:',e); return false; }
 }
 function toast(msg,type='success'){
   const t=document.getElementById('toast');
