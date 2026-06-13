@@ -2447,27 +2447,54 @@ function renderSocialLinksEditor(){
     wrap.innerHTML='<p class="text-gray-400 text-sm">No social links yet. Click "Add Platform" below.</p>';
     return;
   }
-  wrap.innerHTML = socialLinksData.map((l,i)=>`
-    <div class="flex gap-2 items-start" data-social-row="${i}">
-      <input type="text" class="fi" style="max-width:170px" placeholder="Icon class (fa-brands fa-tiktok)" value="${esc(l.icon_class||'')}" data-social-field="icon_class"/>
-      <input type="text" class="fi" style="max-width:120px" placeholder="Label (TikTok)" value="${esc(l.label||'')}" data-social-field="label"/>
-      <input type="url" class="fi flex-1" placeholder="https://..." value="${esc(l.url||'')}" data-social-field="url"/>
+  wrap.innerHTML = socialLinksData.map((l,i)=>{
+    const hasLogo = !!l.logo_url;
+    return `
+    <div class="flex gap-3 items-start p-3 bg-gray-50 rounded-xl" data-social-row="${i}">
+      <input type="hidden" value="${esc(l.logo_url||'')}" data-social-field="logo_url" id="social_logo_${i}"/>
+      <div class="flex-shrink-0">
+        <div class="upload-zone" style="width:64px;height:64px;padding:4px;" onclick="document.getElementById('social_file_${i}').click()">
+          ${hasLogo
+            ? `<img src="${esc(l.logo_url)}" id="social_preview_${i}" class="w-full h-full object-contain"/>`
+            : `<i class="fas fa-cloud-upload-alt text-gray-300" id="social_preview_${i}"></i>`}
+        </div>
+        <input type="file" id="social_file_${i}" class="hidden" accept="image/*" onchange="handleSocialLogoUpload(this,${i})"/>
+        <p class="text-[10px] text-gray-400 text-center mt-1">Logo</p>
+      </div>
+      <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <input type="text" class="fi" placeholder="Label (e.g. TikTok)" value="${esc(l.label||'')}" data-social-field="label"/>
+        <input type="url" class="fi" placeholder="https://..." value="${esc(l.url||'')}" data-social-field="url"/>
+      </div>
       <label class="flex items-center gap-1.5 text-xs text-gray-500 px-2 self-center whitespace-nowrap"><input type="checkbox" class="accent-forest" ${l.is_active!==false?'checked':''} data-social-field="is_active"/> Active</label>
       <button onclick="removeSocialLinkRow(${i})" class="w-9 h-9 flex-shrink-0 rounded-lg border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+// Uploads a platform logo image using the same site-media storage
+// pattern as room images, scoped to row index i.
+async function handleSocialLogoUpload(inputEl,i){
+  const file=inputEl.files[0]; if(!file) return;
+  if(file.size>5*1024*1024){ toast('File too large. Max 5 MB.','error'); return; }
+  try{
+    const url = await uploadFileToStorage(file,'social-media');
+    document.getElementById(`social_logo_${i}`).value=url;
+    const prev=document.getElementById(`social_preview_${i}`);
+    prev.outerHTML = `<img src="${url}" id="social_preview_${i}" class="w-full h-full object-contain"/>`;
+    toast('Logo uploaded!','success');
+  }catch(e){console.error(e);toast('Upload failed.','error');}
 }
 function getSocialLinksFromEditor(){
   return [...document.querySelectorAll('[data-social-row]')].map((row,i)=>({
-    icon_class: row.querySelector('[data-social-field="icon_class"]').value.trim(),
+    logo_url:   row.querySelector('[data-social-field="logo_url"]').value.trim(),
     label:      row.querySelector('[data-social-field="label"]').value.trim(),
     url:        row.querySelector('[data-social-field="url"]').value.trim(),
     is_active:  row.querySelector('[data-social-field="is_active"]').checked,
     display_order: i,
-  })).filter(l=>l.url && l.icon_class);
+  })).filter(l=>l.url && l.label);
 }
 function addSocialLinkRow(){
   socialLinksData = getSocialLinksFromEditor();
-  socialLinksData.push({icon_class:'fa-brands fa-facebook',label:'',url:'',is_active:true,display_order:socialLinksData.length});
+  socialLinksData.push({logo_url:'',label:'',url:'',is_active:true,display_order:socialLinksData.length});
   renderSocialLinksEditor();
 }
 function removeSocialLinkRow(i){
