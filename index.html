@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config={theme:{extend:{colors:{forest:'#2d5a3b','forest-dark':'#1e3d28',gold:'#c9a03d','gold-light':'#e4c06e',cream:'#faf8f5','text-dark':'#1a1a1a','text-muted':'#666666'},fontFamily:{heading:['"Cormorant Garamond"','serif'],body:['Inter','sans-serif']}}}};
@@ -120,6 +122,19 @@
     /* Selected check-in/check-out dates and the range between them */
     .cday.sel-start,.cday.sel-end{background:#2d5a3b;color:white;font-weight:700;box-shadow:0 0 0 2px #c9a03d;}
     .cday.in-range{background:#dcfce7;color:#15803d;}
+    /* ── DATE PICKER (flatpickr) ─────────────────────── */
+    .flatpickr-calendar{font-family:'Inter',sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:12px;overflow:hidden;}
+    .flatpickr-months{background:#2d5a3b;}
+    .flatpickr-months .flatpickr-month{background:#2d5a3b;color:white;fill:white;}
+    .flatpickr-current-month .flatpickr-monthDropdown-months{background:#2d5a3b;color:white;}
+    .flatpickr-current-month input.cur-year{color:white;background:transparent;}
+    .flatpickr-weekdays{background:#f0fdf4;}
+    span.flatpickr-weekday{color:#2d5a3b;font-weight:600;}
+    .flatpickr-months .flatpickr-prev-month:hover svg,.flatpickr-months .flatpickr-next-month:hover svg{fill:#c9a03d;}
+    .flatpickr-day.selected,.flatpickr-day.selected:hover,.flatpickr-day.selected.prevMonthDay,.flatpickr-day.selected.nextMonthDay{background:#2d5a3b;border-color:#2d5a3b;}
+    .flatpickr-day.today{border-color:#c9a03d;}
+    .flatpickr-day.today:hover{border-color:#c9a03d;background:#fef3c7;}
+    span.flatpickr-day.flatpickr-disabled,span.flatpickr-day.flatpickr-disabled:hover{color:#991b1b;background:#fee2e2;text-decoration:line-through;cursor:not-allowed;}
     /* ── VOUCHER ─────────────────────────────────────── */
     .vok{background:#d1fae5;border:1px solid #34d399;color:#065f46;}
     .verr{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;}
@@ -522,13 +537,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
           <div>
             <label class="fi-label">Check-in Date <span class="text-red-500">*</span></label>
-            <input type="date" id="check_in" class="fi" onchange="onDateChange()"/>
+            <input type="text" id="check_in" class="fi" placeholder="Select date" readonly/>
           </div>
           <div>
             <label class="fi-label">Check-out Date <span class="text-red-500">*</span></label>
-            <input type="date" id="check_out" class="fi" onchange="onDateChange()"/>
+            <input type="text" id="check_out" class="fi" placeholder="Select date" readonly/>
           </div>
         </div>
+        <p class="text-xs text-text-muted -mt-3 mb-4"><i class="fas fa-circle-info mr-1"></i>Dates already fully booked are greyed out and can't be selected.</p>
         <div class="bg-cream rounded-xl p-5 mb-5 border border-gray-100">
           <p class="text-sm font-semibold text-gray-700 mb-3">Number of Guests</p>
           <div class="grid grid-cols-3 gap-4">
@@ -614,6 +630,7 @@
         <div class="bg-cream rounded-xl p-5 mb-5 border border-gray-100 text-sm space-y-2">
           <p class="text-xs uppercase tracking-widest text-gold font-semibold mb-1">Booking Summary</p>
           <div class="flex justify-between"><span class="text-text-muted">Reference</span><span class="font-medium font-mono" id="sumRef">–</span></div>
+          <div class="flex justify-between"><span class="text-text-muted">Guest Name</span><span class="font-medium" id="sumGuestName">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Package</span><span class="font-medium" id="sumPkg">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Dates</span><span class="font-medium" id="sumDates">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Guests</span><span class="font-medium" id="sumPax">–</span></div>
@@ -723,6 +740,48 @@
               <p class="text-xs text-gray-400 mt-1">Click to change</p>
             </div>
           </div>
+        </div>
+        <!-- Government ID — front & back (for identity verification) -->
+        <div class="mb-4">
+          <label class="fi-label">Government ID — Front &amp; Back <span class="text-red-500">*</span></label>
+          <p class="text-xs text-text-muted mb-2">Any valid government-issued ID (driver's license, passport, UMID, national ID, etc.) — used for identity verification at check-in.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="upload-area" id="idFrontArea" style="padding:20px"
+                 onclick="document.getElementById('idFrontInput').click()"
+                 ondragover="event.preventDefault();this.classList.add('over')"
+                 ondragleave="this.classList.remove('over')"
+                 ondrop="handleIdDrop(event,'idFront')">
+              <input type="file" id="idFrontInput" class="hidden" accept="image/*,application/pdf" onchange="handleIdFile(event,'idFront')"/>
+              <div id="idFrontPlaceholder">
+                <i class="fas fa-id-card text-3xl text-gray-300 mb-2"></i>
+                <p class="text-sm text-gray-500 font-medium">ID Front</p>
+                <p class="text-xs text-gray-400 mt-1">Click or drag &amp; drop</p>
+              </div>
+              <div id="idFrontPreview" class="hidden">
+                <i class="fas fa-check-circle text-3xl text-forest mb-1"></i>
+                <p class="text-sm text-forest font-medium" id="idFrontFileName">file.jpg</p>
+                <p class="text-xs text-gray-400 mt-1">Click to change</p>
+              </div>
+            </div>
+            <div class="upload-area" id="idBackArea" style="padding:20px"
+                 onclick="document.getElementById('idBackInput').click()"
+                 ondragover="event.preventDefault();this.classList.add('over')"
+                 ondragleave="this.classList.remove('over')"
+                 ondrop="handleIdDrop(event,'idBack')">
+              <input type="file" id="idBackInput" class="hidden" accept="image/*,application/pdf" onchange="handleIdFile(event,'idBack')"/>
+              <div id="idBackPlaceholder">
+                <i class="fas fa-id-card text-3xl text-gray-300 mb-2"></i>
+                <p class="text-sm text-gray-500 font-medium">ID Back</p>
+                <p class="text-xs text-gray-400 mt-1">Click or drag &amp; drop</p>
+              </div>
+              <div id="idBackPreview" class="hidden">
+                <i class="fas fa-check-circle text-3xl text-forest mb-1"></i>
+                <p class="text-sm text-forest font-medium" id="idBackFileName">file.jpg</p>
+                <p class="text-xs text-gray-400 mt-1">Click to change</p>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1.5"><i class="fas fa-lock mr-1"></i>Stored securely and used only for booking verification.</p>
         </div>
         <!-- Special requests -->
         <div class="mb-5">
@@ -972,6 +1031,7 @@ let selRooms  = [];          // selected room names
 let selAddons = {};          // { key: price }
 let addonQtys = {};          // { key: qty }
 let uploadedFile = null;
+let stagedIdFiles = {idFront:null, idBack:null}; // government ID front/back, staged before submit
 let appliedVoucher = null;
 let totalAmt  = 0;
 let depositAmt= 0;
@@ -1000,10 +1060,10 @@ async function boot() {
     loadSocialLinks()
   ]);
   initSliders();
+  initDatePickers();
   renderCalendar();
   renderPricingTable();
   renderAddonsBar();
-  setDateMin();
   startSliderAuto();
   initRevealObserver();
 }
@@ -1403,7 +1463,7 @@ function getTakenRoomsByDate(){
     let d=new Date(b.check_in_date+'T00:00:00');
     const e=new Date(b.check_out_date+'T00:00:00');
     while(d<e){
-      const ds=d.toISOString().split('T')[0];
+      const ds=ymd(d);
       if(!map[ds]) map[ds]=new Set();
       (b.rooms||[]).forEach(r=>map[ds].add(r));
       d.setDate(d.getDate()+1);
@@ -1418,7 +1478,7 @@ function findBlockedDateInRange(ci, co, rooms){
   const taken=getTakenRoomsByDate();
   let d=new Date(ci+'T00:00:00'); const e=new Date(co+'T00:00:00');
   while(d<e){
-    const ds=d.toISOString().split('T')[0];
+    const ds=ymd(d);
     const t=taken[ds];
     if(t && rooms.every(r=>t.has(r))) return ds;
     d.setDate(d.getDate()+1);
@@ -1428,12 +1488,71 @@ function findBlockedDateInRange(ci, co, rooms){
 
 const ALL_ROOMS=['Silayan','Sinta','Tahanan','Barkada'];
 
+// Local YYYY-MM-DD formatting for a Date object (avoids the UTC-shift
+// bugs that toISOString() can introduce for local dates).
+function ymd(date){
+  const y=date.getFullYear(), m=String(date.getMonth()+1).padStart(2,'0'), d=String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+
+// Used as a flatpickr `disable` function — a date is disabled (greyed
+// out, unselectable in the picker) if ALL of the guest's currently
+// relevant rooms are already booked on that date.
+function isDateDisabled(date){
+  const ds = ymd(date);
+  const relevantRooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
+  const taken = getTakenRoomsByDate()[ds];
+  return !!(taken && relevantRooms.every(r=>taken.has(r)));
+}
+
+let fpCheckIn=null, fpCheckOut=null;
+
+// Replaces the native <input type="date"> pickers with flatpickr so
+// fully-booked dates are visually greyed out and unselectable directly
+// in the calendar widget — not just rejected after the fact.
+function initDatePickers(){
+  fpCheckIn = flatpickr('#check_in', {
+    dateFormat:'Y-m-d',
+    altInput:true,
+    altFormat:'M j, Y (D)',
+    altInputClass:'fi',
+    minDate:'today',
+    disable:[isDateDisabled],
+    onChange:(dates,dateStr)=>{
+      if(fpCheckOut && dateStr){
+        const nx=new Date(dateStr+'T00:00:00'); nx.setDate(nx.getDate()+1);
+        fpCheckOut.set('minDate', ymd(nx));
+        const co=document.getElementById('check_out').value;
+        if(co && co<=dateStr) fpCheckOut.clear(false);
+      }
+      onDateChange();
+      buildPackageSummary();
+    }
+  });
+  fpCheckOut = flatpickr('#check_out', {
+    dateFormat:'Y-m-d',
+    altInput:true,
+    altFormat:'M j, Y (D)',
+    altInputClass:'fi',
+    minDate:'today',
+    disable:[isDateDisabled],
+    onChange:()=>{ onDateChange(); buildPackageSummary(); }
+  });
+}
+
+// Re-renders the flatpickr calendar grids so newly-loaded bookedDates
+// or a changed room selection are reflected in the disabled dates.
+function refreshDatePickers(){
+  if(fpCheckIn) fpCheckIn.redraw();
+  if(fpCheckOut) fpCheckOut.redraw();
+}
+
 function renderCalendar() {
   document.getElementById('calLabel').textContent =
     new Date(calY,calM,1).toLocaleDateString('en-PH',{month:'long',year:'numeric'});
   const first = new Date(calY,calM,1).getDay();
   const days  = new Date(calY,calM+1,0).getDate();
-  const today = new Date().toISOString().split('T')[0];
+  const today = ymd(new Date());
   const ci = document.getElementById('check_in')?.value || '';
   const co = document.getElementById('check_out')?.value || '';
 
@@ -1473,6 +1592,7 @@ function renderCalendar() {
     html+=`<div class="cday ${cls}${selCls}" title="${label}"${onclick}>${d}</div>`;
   }
   document.getElementById('calGrid').innerHTML=html;
+  refreshDatePickers();
 }
 
 // Clicking an available date on the calendar sets check-in (first
@@ -1486,7 +1606,10 @@ function pickCalDate(ds){
   if(!ci || (ci && co) || ds<=ci){
     // Start a new selection (no check-in yet, both already set, or
     // clicked date is before/equal to the current check-in).
-    ciEl.value=ds; coEl.value='';
+    fpCheckIn.setDate(ds,false);
+    fpCheckOut.clear(false);
+    const nx=new Date(ds+'T00:00:00'); nx.setDate(nx.getDate()+1);
+    fpCheckOut.set('minDate', ymd(nx));
     onDateChange();
   } else {
     // check-in set, check-out empty, clicked date is after check-in.
@@ -1495,7 +1618,7 @@ function pickCalDate(ds){
       toast(`${fmtDate(blocked)} is fully booked for your room selection — please choose different dates.`,'error');
       return;
     }
-    coEl.value=ds;
+    fpCheckOut.setDate(ds,false);
     onDateChange();
   }
   buildPackageSummary();
@@ -1557,29 +1680,25 @@ function getDayType(dateStr) {
   return (d===5||d===6)?'weekend':'weekday';
 }
 
-function setDateMin() {
-  const t=new Date().toISOString().split('T')[0];
-  document.getElementById('check_in').min=t;
-  document.getElementById('check_out').min=t;
-}
-
 function onDateChange() {
   const ciEl=document.getElementById('check_in'), coEl=document.getElementById('check_out');
   let ci=ciEl.value, co=coEl.value;
-  if(ci){
-    const nx=new Date(ci+'T00:00:00'); nx.setDate(nx.getDate()+1);
-    coEl.min=nx.toISOString().split('T')[0];
-    if(co&&co<=ci){ coEl.value=''; co=''; }
+  if(ci && co && co<=ci){
+    if(fpCheckOut) fpCheckOut.clear(false);
+    co='';
   }
-  // If both dates are set (e.g. typed manually into the native date
-  // pickers), reject the range if any night falls on a date that's
-  // fully booked for the guest's currently-selected room(s).
+  // If both dates are set, reject the range if any night falls on a
+  // date that's fully booked for the guest's currently-selected room(s).
+  // (The flatpickr `disable` function already prevents picking a fully
+  // booked date directly, but this also covers ranges that pass THROUGH
+  // a booked date even though the endpoints themselves are free.)
   if(ci && co){
     const relevantRooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
     const blocked = findBlockedDateInRange(ci,co,relevantRooms);
     if(blocked){
       toast(`${fmtDate(blocked)} is fully booked for your room selection — please choose different dates.`,'error');
-      coEl.value=''; co='';
+      if(fpCheckOut) fpCheckOut.clear(false);
+      co='';
     }
   }
   const dt=getDayType(ci);
@@ -1868,7 +1987,7 @@ function recalc(){
   if(ci){
     let d=new Date(ci+'T00:00:00');
     for(let i=0;i<nights;i++){
-      const ds=d.toISOString().split('T')[0];
+      const ds=ymd(d);
       const price=tierPriceForDate(selPkg,ds,pax);
       base += price;
       const dt=getDayType(ds);
@@ -2045,6 +2164,7 @@ function fillS3Summary(){
 
   if(!previewRef) previewRef=genRef();
   setT('sumRef', previewRef);
+  setT('sumGuestName', document.getElementById('guest_name').value.trim()||'–');
   setT('sumPkg',  `${selPkg.pax_min}–${selPkg.pax_max} pax · ${selPkg.rooms_included} room${selPkg.rooms_included>1?'s':''}`);
   setT('sumDates',`${fmtDate(ci)} → ${fmtDate(co)} (${n} night${n>1?'s':''})`);
   setT('sumPax',  extraGuestsCount>0 ? `${pax} pax + ${extraGuestsCount} extra (${pax+extraGuestsCount} total)` : `${pax} pax`);
@@ -2117,6 +2237,24 @@ function doFile(f){
   document.getElementById('uploadArea').classList.add('done2');
 }
 
+// Government ID front/back — same drag/drop/click pattern as the
+// payment proof uploader above, generalized for two named slots
+// ('idFront' / 'idBack'). Files are staged here and uploaded to the
+// private 'guest-ids' bucket during submitBooking().
+function handleIdDrop(e,slot){
+  e.preventDefault(); document.getElementById(slot+'Area').classList.remove('over');
+  const f=e.dataTransfer.files[0]; if(f) stageIdFile(f,slot);
+}
+function handleIdFile(e,slot){ const f=e.target.files[0]; if(f) stageIdFile(f,slot); }
+function stageIdFile(f,slot){
+  if(f.size>5*1024*1024){ toast('File too large. Max 5 MB.','error'); return; }
+  stagedIdFiles[slot]=f;
+  document.getElementById(slot+'Placeholder').classList.add('hidden');
+  document.getElementById(slot+'Preview').classList.remove('hidden');
+  setT(slot+'FileName',f.name);
+  document.getElementById(slot+'Area').classList.add('done2');
+}
+
 function showPay(m,btn){
   document.querySelectorAll('.paymethod').forEach(el=>el.classList.add('hidden'));
   document.querySelectorAll('.qtab').forEach(el=>el.classList.remove('on'));
@@ -2134,6 +2272,8 @@ async function submitBooking(){
   const payRef=document.getElementById('payment_ref').value.trim();
   if(!payRef){ toast('Please enter your transaction reference number.','error'); return; }
   if(!uploadedFile){ toast('Please upload your payment screenshot.','error'); return; }
+  if(!stagedIdFiles.idFront){ toast('Please upload the front of your government ID.','error'); return; }
+  if(!stagedIdFiles.idBack){ toast('Please upload the back of your government ID.','error'); return; }
 
   const name   =document.getElementById('guest_name').value.trim();
   const email  =document.getElementById('guest_email').value.trim();
@@ -2188,6 +2328,23 @@ async function submitBooking(){
       }
     } catch(e){ console.warn('Proof upload:',e); }
 
+    // 1b. Upload government ID front/back to the PRIVATE 'guest-ids'
+    // bucket. We store the storage PATH (not a public URL) — these
+    // are PII and require a signed URL to view (see SQL comments).
+    let idFrontPath=null, idBackPath=null;
+    try {
+      const fext=stagedIdFiles.idFront.name.split('.').pop();
+      const fpath=`ids/${ref}-front-${Date.now()}.${fext}`;
+      const {error:fe}=await db.storage.from('guest-ids').upload(fpath,stagedIdFiles.idFront,{cacheControl:'3600'});
+      if(!fe) idFrontPath=fpath;
+    } catch(e){ console.warn('ID front upload:',e); }
+    try {
+      const bext=stagedIdFiles.idBack.name.split('.').pop();
+      const bpath=`ids/${ref}-back-${Date.now()}.${bext}`;
+      const {error:be}=await db.storage.from('guest-ids').upload(bpath,stagedIdFiles.idBack,{cacheControl:'3600'});
+      if(!be) idBackPath=bpath;
+    } catch(e){ console.warn('ID back upload:',e); }
+
     // 2. Insert booking row
     const {data:insertedRows, error:dbe}=await db.from('bookings').insert({
       booking_ref:     ref,
@@ -2209,6 +2366,8 @@ async function submitBooking(){
       remaining_balance:balance,
       payment_status:  'proof_uploaded',
       payment_proof_url:proofUrl,
+      id_front_path:   idFrontPath,
+      id_back_path:    idBackPath,
       payment_ref_number:payRef,
       payment_type:    isFull?'full':'downpayment',
       addons:          JSON.stringify(extraGuestsCount>0 ? {...selAddons, _extra_guests:extraGuestsCount} : selAddons),
@@ -2398,8 +2557,10 @@ function resetForm(){
   selPkg=null;selRooms=[];selAddons={};addonQtys={};
   uploadedFile=null;appliedVoucher=null;appliedVoucherDiscount=0;totalAmt=0;depositAmt=0;
   extraGuestsCount=0;previewRef=null;
-  ['guest_name','guest_email','guest_phone','check_in','check_out',
+  ['guest_name','guest_email','guest_phone',
    'payment_ref','special_requests','voucher_code'].forEach(id=>document.getElementById(id).value='');
+  if(fpCheckIn) fpCheckIn.clear(false);
+  if(fpCheckOut) fpCheckOut.clear(false);
   document.getElementById('adults').value='2';
   document.getElementById('children_above').value='0';
   document.getElementById('children_below').value='0';
@@ -2409,6 +2570,13 @@ function resetForm(){
   document.getElementById('upPlaceholder').classList.remove('hidden');
   document.getElementById('upPreview').classList.add('hidden');
   document.getElementById('uploadArea').classList.remove('done2');
+  stagedIdFiles={idFront:null, idBack:null};
+  ['idFront','idBack'].forEach(slot=>{
+    document.getElementById(slot+'Placeholder').classList.remove('hidden');
+    document.getElementById(slot+'Preview').classList.add('hidden');
+    document.getElementById(slot+'Area').classList.remove('done2');
+    document.getElementById(slot+'Input').value='';
+  });
   calcPax(); goStep(1);
 }
 
