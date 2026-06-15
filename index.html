@@ -112,10 +112,14 @@
     /* ── CALENDAR ────────────────────────────────────── */
     .cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
     .cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:500;transition:transform .15s;}
-    .cday.avail:hover{transform:scale(1.08);}
+    .cday.avail:hover,.cday.partial:hover,.cday.today:hover{transform:scale(1.08);}
+    .cday.avail,.cday.partial,.cday.today{cursor:pointer;}
     .cday.past{background:#f3f4f6;color:#c0bfbd;}.cday.booked{background:#fee2e2;color:#991b1b;cursor:not-allowed;}
     .cday.partial{background:#fef3c7;color:#92400e;}
     .cday.today{background:#2d5a3b;color:white;font-weight:700;}.cday.avail{background:#f0fdf4;color:#2d5a3b;}.cday.empty{background:transparent;}
+    /* Selected check-in/check-out dates and the range between them */
+    .cday.sel-start,.cday.sel-end{background:#2d5a3b;color:white;font-weight:700;box-shadow:0 0 0 2px #c9a03d;}
+    .cday.in-range{background:#dcfce7;color:#15803d;}
     /* ── VOUCHER ─────────────────────────────────────── */
     .vok{background:#d1fae5;border:1px solid #34d399;color:#065f46;}
     .verr{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;}
@@ -554,11 +558,12 @@
       <!-- ══ STEP 2: Package + Room + Add-ons ══ -->
       <div class="step hidden" id="step-2">
         <h3 class="font-heading text-2xl text-forest mb-1">Your Package</h3>
-        <p class="text-text-muted text-sm mb-5" id="step2Msg">Based on your guest count, here's what's included:</p>
+        <p class="text-text-muted text-sm mb-5" id="step2Msg">Based on your guest count, here's what's included — you can pick a bigger package for more rooms if you'd like.</p>
         <div id="pkgEmptyMsg" class="hidden mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
           <i class="fas fa-info-circle mr-1"></i> No matching package was found — please go back and adjust your guest count or dates.
         </div>
-        <div id="pkgSummary" class="mb-6"></div>
+        <div id="pkgSummary" class="space-y-3 mb-3"></div>
+        <div id="pkgNightBreakdown" class="mb-6"></div>
         <!-- Room picker (shown when < 4 rooms) -->
         <div id="roomArea" class="hidden mb-6">
           <p class="fi-label mb-3" id="roomPickLabel">Select Room(s) <span class="text-red-500">*</span></p>
@@ -574,13 +579,15 @@
           <label class="fi-label">Number of Pets <span class="text-text-muted text-xs font-normal">(max 2)</span></label>
           <input type="number" id="pet_count" class="fi w-28" value="1" min="1" max="2" oninput="recalc()"/>
         </div>
-        <div id="mattressQtyArea" class="hidden mb-4">
-          <label class="fi-label">Extra Mattresses <span class="text-text-muted text-xs font-normal">(1–6)</span></label>
-          <input type="number" id="mattress_count" class="fi w-28" value="1" min="1" max="6" oninput="recalc()"/>
-        </div>
         <div id="spaHrsArea" class="hidden mb-4">
           <label class="fi-label">Extra Pool Spa Hours <span class="text-text-muted text-xs font-normal">(₱350/hr)</span></label>
           <input type="number" id="spa_hours" class="fi w-28" value="1" min="1" oninput="recalc()"/>
+        </div>
+        <!-- Extra Guests (only at pax=24 — paired extra pax + extra mattress) -->
+        <div id="extraGuestsArea" class="hidden mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <label class="fi-label">Add Extra Guests <span class="text-text-muted text-xs font-normal">(optional, max +6 — ₱1,000 each)</span></label>
+          <input type="number" id="extra_guests_count" class="fi w-28" value="0" min="0" max="6" oninput="recalc()"/>
+          <p class="text-xs text-amber-700 mt-2">You're at our 24-guest maximum. Each extra guest (up to 30 total) adds ₱500 extra-pax fee + ₱500 extra mattress = ₱1,000.</p>
         </div>
         <!-- Price box -->
         <div id="priceBox" class="hidden price-box mb-6">
@@ -603,15 +610,39 @@
       <div class="step hidden" id="step-3">
         <h3 class="font-heading text-2xl text-forest mb-2">Send Your Payment</h3>
         <p class="text-text-muted text-sm mb-5">24-hour booking hold starts now. Send payment and upload your screenshot.</p>
-        <!-- Booking summary -->
+        <!-- Booking summary (receipt-style) -->
         <div class="bg-cream rounded-xl p-5 mb-5 border border-gray-100 text-sm space-y-2">
+          <p class="text-xs uppercase tracking-widest text-gold font-semibold mb-1">Booking Summary</p>
+          <div class="flex justify-between"><span class="text-text-muted">Reference</span><span class="font-medium font-mono" id="sumRef">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Package</span><span class="font-medium" id="sumPkg">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Dates</span><span class="font-medium" id="sumDates">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Guests</span><span class="font-medium" id="sumPax">–</span></div>
           <div class="flex justify-between"><span class="text-text-muted">Room(s)</span><span class="font-medium" id="sumRooms">–</span></div>
-          <div class="border-t border-gray-200 pt-2 flex justify-between font-semibold">
+          <div id="sumAddons" class="hidden"></div>
+          <div class="border-t border-gray-200 pt-2 flex justify-between">
+            <span class="text-text-muted">Subtotal</span><span class="font-medium" id="sumSubtotal">₱0</span>
+          </div>
+          <div id="sumVoucherRow" class="hidden flex justify-between text-green-600">
+            <span>Voucher Discount</span><span id="sumVoucherAmt">−₱0</span>
+          </div>
+          <div class="border-t border-gray-200 pt-2 flex justify-between font-semibold text-base">
             <span>Total</span><span class="text-forest" id="sumTotal">₱0</span>
           </div>
+          <div class="flex justify-between text-xs text-text-muted pt-1">
+            <span>50% Downpayment</span><span id="sumDP">₱0</span>
+          </div>
+          <div class="flex justify-between text-xs text-text-muted">
+            <span>Balance (due on arrival if paying DP)</span><span id="sumBalance">₱0</span>
+          </div>
+        </div>
+        <!-- Voucher (apply before choosing payment, so the amounts above update) -->
+        <div class="mb-5">
+          <label class="fi-label">Voucher Code <span class="text-xs text-text-muted font-normal">(optional)</span></label>
+          <div class="flex gap-2">
+            <input type="text" id="voucher_code" class="fi" placeholder="Enter code" style="text-transform:uppercase"/>
+            <button onclick="applyVoucher()" class="px-4 py-3 bg-gold text-white rounded-xl text-sm font-medium hover:bg-gold-light whitespace-nowrap transition-colors btn-sheen">Apply</button>
+          </div>
+          <div id="voucherStatus" class="hidden mt-2 p-3 rounded-lg text-xs font-medium"></div>
         </div>
         <!-- Payment amount choice -->
         <div class="mb-5">
@@ -692,15 +723,6 @@
               <p class="text-xs text-gray-400 mt-1">Click to change</p>
             </div>
           </div>
-        </div>
-        <!-- Voucher -->
-        <div class="mb-4">
-          <label class="fi-label">Voucher Code <span class="text-xs text-text-muted font-normal">(optional)</span></label>
-          <div class="flex gap-2">
-            <input type="text" id="voucher_code" class="fi" placeholder="Enter code" style="text-transform:uppercase"/>
-            <button onclick="applyVoucher()" class="px-4 py-3 bg-gold text-white rounded-xl text-sm font-medium hover:bg-gold-light whitespace-nowrap transition-colors btn-sheen">Apply</button>
-          </div>
-          <div id="voucherStatus" class="hidden mt-2 p-3 rounded-lg text-xs font-medium"></div>
         </div>
         <!-- Special requests -->
         <div class="mb-5">
@@ -954,6 +976,8 @@ let appliedVoucher = null;
 let totalAmt  = 0;
 let depositAmt= 0;
 let appliedVoucherDiscount = 0; // peso amount currently being deducted by appliedVoucher
+let extraGuestsCount = 0; // 0-6, only relevant at pax=24 (paired extra-pax + extra-mattress)
+let previewRef = null; // booking reference shown in the receipt summary, reused at submission
 let calY = new Date().getFullYear();
 let calM = new Date().getMonth();
 // slider: { roomName: { cur:0, total:N } }
@@ -1259,6 +1283,7 @@ async function loadAddonPricing() {
       {key:'pet_fee',        label:'Pet fee',                   description:'Per pet',                         price:300,  unit:'per_unit'},
       {key:'pool_spa',       label:'Pool Spa (extra hrs)',       description:'₱350 per hour',                   price:350,  unit:'per_hour'},
       {key:'extra_mattress', label:'Extra mattress',             description:'₱500 per mattress',               price:500,  unit:'per_unit'},
+      {key:'extra_pax',      label:'Extra pax (beyond 24, max +6)', description:'₱500 per extra guest',         price:500,  unit:'per_unit'},
       {key:'ac_living',      label:'AC in living area',         description:'Aircon for common area',           price:1000, unit:'flat'},
     ];
   }
@@ -1369,40 +1394,63 @@ function startSliderAuto() {
 document.getElementById('calPrev').onclick = ()=>{ calM--; if(calM<0){calM=11;calY--;} renderCalendar(); };
 document.getElementById('calNext').onclick = ()=>{ calM++; if(calM>11){calM=0;calY++;} renderCalendar(); };
 
+// Returns { 'YYYY-MM-DD': Set(roomNames) } — which rooms are already
+// booked on each date, across all active bookings. Shared by the
+// calendar renderer and the date-range validation helpers below.
+function getTakenRoomsByDate(){
+  const map={};
+  bookedDates.forEach(b=>{
+    let d=new Date(b.check_in_date+'T00:00:00');
+    const e=new Date(b.check_out_date+'T00:00:00');
+    while(d<e){
+      const ds=d.toISOString().split('T')[0];
+      if(!map[ds]) map[ds]=new Set();
+      (b.rooms||[]).forEach(r=>map[ds].add(r));
+      d.setDate(d.getDate()+1);
+    }
+  });
+  return map;
+}
+
+// Returns the first date in [ci, co) where ALL of `rooms` are already
+// booked, or null if the whole range is clear for those rooms.
+function findBlockedDateInRange(ci, co, rooms){
+  const taken=getTakenRoomsByDate();
+  let d=new Date(ci+'T00:00:00'); const e=new Date(co+'T00:00:00');
+  while(d<e){
+    const ds=d.toISOString().split('T')[0];
+    const t=taken[ds];
+    if(t && rooms.every(r=>t.has(r))) return ds;
+    d.setDate(d.getDate()+1);
+  }
+  return null;
+}
+
+const ALL_ROOMS=['Silayan','Sinta','Tahanan','Barkada'];
+
 function renderCalendar() {
   document.getElementById('calLabel').textContent =
     new Date(calY,calM,1).toLocaleDateString('en-PH',{month:'long',year:'numeric'});
   const first = new Date(calY,calM,1).getDay();
   const days  = new Date(calY,calM+1,0).getDate();
   const today = new Date().toISOString().split('T')[0];
+  const ci = document.getElementById('check_in')?.value || '';
+  const co = document.getElementById('check_out')?.value || '';
 
   // Rooms relevant to the guest's current selection. Before a package is
-  // chosen, fall back to "any room" (ALL_ROOMS) so the calendar still
-  // reflects whole-resort availability as a sensible default.
-  const ALL_ROOMS = ['Silayan','Sinta','Tahanan','Barkada'];
+  // chosen, fall back to "any room" so the calendar still reflects
+  // whole-resort availability as a sensible default.
   const relevantRooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
-
-  // For each date, collect which of the relevant rooms are already taken.
-  const takenRoomsByDate = {}; // date -> Set of room names booked that day
-  bookedDates.forEach(b => {
-    let d = new Date(b.check_in_date+'T00:00:00');
-    const e= new Date(b.check_out_date+'T00:00:00');
-    while(d<e){
-      const ds=d.toISOString().split('T')[0];
-      if(!takenRoomsByDate[ds]) takenRoomsByDate[ds]=new Set();
-      (b.rooms||[]).forEach(r=>takenRoomsByDate[ds].add(r));
-      d.setDate(d.getDate()+1);
-    }
-  });
+  const takenRoomsByDate = getTakenRoomsByDate();
 
   let html='';
   for(let i=0;i<first;i++) html+='<div class="cday empty"></div>';
   for(let d=1;d<=days;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     let cls='avail';
-    let label='Available';
-    if(ds<today){ cls='past'; label='Past'; }
-    else if(ds===today){ cls='today'; label='Today'; }
+    let label='Available — click to select';
+    let selectable=true;
+    if(ds<today){ cls='past'; label='Past'; selectable=false; }
     else {
       const taken = takenRoomsByDate[ds];
       if(taken){
@@ -1410,13 +1458,47 @@ function renderCalendar() {
         // rooms they need are already taken on this date.
         const allTaken = relevantRooms.every(r=>taken.has(r));
         const someTaken = relevantRooms.some(r=>taken.has(r));
-        if(allTaken){ cls='booked'; label='Fully booked'; }
-        else if(someTaken){ cls='partial'; label='Partially booked — some rooms unavailable'; }
+        if(allTaken){ cls='booked'; label='Fully booked — not available'; selectable=false; }
+        else if(someTaken){ cls='partial'; label='Partially booked — some rooms unavailable, click to select'; }
       }
+      if(ds===today) cls = (cls==='avail') ? 'today' : cls;
     }
-    html+=`<div class="cday ${cls}" title="${label}">${d}</div>`;
+    // Selection highlight (check-in / check-out / range between them)
+    let selCls='';
+    if(ci && ds===ci) selCls=' sel-start';
+    if(co && ds===co) selCls+=' sel-end';
+    if(ci && co && ds>ci && ds<co) selCls+=' in-range';
+
+    const onclick = selectable ? ` onclick="pickCalDate('${ds}')"` : (cls==='booked' ? ` onclick="toast('This date is fully booked for your room selection.','error')"` : '');
+    html+=`<div class="cday ${cls}${selCls}" title="${label}"${onclick}>${d}</div>`;
   }
   document.getElementById('calGrid').innerHTML=html;
+}
+
+// Clicking an available date on the calendar sets check-in (first
+// click) or check-out (second click) — same as typing into the date
+// inputs, but visually picks dates and blocks already-booked ones.
+function pickCalDate(ds){
+  const ciEl=document.getElementById('check_in'), coEl=document.getElementById('check_out');
+  const ci=ciEl.value, co=coEl.value;
+  const relevantRooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
+
+  if(!ci || (ci && co) || ds<=ci){
+    // Start a new selection (no check-in yet, both already set, or
+    // clicked date is before/equal to the current check-in).
+    ciEl.value=ds; coEl.value='';
+    onDateChange();
+  } else {
+    // check-in set, check-out empty, clicked date is after check-in.
+    const blocked=findBlockedDateInRange(ci,ds,relevantRooms);
+    if(blocked){
+      toast(`${fmtDate(blocked)} is fully booked for your room selection — please choose different dates.`,'error');
+      return;
+    }
+    coEl.value=ds;
+    onDateChange();
+  }
+  buildPackageSummary();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1482,12 +1564,23 @@ function setDateMin() {
 }
 
 function onDateChange() {
-  const ci=document.getElementById('check_in').value;
-  const co=document.getElementById('check_out').value;
+  const ciEl=document.getElementById('check_in'), coEl=document.getElementById('check_out');
+  let ci=ciEl.value, co=coEl.value;
   if(ci){
     const nx=new Date(ci+'T00:00:00'); nx.setDate(nx.getDate()+1);
-    document.getElementById('check_out').min=nx.toISOString().split('T')[0];
-    if(co&&co<=ci) document.getElementById('check_out').value='';
+    coEl.min=nx.toISOString().split('T')[0];
+    if(co&&co<=ci){ coEl.value=''; co=''; }
+  }
+  // If both dates are set (e.g. typed manually into the native date
+  // pickers), reject the range if any night falls on a date that's
+  // fully booked for the guest's currently-selected room(s).
+  if(ci && co){
+    const relevantRooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
+    const blocked = findBlockedDateInRange(ci,co,relevantRooms);
+    if(blocked){
+      toast(`${fmtDate(blocked)} is fully booked for your room selection — please choose different dates.`,'error');
+      coEl.value=''; co='';
+    }
   }
   const dt=getDayType(ci);
   const nb=document.getElementById('dayNotice');
@@ -1495,12 +1588,13 @@ function onDateChange() {
     nb.classList.remove('hidden');
     if(dt==='weekend'){
       nb.className='mb-4 p-3 rounded-lg text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700';
-      nb.innerHTML='📅 <strong>Weekend rate applies</strong> — check-in falls on Friday or Saturday.';
+      nb.innerHTML='📅 <strong>Your check-in falls on a weekend night</strong> — weekend rates apply for Friday/Saturday nights of your stay (see per-night breakdown in the next step).';
     } else {
       nb.className='mb-4 p-3 rounded-lg text-xs font-medium bg-blue-50 border border-blue-200 text-blue-700';
-      nb.innerHTML='📅 <strong>Weekday rate applies</strong> — includes <strong>1 hour free pool spa</strong>!';
+      nb.innerHTML='📅 <strong>Your check-in falls on a weekday</strong> — includes <strong>1 hour free pool spa</strong> for weekday nights!';
     }
   }
+  renderCalendar();
 }
 
 function calcNights() {
@@ -1523,62 +1617,125 @@ function livePhoneCheck() {
 function findTier(pax){
   return grpPricing.find(p=>p.day_type==='weekday' && pax>=p.pax_min && pax<=p.pax_max);
 }
-// Looks up the price for a given tier on a given calendar date,
-// using that date's actual day-of-week (per-night pricing).
-function tierPriceForDate(tier, dateStr){
+
+// Returns all tiers a guest with this pax count is allowed to choose:
+// any tier whose capacity (pax_max) can fit them. They can "upgrade" to
+// a bigger tier than they strictly need, but never downgrade to one
+// that's too small. Sorted smallest-to-largest.
+function getEligibleTiers(pax){
+  return grpPricing
+    .filter(p=>p.day_type==='weekday' && p.pax_max>=pax)
+    .sort((a,b)=>a.pax_min-b.pax_min);
+}
+
+// Looks up the price for a given tier on a given calendar date, using
+// that date's actual day-of-week (per-night pricing).
+//
+// Special case — the 19-24 tier is NOT a flat price. It's the 15-18
+// tier's price plus ₱500 per pax above 18 (1 "extra" mattress per extra
+// guest, up to 6 at pax=24):
+//   19 pax weekday = 21,000 + 500×1 = 21,500
+//   24 pax weekday = 21,000 + 500×6 = 24,000  (matches old flat rate)
+//   19 pax weekend = 24,000 + 500×1 = 24,500
+//   24 pax weekend = 24,000 + 500×6 = 27,000  (matches old flat rate)
+//
+// If a guest "upgrades" into the 19-24 tier with FEWER than 19 actual
+// pax, we use pax=19 as the floor (the cheapest entry point into that
+// tier) — confirmed: upgraded tier choice is charged regardless of
+// actual headcount.
+function tierPriceForDate(tier, dateStr, pax){
   const dt = getDayType(dateStr);
+  if(tier.pax_min===19){
+    const basisPax = (pax>=19 && pax<=24) ? pax : 19;
+    const base1518 = grpPricing.find(p=>p.day_type===dt && p.pax_min===15 && p.pax_max===18);
+    const baseline = base1518 ? base1518.price : tier.price;
+    return baseline + 500*(basisPax-18);
+  }
   const row = grpPricing.find(p=>p.day_type===dt && p.pax_min===tier.pax_min && p.pax_max===tier.pax_max);
   return row ? row.price : tier.price;
 }
 
+// In-memory map of pax_min -> tier object for the currently eligible
+// tiers, so card click handlers don't need to embed JSON.
+let pkgMap = {};
+
 function buildPackageSummary() {
   const pax=calcPax();
-  const ci=document.getElementById('check_in').value;
-  const nights=calcNights();
-  const tier = findTier(pax);
+  const eligible = getEligibleTiers(pax);
+  const natural  = eligible.find(t=>pax>=t.pax_min && pax<=t.pax_max) || eligible[0];
 
   const pkgEmpty = document.getElementById('pkgEmptyMsg');
-  pkgEmpty.classList.toggle('hidden', !!tier);
-  if(!tier){ document.getElementById('pkgSummary').innerHTML=''; selPkg=null; return; }
-
-  selPkg = tier;
-  buildRoomPicker(tier);
-  buildAddonCards();
-
-  // Per-night breakdown for the summary display
-  let nightRows='';
-  if(ci && nights>0){
-    let d=new Date(ci+'T00:00:00');
-    for(let i=0;i<nights;i++){
-      const ds=d.toISOString().split('T')[0];
-      const dt=getDayType(ds);
-      const price=tierPriceForDate(tier,ds);
-      nightRows+=`<div class="flex justify-between text-xs text-gray-500 py-0.5">
-        <span>${new Date(ds+'T00:00:00').toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric'})} ${dt==='weekend'?'<span class="text-amber-600">(Weekend)</span>':'<span class="text-blue-600">(Weekday)</span>'}</span>
-        <span>₱${price.toLocaleString()}</span>
-      </div>`;
-      d.setDate(d.getDate()+1);
-    }
+  pkgEmpty.classList.toggle('hidden', eligible.length>0);
+  if(!eligible.length){
+    document.getElementById('pkgSummary').innerHTML='';
+    document.getElementById('pkgNightBreakdown').innerHTML='';
+    selPkg=null; return;
   }
 
-  const badges=[
-    tier.free_pool_spa_hours>0?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✓ ${tier.free_pool_spa_hours}hr pool spa</span>`:'',
-    tier.free_ac_living?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>':'',
-    tier.free_extra_mattresses>0?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${tier.free_extra_mattresses} mattresses</span>`:'',
-  ].filter(Boolean).join('');
+  // Keep the guest's current selection if it's still a valid (eligible)
+  // choice; otherwise default to the natural/recommended tier.
+  if(!selPkg || !eligible.find(t=>t.pax_min===selPkg.pax_min && t.pax_max===selPkg.pax_max)){
+    selPkg = natural;
+  }
 
-  document.getElementById('pkgSummary').innerHTML = `
-    <div class="pkg on">
+  renderPackageCards(eligible, natural, pax);
+  buildRoomPicker(selPkg);
+  buildAddonCards();
+  recalc();
+  renderCalendar();
+}
+
+// Renders one card per eligible tier (guest's natural tier + any bigger
+// tier they could upgrade to). Clicking a card selects that tier.
+function renderPackageCards(eligible, natural, pax){
+  pkgMap = {};
+  document.getElementById('pkgSummary').innerHTML = eligible.map((tier,idx)=>{
+    pkgMap[tier.pax_min]=tier;
+    const isSel = selPkg && selPkg.pax_min===tier.pax_min;
+    const isRec = natural && tier.pax_min===natural.pax_min;
+    // basisPax for display: actual pax if it falls within this tier's
+    // range, otherwise the tier's minimum (e.g. 19 for the 19-24 tier).
+    const basisPax = (pax>=tier.pax_min && pax<=tier.pax_max) ? pax : tier.pax_min;
+    const wdRow = grpPricing.find(p=>p.day_type==='weekday'&&p.pax_min===15&&p.pax_max===18);
+    const weRow = grpPricing.find(p=>p.day_type==='weekend'&&p.pax_min===15&&p.pax_max===18);
+    let wdPrice, wePrice;
+    if(tier.pax_min===19){
+      wdPrice=(wdRow?wdRow.price:tier.price)+500*(basisPax-18);
+      wePrice=(weRow?weRow.price:tier.price)+500*(basisPax-18);
+    } else {
+      wdPrice=(grpPricing.find(p=>p.day_type==='weekday'&&p.pax_min===tier.pax_min&&p.pax_max===tier.pax_max)||tier).price;
+      wePrice=(grpPricing.find(p=>p.day_type==='weekend'&&p.pax_min===tier.pax_min&&p.pax_max===tier.pax_max)||tier).price;
+    }
+    const includedMattresses = tier.pax_min===19 ? Math.max(0,basisPax-18) : (tier.free_extra_mattresses||0);
+    const badges=[
+      tier.free_pool_spa_hours>0?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✓ ${tier.free_pool_spa_hours}hr pool spa</span>`:'',
+      tier.free_ac_living?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>':'',
+      includedMattresses>0?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${includedMattresses} mattress${includedMattresses>1?'es':''} incl.</span>`:'',
+    ].filter(Boolean).join('');
+    return `<div class="pkg${isSel?' on':''}" id="pkg-${tier.pax_min}" style="animation-delay:${idx*0.05}s" onclick="selectTier(${tier.pax_min})">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-3">
-          <p class="font-semibold text-gray-800 text-sm">${tier.pax_min}–${tier.pax_max} pax · ${tier.rooms_included} room${tier.rooms_included>1?'s':''}</p>
+          <p class="font-semibold text-gray-800 text-sm">${tier.pax_min}–${tier.pax_max} pax · ${tier.rooms_included} room${tier.rooms_included>1?'s':''}${isRec?' <span class="text-xs font-normal text-gold">(Recommended)</span>':''}</p>
           <p class="text-xs text-text-muted mt-0.5">${tier.description||''}</p>
           ${badges?`<div class="flex flex-wrap gap-1 mt-2">${badges}</div>`:''}
         </div>
+        <div class="text-right flex-shrink-0">
+          <p class="text-xs text-blue-600">Weekday ₱${wdPrice.toLocaleString()}</p>
+          <p class="text-xs text-amber-600">Weekend ₱${wePrice.toLocaleString()}</p>
+          ${tier.pax_min===19?'<p class="text-[10px] text-text-muted mt-0.5">at '+basisPax+' pax</p>':''}
+        </div>
       </div>
-      ${nightRows?`<div class="mt-3 pt-3 border-t border-gray-100">${nightRows}</div>`:''}
     </div>`;
+  }).join('');
+}
 
+function selectTier(paxMin){
+  const tier = pkgMap[paxMin]; if(!tier) return;
+  selPkg = tier;
+  const pax = calcPax();
+  renderPackageCards(getEligibleTiers(pax), getEligibleTiers(pax).find(t=>pax>=t.pax_min&&pax<=t.pax_max), pax);
+  buildRoomPicker(selPkg);
+  buildAddonCards();
   recalc();
   renderCalendar();
 }
@@ -1643,14 +1800,14 @@ function toggleRoom(id,max){
 function buildAddonCards(){
   // Hide "AC in living area" when the selected package already includes
   // free AC for the common area (15+ pax tiers, rooms_included>=4).
-  // Hide "Extra mattress" when the package already includes free
-  // mattresses (19-24 pax tier = 6 free extra mattresses).
-  const hideKeys=[];
+  // "extra_mattress" and "extra_pax" are never shown as standalone
+  // add-ons anymore — they're now the paired "Extra Guests" feature
+  // (only offered at pax=24), built separately in extraGuestsArea.
+  const hideKeys=['extra_mattress','extra_pax'];
   if(selPkg && selPkg.free_ac_living) hideKeys.push('ac_living');
-  if(selPkg && selPkg.free_extra_mattresses>0) hideKeys.push('extra_mattress');
   const visibleAddons = addons.filter(a=>!hideKeys.includes(a.key));
 
-  // If a now-free addon was previously selected, drop it from the
+  // If a now-hidden addon was previously selected, drop it from the
   // selection so it doesn't silently keep charging.
   hideKeys.forEach(key=>{
     if(selAddons[key]){ delete selAddons[key]; delete addonQtys[key]; }
@@ -1671,7 +1828,16 @@ function buildAddonCards(){
   // restore visibility of qty inputs for already-selected addons
   document.getElementById('petQtyArea').classList.toggle('hidden',!selAddons['pet_fee']);
   document.getElementById('spaHrsArea').classList.toggle('hidden',!selAddons['pool_spa']);
-  document.getElementById('mattressQtyArea').classList.toggle('hidden',!selAddons['extra_mattress']);
+
+  // "Extra Guests" (paired extra pax + extra mattress) — only at pax=24
+  const pax=calcPax();
+  const egArea=document.getElementById('extraGuestsArea');
+  if(pax===24){
+    egArea.classList.remove('hidden');
+  } else {
+    egArea.classList.add('hidden');
+    document.getElementById('extra_guests_count').value='0';
+  }
 }
 
 function toggleAddon(key){
@@ -1682,7 +1848,6 @@ function toggleAddon(key){
   else { selAddons[key]=a.price; addonQtys[key]=1; el.classList.add('on'); chk.checked=true; }
   document.getElementById('petQtyArea').classList.toggle('hidden',!selAddons['pet_fee']);
   document.getElementById('spaHrsArea').classList.toggle('hidden',!selAddons['pool_spa']);
-  document.getElementById('mattressQtyArea').classList.toggle('hidden',!selAddons['extra_mattress']);
   recalc();
 }
 
@@ -1693,19 +1858,30 @@ function recalc(){
   if(!selPkg) return;
   const nights=calcNights(); if(nights<=0) return;
   const ci=document.getElementById('check_in').value;
+  const pax=calcPax();
 
-  // Sum each night at its own day-of-week rate (per-night pricing).
+  // Sum each night at its own day-of-week rate (per-night pricing),
+  // and build a per-night breakdown table for #pkgNightBreakdown.
   let base=0;
   let weekdayNights=0, weekendNights=0;
+  let nightRows='';
   if(ci){
     let d=new Date(ci+'T00:00:00');
     for(let i=0;i<nights;i++){
       const ds=d.toISOString().split('T')[0];
-      base += tierPriceForDate(selPkg,ds);
-      if(getDayType(ds)==='weekend') weekendNights++; else weekdayNights++;
+      const price=tierPriceForDate(selPkg,ds,pax);
+      base += price;
+      const dt=getDayType(ds);
+      if(dt==='weekend') weekendNights++; else weekdayNights++;
+      nightRows+=`<div class="flex justify-between text-xs text-gray-500 py-0.5">
+        <span>${new Date(ds+'T00:00:00').toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric'})} ${dt==='weekend'?'<span class="text-amber-600">(Weekend)</span>':'<span class="text-blue-600">(Weekday)</span>'}</span>
+        <span>₱${price.toLocaleString()}</span>
+      </div>`;
       d.setDate(d.getDate()+1);
     }
   }
+  const nbEl=document.getElementById('pkgNightBreakdown');
+  if(nbEl) nbEl.innerHTML = nightRows ? `<div class="bg-white border border-gray-100 rounded-xl p-4">${nightRows}</div>` : '';
 
   let total=base;
   const nightLabel = [
@@ -1714,7 +1890,8 @@ function recalc(){
   ].filter(Boolean).join(' + ');
   let lines=[`<div class="flex justify-between text-white/80"><span>${selPkg.pax_min}–${selPkg.pax_max} pax · ${nightLabel}</span><span>₱${base.toLocaleString()}</span></div>`];
 
-  // Add-ons
+  // Add-ons (extra_mattress / extra_pax are excluded — handled below as
+  // the paired "Extra Guests" feature, only at pax=24)
   Object.entries(selAddons).forEach(([key,price])=>{
     const a=addons.find(x=>x.key===key); if(!a) return;
     let cost=0,lbl=a.label;
@@ -1724,15 +1901,25 @@ function recalc(){
       cost=price*q; lbl+=` ×${q}`;
     }
     else if(key==='pool_spa'){ const h=parseInt(document.getElementById('spa_hours').value)||1; cost=price*h; lbl+=` ×${h}hr`; }
-    else if(key==='extra_mattress'){
-      const el=document.getElementById('mattress_count');
-      const q=Math.min(6,Math.max(1,parseInt(el.value)||1)); el.value=q;
-      cost=price*q; lbl+=` ×${q}`;
-    }
     else { cost=price; }
     total+=cost;
     lines.push(`<div class="flex justify-between text-white/80"><span>${lbl}</span><span>+₱${cost.toLocaleString()}</span></div>`);
   });
+
+  // Extra Guests (only at pax=24) — each extra guest pairs an extra-pax
+  // fee with an extra-mattress fee (₱500 + ₱500 = ₱1,000), max +6 (30 total).
+  extraGuestsCount = 0;
+  if(pax===24){
+    const el=document.getElementById('extra_guests_count');
+    extraGuestsCount = Math.min(6,Math.max(0,parseInt(el.value)||0)); el.value=extraGuestsCount;
+    if(extraGuestsCount>0){
+      const paxFee = addons.find(a=>a.key==='extra_pax')?.price || 500;
+      const matFee = addons.find(a=>a.key==='extra_mattress')?.price || 500;
+      const cost = extraGuestsCount*(paxFee+matFee);
+      total += cost;
+      lines.push(`<div class="flex justify-between text-white/80"><span>Extra Guests ×${extraGuestsCount} (+${extraGuestsCount} pax, +${extraGuestsCount} mattress)</span><span>+₱${cost.toLocaleString()}</span></div>`);
+    }
+  }
 
   // Voucher discount — fixed peso amount (with legacy % support)
   appliedVoucherDiscount = 0;
@@ -1797,7 +1984,7 @@ async function applyVoucher(){
       ? `₱${Number(data.discount_amount).toLocaleString()} off`
       : `${data.discount_percent}% off`;
     showVStat(el,true,`✅ Voucher applied! ${label} your total.`);
-    recalc(); toast(`Voucher applied — ${label}!`,'success');
+    recalc(); fillS3Summary(); toast(`Voucher applied — ${label}!`,'success');
   } catch(e){ console.error('Voucher error:',e); showVStat(el,false,'❌ Could not verify voucher. Please try again.'); }
 }
 function showVStat(el,ok,msg){
@@ -1854,11 +2041,49 @@ function fillS3Summary(){
   const ci=document.getElementById('check_in').value;
   const co=document.getElementById('check_out').value;
   const n=calcNights();
+  const pax=calcPax();
+
+  if(!previewRef) previewRef=genRef();
+  setT('sumRef', previewRef);
   setT('sumPkg',  `${selPkg.pax_min}–${selPkg.pax_max} pax · ${selPkg.rooms_included} room${selPkg.rooms_included>1?'s':''}`);
   setT('sumDates',`${fmtDate(ci)} → ${fmtDate(co)} (${n} night${n>1?'s':''})`);
-  setT('sumPax',  `${calcPax()} pax`);
+  setT('sumPax',  extraGuestsCount>0 ? `${pax} pax + ${extraGuestsCount} extra (${pax+extraGuestsCount} total)` : `${pax} pax`);
   setT('sumRooms', selRooms.join(', ')||'All rooms');
+
+  // Add-ons line (only shown if any addons or extra guests are selected)
+  const addonLines=[];
+  Object.entries(selAddons).forEach(([key,price])=>{
+    const a=addons.find(x=>x.key===key); if(!a) return;
+    let qty='';
+    if(key==='pet_fee') qty=` ×${document.getElementById('pet_count').value}`;
+    if(key==='pool_spa') qty=` ×${document.getElementById('spa_hours').value}hr`;
+    addonLines.push(`${a.label}${qty}`);
+  });
+  if(extraGuestsCount>0) addonLines.push(`Extra Guests ×${extraGuestsCount}`);
+  const sumAddonsEl=document.getElementById('sumAddons');
+  if(addonLines.length){
+    sumAddonsEl.classList.remove('hidden');
+    sumAddonsEl.innerHTML = `<div class="flex justify-between"><span class="text-text-muted">Add-ons</span><span class="font-medium text-right">${addonLines.join(', ')}</span></div>`;
+  } else {
+    sumAddonsEl.classList.add('hidden');
+    sumAddonsEl.innerHTML='';
+  }
+
+  // Subtotal = total before voucher discount
+  const subtotal = totalAmt + (appliedVoucherDiscount||0);
+  setT('sumSubtotal','₱'+subtotal.toLocaleString());
+
+  const vRow=document.getElementById('sumVoucherRow');
+  if(appliedVoucherDiscount>0){
+    vRow.classList.remove('hidden');
+    setT('sumVoucherAmt','−₱'+appliedVoucherDiscount.toLocaleString());
+  } else {
+    vRow.classList.add('hidden');
+  }
+
   setT('sumTotal', '₱'+totalAmt.toLocaleString());
+  setT('sumDP',    '₱'+depositAmt.toLocaleString());
+  setT('sumBalance','₱'+(totalAmt-depositAmt).toLocaleString());
   setT('halfAmt',  '₱'+depositAmt.toLocaleString());
   setT('fullAmt',  '₱'+totalAmt.toLocaleString());
   updatePayAmt();
@@ -1921,7 +2146,7 @@ async function submitBooking(){
   const pax    =calcPax();
   const nights =calcNights();
   const isFull =document.getElementById('payFull')?.checked;
-  const ref    =genRef();
+  const ref    =previewRef||genRef();
   const balance=isFull?0:totalAmt-depositAmt;
 
   setBtnLoad(true);
@@ -1986,7 +2211,7 @@ async function submitBooking(){
       payment_proof_url:proofUrl,
       payment_ref_number:payRef,
       payment_type:    isFull?'full':'downpayment',
-      addons:          JSON.stringify(selAddons),
+      addons:          JSON.stringify(extraGuestsCount>0 ? {...selAddons, _extra_guests:extraGuestsCount} : selAddons),
       voucher_code:    appliedVoucher?.code||null,
       voucher_discount:appliedVoucherDiscount||0,
       special_requests:document.getElementById('special_requests').value.trim()||null,
@@ -2172,6 +2397,7 @@ function toast(msg,type='success'){
 function resetForm(){
   selPkg=null;selRooms=[];selAddons={};addonQtys={};
   uploadedFile=null;appliedVoucher=null;appliedVoucherDiscount=0;totalAmt=0;depositAmt=0;
+  extraGuestsCount=0;previewRef=null;
   ['guest_name','guest_email','guest_phone','check_in','check_out',
    'payment_ref','special_requests','voucher_code'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('adults').value='2';
