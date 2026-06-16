@@ -115,9 +115,10 @@
     .cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
     .cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;font-weight:500;transition:transform .15s;}
     .cday.avail:hover,.cday.partial:hover,.cday.today:hover{transform:scale(1.08);}
-    .cday.avail,.cday.partial,.cday.today{cursor:pointer;}
+    .cday.avail,.cday.partial,.cday.today,.cday.checkout-open{cursor:pointer;}
     .cday.past{background:#f3f4f6;color:#c0bfbd;}.cday.booked{background:#fee2e2;color:#991b1b;cursor:not-allowed;}
     .cday.partial{background:#fef3c7;color:#92400e;}
+    .cday.checkout-open{background:#f0fdf4;color:#2d5a3b;ring:1px solid #86efac;}
     .cday.today{background:#2d5a3b;color:white;font-weight:700;}.cday.avail{background:#f0fdf4;color:#2d5a3b;}.cday.empty{background:transparent;}
     /* Selected check-in/check-out dates and the range between them */
     .cday.sel-start,.cday.sel-end{background:#2d5a3b;color:white;font-weight:700;box-shadow:0 0 0 2px #c9a03d;}
@@ -314,6 +315,7 @@
     <div class="text-center mb-8">
       <p class="text-gold text-xs tracking-widest uppercase mb-2">Live Availability</p>
       <h2 class="font-heading text-4xl text-forest font-light">Check Open Dates</h2>
+      <p class="text-text-muted text-sm mt-2">Calendar updates in real time as bookings are confirmed.</p>
     </div>
     <div class="bg-cream rounded-2xl p-6 shadow-sm">
       <div class="flex items-center justify-between mb-4">
@@ -322,16 +324,16 @@
         <button id="calNext" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-forest hover:bg-forest hover:text-white transition-colors"><i class="fas fa-chevron-right text-xs"></i></button>
       </div>
       <div class="grid grid-cols-7 gap-1 mb-2 text-center">
-        <div class="text-xs font-semibold text-gray-400 py-1">SUN</div><div class="text-xs font-semibold text-gray-400 py-1">MON</div><div class="text-xs font-semibold text-gray-400 py-1">TUE</div><div class="text-xs font-semibold text-gray-400 py-1">WED</div><div class="text-xs font-semibold text-gray-400 py-1">THU</div><div class="text-xs font-semibold text-gray-400 py-1">FRI</div><div class="text-xs font-semibold text-gray-400 py-1">SAT</div>
+        <div class="text-xs font-semibold text-gray-400 py-1">SUN</div><div class="text-xs font-semibold text-gray-400 py-1">MON</div><div class="text-xs font-semibold text-gray-400 py-1">TUE</div><div class="text-xs font-semibold text-gray-400 py-1">WED</div><div class="text-xs font-semibold text-gray-400 py-1">THU</div><div class="text-xs font-semibold text-gray-400 py-1 text-amber-600">FRI</div><div class="text-xs font-semibold text-gray-400 py-1 text-amber-600">SAT</div>
       </div>
       <div id="calGrid" class="cgrid"></div>
-      <div class="flex gap-4 mt-4 text-xs justify-center flex-wrap">
+      <div class="flex gap-4 mt-4 text-xs justify-center flex-wrap text-gray-500">
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-100 border border-green-400 inline-block"></span>Available</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-100 border border-amber-300 inline-block"></span>Some rooms taken</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block"></span>Fully Booked</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-gray-200 inline-block"></span>Past</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-100 border border-amber-300 inline-block"></span>Partially booked</div>
+        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-100 border border-red-300 inline-block"></span>Fully booked</div>
         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-forest inline-block"></span>Today</div>
       </div>
+      <p class="text-center text-xs text-gray-400 mt-3"><i class="fas fa-info-circle mr-1"></i>Checkout date is always free for the next guest's check-in.</p>
     </div>
   </div>
 </section>
@@ -1507,44 +1509,88 @@ function isDateDisabled(date){
 
 let fpCheckIn=null, fpCheckOut=null;
 
-// Replaces the native <input type="date"> pickers with flatpickr so
-// fully-booked dates are visually greyed out and unselectable directly
-// in the calendar widget — not just rejected after the fact.
+// For the CHECK-IN picker: a date is disabled if every room the guest
+// needs is already occupied on that night. Before rooms are chosen,
+// fall back to ALL_ROOMS (so a date only disables if the whole resort
+// is taken — the most conservative/accurate pre-selection estimate).
+function isCIDisabled(date){
+  const ds = ymd(date);
+  const rooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
+  const taken = getTakenRoomsByDate()[ds];
+  return !!(taken && rooms.every(r=>taken.has(r)));
+}
+
+// For the CHECK-OUT picker: given a currently-selected check-in date,
+// a checkout date is invalid if there is any fully-blocked night in
+// the range [check_in, proposed_checkout). This is the Airbnb model:
+// you can't "jump over" a blocked night — checkout must land at or
+// before the first blocked night AFTER check-in.
+function isCODisabled(date){
+  const ci = document.getElementById('check_in').value;
+  if(!ci) return false; // no check-in yet, nothing to validate against
+  const ds = ymd(date);
+  if(ds <= ci) return true; // checkout can't be on or before check-in
+  const rooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
+  // Disabled if there's a fully-blocked night anywhere in [ci, ds)
+  return !!findBlockedDateInRange(ci, ds, rooms);
+}
+
+// Replaces the native date inputs with flatpickr so booked dates are
+// visually greyed out. Uses the Airbnb/Booking.com model:
+//  - Check-in picker: disables dates that are fully booked
+//  - Check-out picker: disables dates that would span over a booked night
 function initDatePickers(){
-  fpCheckIn = flatpickr('#check_in', {
+  const sharedConfig = {
     dateFormat:'Y-m-d',
     altInput:true,
-    altFormat:'M j, Y (D)',
-    altInputClass:'fi',
+    altFormat:'F j, Y',
+    altInputClass:'fi cursor-pointer',
     minDate:'today',
-    disable:[isDateDisabled],
+    showMonths:1,
+    locale:{firstDayOfWeek:0},
+    disableMobile:false,
+  };
+
+  fpCheckIn = flatpickr('#check_in', {
+    ...sharedConfig,
+    disable:[isCIDisabled],
+    placeholder:'Select check-in date',
     onChange:(dates,dateStr)=>{
-      if(fpCheckOut && dateStr){
+      if(!dateStr) return;
+      // When check-in changes, immediately open the checkout picker
+      // (Airbnb UX: pick both dates in one flow).
+      if(fpCheckOut){
         const nx=new Date(dateStr+'T00:00:00'); nx.setDate(nx.getDate()+1);
         fpCheckOut.set('minDate', ymd(nx));
+        // If existing checkout is now invalid, clear it
         const co=document.getElementById('check_out').value;
-        if(co && co<=dateStr) fpCheckOut.clear(false);
+        if(co && co<=dateStr){ fpCheckOut.clear(false); }
+        // Redraw checkout to reflect new blocked ranges from this check-in
+        fpCheckOut.redraw();
+        setTimeout(()=>fpCheckOut.open(), 10);
       }
+      onDateChange();
+      if(document.getElementById('check_out').value) buildPackageSummary();
+    }
+  });
+
+  fpCheckOut = flatpickr('#check_out', {
+    ...sharedConfig,
+    disable:[isCODisabled],
+    placeholder:'Select check-out date',
+    onChange:(dates,dateStr)=>{
+      if(!dateStr) return;
       onDateChange();
       buildPackageSummary();
     }
   });
-  fpCheckOut = flatpickr('#check_out', {
-    dateFormat:'Y-m-d',
-    altInput:true,
-    altFormat:'M j, Y (D)',
-    altInputClass:'fi',
-    minDate:'today',
-    disable:[isDateDisabled],
-    onChange:()=>{ onDateChange(); buildPackageSummary(); }
-  });
 }
 
-// Re-renders the flatpickr calendar grids so newly-loaded bookedDates
-// or a changed room selection are reflected in the disabled dates.
+// Re-renders flatpickr so newly-loaded bookedDates or a changed room
+// selection are reflected in disabled dates.
 function refreshDatePickers(){
-  if(fpCheckIn) fpCheckIn.redraw();
-  if(fpCheckOut) fpCheckOut.redraw();
+  if(fpCheckIn){ fpCheckIn.set('disable',[isCIDisabled]); fpCheckIn.redraw(); }
+  if(fpCheckOut){ fpCheckOut.set('disable',[isCODisabled]); fpCheckOut.redraw(); }
 }
 
 function renderCalendar() {
@@ -1556,39 +1602,56 @@ function renderCalendar() {
   const ci = document.getElementById('check_in')?.value || '';
   const co = document.getElementById('check_out')?.value || '';
 
-  // Rooms relevant to the guest's current selection. Before a package is
-  // chosen, fall back to "any room" so the calendar still reflects
-  // whole-resort availability as a sensible default.
   const relevantRooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
-  const takenRoomsByDate = getTakenRoomsByDate();
+  const takenByDate = getTakenRoomsByDate();
 
   let html='';
   for(let i=0;i<first;i++) html+='<div class="cday empty"></div>';
   for(let d=1;d<=days;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    let cls='avail';
-    let label='Available — click to select';
-    let selectable=true;
-    if(ds<today){ cls='past'; label='Past'; selectable=false; }
-    else {
-      const taken = takenRoomsByDate[ds];
+    // Previous night — to detect if this date is a "just-freed checkout day"
+    const prev=new Date(ds+'T00:00:00'); prev.setDate(prev.getDate()-1);
+    const prevDs=ymd(prev);
+
+    let cls='avail', label='Available', selectable=true;
+
+    if(ds<today){
+      cls='past'; label='Past date'; selectable=false;
+    } else {
+      const taken = takenByDate[ds];
+      const prevTaken = takenByDate[prevDs];
+
       if(taken){
-        // Date is "booked" for the guest's purposes only if ALL of the
-        // rooms they need are already taken on this date.
-        const allTaken = relevantRooms.every(r=>taken.has(r));
-        const someTaken = relevantRooms.some(r=>taken.has(r));
-        if(allTaken){ cls='booked'; label='Fully booked — not available'; selectable=false; }
-        else if(someTaken){ cls='partial'; label='Partially booked — some rooms unavailable, click to select'; }
+        const allTaken=relevantRooms.every(r=>taken.has(r));
+        const someTaken=relevantRooms.some(r=>taken.has(r));
+        if(allTaken){
+          cls='booked';
+          label='Fully booked — not available for check-in';
+          selectable=false;
+        } else if(someTaken){
+          cls='partial';
+          label='Partially booked — some rooms unavailable';
+        }
+      } else if(prevTaken && relevantRooms.every(r=>prevTaken.has(r))){
+        // Previous night was fully booked — this is the checkout day,
+        // now available for new check-in. Show a subtle "just opened" indicator.
+        cls='avail checkout-open';
+        label='Available — previous guests check out today';
       }
-      if(ds===today) cls = (cls==='avail') ? 'today' : cls;
+
+      if(ds===today) cls=(cls==='avail'||cls==='checkout-open')?'today':cls;
     }
-    // Selection highlight (check-in / check-out / range between them)
+
+    // Selection highlight
     let selCls='';
     if(ci && ds===ci) selCls=' sel-start';
     if(co && ds===co) selCls+=' sel-end';
     if(ci && co && ds>ci && ds<co) selCls+=' in-range';
 
-    const onclick = selectable ? ` onclick="pickCalDate('${ds}')"` : (cls==='booked' ? ` onclick="toast('This date is fully booked for your room selection.','error')"` : '');
+    const onclick = selectable
+      ? ` onclick="pickCalDate('${ds}')"`
+      : cls==='booked' ? ` onclick="toast('This date is fully booked. Please choose different dates.','error')"` : '';
+
     html+=`<div class="cday ${cls}${selCls}" title="${label}"${onclick}>${d}</div>`;
   }
   document.getElementById('calGrid').innerHTML=html;
@@ -1688,30 +1751,33 @@ function onDateChange() {
     co='';
   }
   // If both dates are set, reject the range if any night falls on a
-  // date that's fully booked for the guest's currently-selected room(s).
-  // (The flatpickr `disable` function already prevents picking a fully
-  // booked date directly, but this also covers ranges that pass THROUGH
-  // a booked date even though the endpoints themselves are free.)
+  // date that's fully booked for the guest's currently-selected rooms.
+  // (flatpickr's isCODisabled already prevents picking such a checkout
+  // date, but this catches manual input or edge cases.)
   if(ci && co){
     const relevantRooms = (selRooms && selRooms.length) ? selRooms : ALL_ROOMS;
     const blocked = findBlockedDateInRange(ci,co,relevantRooms);
     if(blocked){
-      toast(`${fmtDate(blocked)} is fully booked for your room selection — please choose different dates.`,'error');
+      toast(`${fmtDate(blocked)} is fully booked — your stay cannot span that night. Please choose different dates.`,'error');
       if(fpCheckOut) fpCheckOut.clear(false);
       co='';
     }
   }
+  // Redraw checkout picker to reflect new blocked ranges whenever CI changes
+  if(fpCheckOut) fpCheckOut.redraw();
   const dt=getDayType(ci);
   const nb=document.getElementById('dayNotice');
   if(ci){
     nb.classList.remove('hidden');
     if(dt==='weekend'){
       nb.className='mb-4 p-3 rounded-lg text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700';
-      nb.innerHTML='📅 <strong>Your check-in falls on a weekend night</strong> — weekend rates apply for Friday/Saturday nights of your stay (see per-night breakdown in the next step).';
+      nb.innerHTML='<i class="fas fa-calendar-check mr-1"></i><strong>Weekend night check-in</strong> — Friday/Saturday nights use weekend rates. Weekday nights in your stay use weekday rates (see per-night breakdown in the next step).';
     } else {
       nb.className='mb-4 p-3 rounded-lg text-xs font-medium bg-blue-50 border border-blue-200 text-blue-700';
-      nb.innerHTML='📅 <strong>Your check-in falls on a weekday</strong> — includes <strong>1 hour free pool spa</strong> for weekday nights!';
+      nb.innerHTML='<i class="fas fa-calendar-check mr-1"></i><strong>Weekday check-in</strong> — includes <strong>1 hour free pool spa</strong> for each weekday night in your stay!';
     }
+  } else {
+    nb.classList.add('hidden');
   }
   renderCalendar();
 }
@@ -1737,14 +1803,27 @@ function findTier(pax){
   return grpPricing.find(p=>p.day_type==='weekday' && pax>=p.pax_min && pax<=p.pax_max);
 }
 
-// Returns all tiers a guest with this pax count is allowed to choose:
-// any tier whose capacity (pax_max) can fit them. They can "upgrade" to
-// a bigger tier than they strictly need, but never downgrade to one
-// that's too small. Sorted smallest-to-largest.
+// Returns all tiers a guest with this pax count is allowed to choose.
+// Rule: they may stay on their natural (recommended) tier, or UPGRADE
+// to any higher tier — but never downgrade to a tier whose pax_max is
+// smaller than their pax count (which wouldn't even fit them).
+// e.g. 14 pax → sees 13-14, 15-18, 19-24 (can upgrade to all-4-rooms)
+//      10 pax → sees 1-10, 11-12, 13-14, 15-18, 19-24 (can upgrade any)
+//      19 pax → sees only 19-24 (no tier below fits them)
 function getEligibleTiers(pax){
-  return grpPricing
-    .filter(p=>p.day_type==='weekday' && p.pax_max>=pax)
+  const all = grpPricing
+    .filter(p=>p.day_type==='weekday')
     .sort((a,b)=>a.pax_min-b.pax_min);
+  // Natural tier = the tier whose range the pax count falls into
+  const natural = all.find(t=>pax>=t.pax_min && pax<=t.pax_max);
+  if(!natural){
+    // pax is above all tier maxes — shouldn't happen with the 24-cap,
+    // but fall back to just the last tier so there's always something.
+    return all.slice(-1);
+  }
+  // Show natural tier + every tier with a higher pax_min (upgrades).
+  // This prevents showing tiers below the natural one (downgrades).
+  return all.filter(t=>t.pax_min>=natural.pax_min);
 }
 
 // Looks up the price for a given tier on a given calendar date, using
@@ -1780,8 +1859,18 @@ let pkgMap = {};
 
 function buildPackageSummary() {
   const pax=calcPax();
+  const nights=calcNights();
+  const ci=document.getElementById('check_in').value;
+  const co=document.getElementById('check_out').value;
   const eligible = getEligibleTiers(pax);
   const natural  = eligible.find(t=>pax>=t.pax_min && pax<=t.pax_max) || eligible[0];
+
+  // Update step 2 heading message
+  const msgEl=document.getElementById('step2Msg');
+  if(msgEl){
+    const nightStr=nights>0?`${nights} night${nights>1?'s':''}`:ci&&co?'–':'select dates first';
+    msgEl.textContent=`${pax} guest${pax>1?'s':''} · ${nightStr} — your recommended package is pre-selected. You can upgrade to a larger package if you prefer more rooms.`;
+  }
 
   const pkgEmpty = document.getElementById('pkgEmptyMsg');
   pkgEmpty.classList.toggle('hidden', eligible.length>0);
@@ -1831,17 +1920,17 @@ function renderPackageCards(eligible, natural, pax){
       tier.free_ac_living?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>':'',
       includedMattresses>0?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${includedMattresses} mattress${includedMattresses>1?'es':''} incl.</span>`:'',
     ].filter(Boolean).join('');
-    return `<div class="pkg${isSel?' on':''}" id="pkg-${tier.pax_min}" style="animation-delay:${idx*0.05}s" onclick="selectTier(${tier.pax_min})">
+    return `<div class="pkg${isSel?' on':''}${isRec?' rec':''}" id="pkg-${tier.pax_min}" style="animation-delay:${idx*0.05}s" onclick="selectTier(${tier.pax_min})">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-3">
-          <p class="font-semibold text-gray-800 text-sm">${tier.pax_min}–${tier.pax_max} pax · ${tier.rooms_included} room${tier.rooms_included>1?'s':''}${isRec?' <span class="text-xs font-normal text-gold">(Recommended)</span>':''}</p>
+          <p class="font-semibold text-gray-800 text-sm">${tier.pax_min}–${tier.pax_max} pax · ${tier.rooms_included} room${tier.rooms_included>1?'s':''}</p>
           <p class="text-xs text-text-muted mt-0.5">${tier.description||''}</p>
           ${badges?`<div class="flex flex-wrap gap-1 mt-2">${badges}</div>`:''}
         </div>
         <div class="text-right flex-shrink-0">
           <p class="text-xs text-blue-600">Weekday ₱${wdPrice.toLocaleString()}</p>
           <p class="text-xs text-amber-600">Weekend ₱${wePrice.toLocaleString()}</p>
-          ${tier.pax_min===19?'<p class="text-[10px] text-text-muted mt-0.5">at '+basisPax+' pax</p>':''}
+          ${tier.pax_min===19?`<p class="text-[10px] text-text-muted mt-0.5">at ${basisPax} pax</p>`:''}
         </div>
       </div>
     </div>`;
@@ -1948,14 +2037,18 @@ function buildAddonCards(){
   document.getElementById('petQtyArea').classList.toggle('hidden',!selAddons['pet_fee']);
   document.getElementById('spaHrsArea').classList.toggle('hidden',!selAddons['pool_spa']);
 
-  // "Extra Guests" (paired extra pax + extra mattress) — only at pax=24
+  // "Extra Guests" (paired extra pax + extra mattress):
+  // Only available when the guest count is EXACTLY 24 AND they are on
+  // the 19-24 tier. No other tier allows extra guests.
   const pax=calcPax();
   const egArea=document.getElementById('extraGuestsArea');
-  if(pax===24){
+  const onTop=selPkg && selPkg.pax_min===19 && pax===24;
+  if(onTop){
     egArea.classList.remove('hidden');
   } else {
     egArea.classList.add('hidden');
     document.getElementById('extra_guests_count').value='0';
+    extraGuestsCount=0;
   }
 }
 
@@ -2025,10 +2118,11 @@ function recalc(){
     lines.push(`<div class="flex justify-between text-white/80"><span>${lbl}</span><span>+₱${cost.toLocaleString()}</span></div>`);
   });
 
-  // Extra Guests (only at pax=24) — each extra guest pairs an extra-pax
-  // fee with an extra-mattress fee (₱500 + ₱500 = ₱1,000), max +6 (30 total).
+  // Extra Guests (only at pax=24 on the 19-24 tier) — each extra guest
+  // pairs an extra-pax fee with an extra-mattress fee (₱500+₱500=₱1,000),
+  // max +6 (30 total).
   extraGuestsCount = 0;
-  if(pax===24){
+  if(pax===24 && selPkg && selPkg.pax_min===19){
     const el=document.getElementById('extra_guests_count');
     extraGuestsCount = Math.min(6,Math.max(0,parseInt(el.value)||0)); el.value=extraGuestsCount;
     if(extraGuestsCount>0){
