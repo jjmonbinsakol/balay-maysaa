@@ -2223,7 +2223,8 @@ function exportPL(){
 // ═══════════════════════════════════════════════════════
 let acctBookings=[], acctSelected=null;
 
-function loadAccounting(){
+async function loadAccounting(){
+  if(!allBookings.length) await loadAllBookings(true);
   const m=parseInt(document.getElementById('acctMonth')?.value||0);
   const y=parseInt(document.getElementById('acctYear')?.value||new Date().getFullYear());
   if(m){
