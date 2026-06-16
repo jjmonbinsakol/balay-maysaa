@@ -185,9 +185,6 @@
       /* Room feature grids: single column for readability */
       [data-room-features]{grid-template-columns:1fr 1fr;gap:0.5rem;}
 
-      /* Pricing table note + addons wrap nicely already via flex-wrap */
-      #pricingNote{font-size:12px;}
-
       /* Payment QR codes: slightly smaller on tiny screens */
       #gcash-qr,#maya-qr{width:80px;height:80px;}
 
@@ -239,7 +236,6 @@
     <div class="hidden md:flex items-center gap-8">
       <a href="#rooms"   class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rooms</a>
       <a href="#amenities" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Amenities</a>
-      <a href="#pricing" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Rates</a>
       <a href="#booking" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Book Now</a>
       <a href="lookup.html" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">My Booking</a>
       <a href="#inquiry" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Inquire</a>
@@ -251,7 +247,6 @@
   <div id="mobileMenu" class="hidden md:hidden mt-3 bg-white rounded-xl shadow-xl p-4 space-y-1">
     <a href="#rooms"      class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Rooms</a>
     <a href="#amenities"  class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Amenities</a>
-    <a href="#pricing"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Rates</a>
     <a href="#booking"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Book Now</a>
     <a href="lookup.html" class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">My Booking</a>
     <a href="#inquiry"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Inquire</a>
@@ -456,43 +451,6 @@
         </div>
       </div>
 
-    </div>
-  </div>
-</section>
-
-<!-- PRICING TABLE — fully dynamic from group_pricing table -->
-<section id="pricing" class="py-16 bg-white">
-  <div class="max-w-5xl mx-auto px-6 reveal">
-    <div class="text-center mb-10">
-      <p class="text-gold text-xs tracking-widest uppercase mb-3">Group Rates</p>
-      <h2 class="font-heading text-5xl text-forest font-light">Pricing Guide</h2>
-      <p class="text-text-muted text-sm mt-2" id="pricingNote">Weekdays (Sun–Thu) include <strong>1 hour free pool spa</strong>. Weekends = Fri–Sat. Rates are per night.</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
-      <div class="bg-forest px-6 py-4">
-        <h3 class="font-heading text-2xl text-white font-light">Group Pricing</h3>
-        <p class="text-white/60 text-xs mt-0.5">All rates per night · Pool spa included on weekdays</p>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="bg-cream border-b border-gray-100">
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Pax</th>
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Rooms</th>
-              <th class="text-center px-5 py-3 text-xs font-semibold text-forest uppercase">Weekday</th>
-              <th class="text-center px-5 py-3 text-xs font-semibold uppercase" style="color:#b8860b">Weekend</th>
-              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Inclusions</th>
-            </tr>
-          </thead>
-          <tbody id="pricingTableBody">
-            <tr><td colspan="5" class="text-center py-8 text-gray-300 text-sm">Loading rates…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="px-6 py-5 bg-cream border-t border-gray-100">
-        <p class="text-xs font-semibold text-gray-600 mb-3 uppercase tracking-wide">Available Add-ons</p>
-        <div id="addonsDisplay" class="flex flex-wrap gap-2 text-xs">Loading…</div>
-      </div>
     </div>
   </div>
 </section>
@@ -1064,8 +1022,6 @@ async function boot() {
   initSliders();
   initDatePickers();
   renderCalendar();
-  renderPricingTable();
-  renderAddonsBar();
   startSliderAuto();
   initRevealObserver();
 }
@@ -1688,35 +1644,6 @@ function pickCalDate(ds){
 }
 
 // ═══════════════════════════════════════════════════════
-// PRICING TABLE
-// ═══════════════════════════════════════════════════════
-function renderPricingTable() {
-  const wd = grpPricing.filter(p=>p.day_type==='weekday');
-  const we = grpPricing.filter(p=>p.day_type==='weekend');
-  const html = wd.map((w,i)=>{
-    const e=we[i]||{};
-    const inc=[
-      w.free_pool_spa_hours>0?`<span class="text-blue-600">✓ ${w.free_pool_spa_hours}hr pool spa</span>`:'',
-      w.free_ac_living?'<span class="text-green-600">✓ Free AC</span>':'',
-      w.free_extra_mattresses>0?`<span class="text-purple-600">✓ ${w.free_extra_mattresses} mattresses</span>`:'',
-    ].filter(Boolean).join(' ');
-    return `<tr class="border-b border-gray-50 hover:bg-gray-50">
-      <td class="px-5 py-3 font-semibold text-gray-800">${w.pax_min}–${w.pax_max}</td>
-      <td class="px-5 py-3 text-xs text-gray-500">${w.description||''}</td>
-      <td class="px-5 py-3 text-center font-bold text-forest">₱${(w.price||0).toLocaleString()}</td>
-      <td class="px-5 py-3 text-center font-bold" style="color:#b8860b">₱${(e.price||0).toLocaleString()}</td>
-      <td class="px-5 py-3 text-xs">${inc||'—'}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('pricingTableBody').innerHTML = html||'<tr><td colspan="5" class="text-center py-6 text-gray-300">No pricing configured.</td></tr>';
-}
-
-function renderAddonsBar() {
-  document.getElementById('addonsDisplay').innerHTML = addons.map(a=>
-    `<span class="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full font-medium">${a.label}: <strong>₱${a.price.toLocaleString()}</strong>${a.unit==='per_unit'?'/unit':a.unit==='per_hour'?'/hr':''}</span>`
-  ).join('');
-}
-
 // ═══════════════════════════════════════════════════════
 // PAX & DAY TYPE
 // ═══════════════════════════════════════════════════════
@@ -1826,25 +1753,23 @@ function getEligibleTiers(pax){
   return all.filter(t=>t.pax_min>=natural.pax_min);
 }
 
-// Looks up the price for a given tier on a given calendar date, using
-// that date's actual day-of-week (per-night pricing).
+// Price for the 19-24 tier on a given date, given actual pax:
 //
-// Special case — the 19-24 tier is NOT a flat price. It's the 15-18
-// tier's price plus ₱500 per pax above 18 (1 "extra" mattress per extra
-// guest, up to 6 at pax=24):
-//   19 pax weekday = 21,000 + 500×1 = 21,500
-//   24 pax weekday = 21,000 + 500×6 = 24,000  (matches old flat rate)
-//   19 pax weekend = 24,000 + 500×1 = 24,500
-//   24 pax weekend = 24,000 + 500×6 = 27,000  (matches old flat rate)
+//   Actual pax 19-24: price = 15-18 base + ₱500 × (pax-18)
+//     → mattress surcharge for each guest above 18 (max 6 at pax=24)
+//     → weekday: 19→₱21,500 / 20→₱22,000 ... 24→₱24,000
+//     → weekend: 19→₱24,500 / 20→₱25,000 ... 24→₱27,000
 //
-// If a guest "upgrades" into the 19-24 tier with FEWER than 19 actual
-// pax, we use pax=19 as the floor (the cheapest entry point into that
-// tier) — confirmed: upgraded tier choice is charged regardless of
-// actual headcount.
+//   Upgrade (pax < 19 choosing this tier for the larger rooms):
+//     → charged at the flat 15-18 base price only (no mattress surcharge)
+//     → weekday ₱21,000 / weekend ₱24,000
+//     → basisPax is treated as 18 so 500×(18-18) = +₱0
+//
 function tierPriceForDate(tier, dateStr, pax){
   const dt = getDayType(dateStr);
   if(tier.pax_min===19){
-    const basisPax = (pax>=19 && pax<=24) ? pax : 19;
+    // pax in 19-24 → use actual pax; pax < 19 upgrade → use 18 (no surcharge)
+    const basisPax = (pax>=19 && pax<=24) ? pax : 18;
     const base1518 = grpPricing.find(p=>p.day_type===dt && p.pax_min===15 && p.pax_max===18);
     const baseline = base1518 ? base1518.price : tier.price;
     return baseline + 500*(basisPax-18);
@@ -1901,9 +1826,13 @@ function renderPackageCards(eligible, natural, pax){
     pkgMap[tier.pax_min]=tier;
     const isSel = selPkg && selPkg.pax_min===tier.pax_min;
     const isRec = natural && tier.pax_min===natural.pax_min;
-    // basisPax for display: actual pax if it falls within this tier's
-    // range, otherwise the tier's minimum (e.g. 19 for the 19-24 tier).
-    const basisPax = (pax>=tier.pax_min && pax<=tier.pax_max) ? pax : tier.pax_min;
+    // For the 19-24 tier:
+    //   actual pax 19-24 → show the surcharged price for that pax count
+    //   upgrade (pax < 19) → show flat 15-18 base price (no surcharge)
+    //   basisPax=18 gives 500×(18-18)=+₱0, same as the 15-18 base price
+    const basisPax = (tier.pax_min===19)
+      ? ((pax>=19 && pax<=24) ? pax : 18)
+      : ((pax>=tier.pax_min && pax<=tier.pax_max) ? pax : tier.pax_min);
     const wdRow = grpPricing.find(p=>p.day_type==='weekday'&&p.pax_min===15&&p.pax_max===18);
     const weRow = grpPricing.find(p=>p.day_type==='weekend'&&p.pax_min===15&&p.pax_max===18);
     let wdPrice, wePrice;
@@ -1914,7 +1843,8 @@ function renderPackageCards(eligible, natural, pax){
       wdPrice=(grpPricing.find(p=>p.day_type==='weekday'&&p.pax_min===tier.pax_min&&p.pax_max===tier.pax_max)||tier).price;
       wePrice=(grpPricing.find(p=>p.day_type==='weekend'&&p.pax_min===tier.pax_min&&p.pax_max===tier.pax_max)||tier).price;
     }
-    const includedMattresses = tier.pax_min===19 ? Math.max(0,basisPax-18) : (tier.free_extra_mattresses||0);
+    // Mattress inclusions: for 19-24 tier, included = pax-18 (only for actual pax ≥ 19)
+    const includedMattresses = (tier.pax_min===19 && pax>=19) ? Math.max(0,pax-18) : (tier.free_extra_mattresses||0);
     const badges=[
       tier.free_pool_spa_hours>0?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✓ ${tier.free_pool_spa_hours}hr pool spa</span>`:'',
       tier.free_ac_living?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>':'',
@@ -1930,7 +1860,7 @@ function renderPackageCards(eligible, natural, pax){
         <div class="text-right flex-shrink-0">
           <p class="text-xs text-blue-600">Weekday ₱${wdPrice.toLocaleString()}</p>
           <p class="text-xs text-amber-600">Weekend ₱${wePrice.toLocaleString()}</p>
-          ${tier.pax_min===19?`<p class="text-[10px] text-text-muted mt-0.5">at ${basisPax} pax</p>`:''}
+          ${tier.pax_min===19 ? `<p class="text-[10px] text-text-muted mt-0.5">${pax>=19?`at ${pax} pax (+${pax-18} mattress${pax-18>1?'es':''})`:''}</p>` : ''}
         </div>
       </div>
     </div>`;
