@@ -156,6 +156,7 @@
       <p class="nav-group-label">Finances</p>
       <button class="nav-item" onclick="showView('finances')" id="nav-finances"><i class="fas fa-peso-sign"></i> Revenue & P&L</button>
       <button class="nav-item" onclick="showView('expenses')" id="nav-expenses"><i class="fas fa-receipt"></i> Expenses</button>
+      <button class="nav-item" onclick="showView('accounting')" id="nav-accounting"><i class="fas fa-book-open"></i> Guest Ledger</button>
       <button class="nav-item" onclick="showView('pricing')" id="nav-pricing"><i class="fas fa-tags"></i> Pricing Engine</button>
 
       <p class="nav-group-label">Operations</p>
@@ -192,32 +193,67 @@
 
       <!-- ═══ DASHBOARD ═══ -->
       <div id="view-dashboard" class="view active">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div><h2 class="font-heading text-3xl text-gray-800 font-light">Business Dashboard</h2><p class="text-gray-400 text-xs mt-0.5" id="dashDate">–</p></div>
           <div class="flex gap-2">
             <button onclick="refreshDashboard()" class="text-xs bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
             <a href="admin.html" target="_blank" class="text-xs bg-forest text-white px-3 py-2 rounded-lg hover:bg-forest-dark flex items-center gap-1"><i class="fas fa-external-link-alt"></i> Admin Panel</a>
           </div>
         </div>
+
+        <!-- Period filter — every KPI/chart below responds to this -->
+        <div class="sc p-4 mb-5 flex flex-wrap items-center gap-2">
+          <span class="text-xs text-gray-400 uppercase font-semibold tracking-wide mr-1">Period</span>
+          <select id="dashFromMonth" class="fi w-32" onchange="onDashFilterChange()"></select>
+          <span class="text-gray-400 text-xs">to</span>
+          <select id="dashToMonth" class="fi w-32" onchange="onDashFilterChange()"></select>
+          <select id="dashYear" class="fi w-24" onchange="onDashFilterChange()"></select>
+          <div class="flex gap-1.5 ml-auto">
+            <button onclick="dashQuickFilter('month')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200">This Month</button>
+            <button onclick="dashQuickFilter('year')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200">This Year</button>
+            <button onclick="dashQuickFilter('all')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200">All Time</button>
+          </div>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Total Projected Revenue</p><p class="text-2xl font-bold text-forest" id="kpiProjRevenue">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiProjRevenueSub">–</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Total Bookings</p><p class="text-2xl font-bold text-gray-800" id="kpiTotalBookings">–</p><p class="text-xs text-gray-400 mt-1">confirmed, this period</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Current Revenue (Paid)</p><p class="text-2xl font-bold text-forest" id="kpiCurrentRevenue">₱–</p><p class="text-xs text-gray-400 mt-1">collected so far</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Balance Collectible</p><p class="text-2xl font-bold text-purple-700" id="kpiBalanceTotal">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiBalanceCount">–</p></div>
+        </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Today's Revenue</p><p class="text-2xl font-bold text-forest" id="kpiToday">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiTodayCount">–</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">This Month</p><p class="text-2xl font-bold text-gray-800" id="kpiMonth">₱–</p><p class="text-xs mt-1" id="kpiVsLast">–</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Pending Verification</p><p class="text-2xl font-bold text-yellow-600" id="kpiPending">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiPendingCount">–</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">New Inquiries</p><p class="text-2xl font-bold text-blue-600" id="kpiInquiries">–</p><p class="text-xs text-gray-400 mt-1">unread</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Expenses</p><p class="text-2xl font-bold text-red-600" id="kpiExpensesTotal">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiExpensesSub">–</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Net Profit</p><p class="text-2xl font-bold" id="kpiNetProfit">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiNetMargin">–</p></div>
+          <div class="stat-card flex items-center gap-3"><div><p class="text-xs text-gray-400 uppercase mb-1">Occupancy Rate</p><p class="text-2xl font-bold text-gray-800" id="kpiOccRate">–%</p><p class="text-xs text-gray-400" id="kpiOccSub">this period</p></div><canvas id="occMini" width="52" height="52" class="ml-auto"></canvas></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Pending Confirmation</p><p class="text-2xl font-bold text-yellow-600" id="kpiPendingConfirm">–</p><p class="text-xs text-gray-400 mt-1" id="kpiPendingSub">–</p></div>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div class="stat-card flex items-center gap-3"><div><p class="text-xs text-gray-400 uppercase mb-1">Occupancy</p><p class="text-2xl font-bold text-gray-800" id="kpiOcc">–%</p><p class="text-xs text-gray-400">this month</p></div><canvas id="occMini" width="52" height="52" class="ml-auto"></canvas></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Net Profit</p><p class="text-2xl font-bold" id="kpiProfit">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiMargin">–%</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Balance Collectible</p><p class="text-2xl font-bold text-purple-700" id="kpiBalance">₱–</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Year to Date</p><p class="text-2xl font-bold text-gray-800" id="kpiYTD">₱–</p></div>
-        </div>
+
+        <!-- Cash Flow + Expense Category -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-          <div class="sc md:col-span-2 p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Revenue – Last 6 Months</h3><div class="chart-wrap"><canvas id="revenueChart"></canvas></div></div>
-          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Revenue by Room</h3><div class="chart-wrap"><canvas id="roomChart"></canvas></div></div>
+          <div class="sc md:col-span-2 p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Cash Flow — <span id="cashFlowYearLabel">–</span></h3><div class="chart-wrap"><canvas id="cashFlowChart"></canvas></div></div>
+          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Expenses by Category</h3><div class="chart-wrap"><canvas id="expenseCategoryChart"></canvas></div><div id="expenseCategoryLegend" class="mt-3 space-y-1.5 text-xs"></div></div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-3">Today's Check-ins & Check-outs</h3><div id="todayCI" class="text-sm text-gray-400">Loading…</div></div>
+
+        <!-- Revenue by Room + Alerts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Revenue by Room</h3><div class="chart-wrap"><canvas id="roomChart"></canvas></div></div>
           <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-3">Alerts & Notifications</h3><div id="alertsArea" class="space-y-2">Loading…</div></div>
+        </div>
+
+        <!-- Today's Check-ins & Check-outs — detailed cards -->
+        <div class="sc p-5">
+          <h3 class="font-semibold text-gray-700 text-sm mb-3">Today's Check-ins &amp; Check-outs</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <p class="text-xs text-gray-400 uppercase mb-2">Check-ins (<span id="ciCount">0</span>)</p>
+              <div id="todayCheckins" class="space-y-3 text-sm text-gray-400">Loading…</div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-400 uppercase mb-2">Check-outs (<span id="coCount">0</span>)</p>
+              <div id="todayCheckouts" class="space-y-3 text-sm text-gray-400">Loading…</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -333,25 +369,83 @@
 
       <!-- ═══ FINANCES / P&L ═══ -->
       <div id="view-finances" class="view">
-        <h2 class="font-heading text-3xl text-gray-800 font-light mb-6">Revenue & P&L</h2>
-        <div class="flex gap-3 mb-6">
-          <select id="plMonth" class="fi w-40" onchange="loadPL()"><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5" selected>June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select>
-          <select id="plYear" class="fi w-28" onchange="loadPL()"><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option></select>
-          <button onclick="exportPL()" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-download"></i> Export CSV</button>
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <h2 class="font-heading text-3xl text-gray-800 font-light">Revenue & P&L</h2>
+          <div class="flex gap-2 flex-wrap">
+            <select id="plMonth" class="fi w-40" onchange="loadPL()"><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select>
+            <select id="plYear" class="fi w-28" onchange="loadPL()"><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option></select>
+            <button onclick="exportPL()" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-download"></i> Export CSV</button>
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-          <div class="stat-card"><p class="text-xs text-gray-400 mb-1">TOTAL REVENUE</p><p class="text-3xl font-bold text-forest" id="pl_revenue">₱–</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 mb-1">TOTAL EXPENSES</p><p class="text-3xl font-bold text-red-600" id="pl_expenses">₱–</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 mb-1">NET PROFIT</p><p class="text-3xl font-bold" id="pl_profit">₱–</p><p class="text-xs text-gray-400 mt-1" id="pl_margin">–% margin</p></div>
+        <!-- Summary KPIs -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+          <div class="stat-card"><p class="text-xs text-gray-400 mb-1 uppercase tracking-wide">Total Revenue</p><p class="text-3xl font-bold text-forest" id="pl_revenue">₱–</p><p class="text-xs text-gray-400 mt-1" id="pl_bookingCount">– bookings</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 mb-1 uppercase tracking-wide">Collected (Paid)</p><p class="text-3xl font-bold text-blue-600" id="pl_collected">₱–</p><p class="text-xs text-gray-400 mt-1" id="pl_balance">Balance: ₱–</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 mb-1 uppercase tracking-wide">Total Expenses</p><p class="text-3xl font-bold text-red-600" id="pl_expenses">₱–</p></div>
+          <div class="stat-card border-l-4 border-forest"><p class="text-xs text-gray-400 mb-1 uppercase tracking-wide">Net Operating Income</p><p class="text-3xl font-bold" id="pl_profit">₱–</p><p class="text-xs text-gray-400 mt-1" id="pl_margin">–% margin</p><p class="text-[10px] text-gray-400 mt-1">Collected Revenue − Expenses</p></div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Revenue by Room</h3><div id="plRoomBreak" class="space-y-2 text-sm"></div></div>
-          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Expenses by Category</h3><div class="chart-wrap"><canvas id="expCatChart"></canvas></div></div>
+        <!-- Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Revenue by Room</h3><div id="plRoomBreak" class="space-y-2.5 text-sm"></div></div>
+          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Expenses by Category</h3><div class="chart-wrap" style="max-height:180px"><canvas id="expCatChart"></canvas></div></div>
         </div>
+        <!-- Booking List — enhanced with nights, downpayment, balance, add-ons, status -->
         <div class="sc overflow-hidden">
-          <div class="p-4 border-b border-gray-100"><h3 class="font-semibold text-gray-700 text-sm">Booking Revenue Detail</h3></div>
-          <table class="tbl w-full"><thead><tr><th>Ref</th><th>Guest</th><th>Room</th><th>Dates</th><th>Total</th><th>Deposit</th><th>Balance</th><th>Status</th></tr></thead>
-          <tbody id="plBookingsTable"></tbody></table>
+          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-semibold text-gray-700 text-sm">Booking Revenue Detail</h3>
+            <p class="text-xs text-gray-400">Click any row for full details</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="tbl w-full min-w-max">
+              <thead><tr>
+                <th>Ref</th><th>Guest</th><th>Room(s)</th><th>Dates</th><th>Nights</th>
+                <th>Package</th><th>Total</th><th>Paid (DP)</th><th>Balance</th>
+                <th>Add-ons</th><th>Status</th>
+              </tr></thead>
+              <tbody id="plBookingsTable"><tr><td colspan="11" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ GUEST LEDGER (accounting) ═══ -->
+      <div id="view-accounting" class="view">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div><h2 class="font-heading text-3xl text-gray-800 font-light">Guest Ledger</h2><p class="text-xs text-gray-400 mt-0.5">Detailed accounting view per booking — payments, add-ons, balance, and notes.</p></div>
+        </div>
+        <!-- Search / filter -->
+        <div class="sc p-4 mb-5 flex flex-wrap gap-3 items-end">
+          <div>
+            <label class="fi-label text-xs">Month</label>
+            <select id="acctMonth" class="fi w-36" onchange="loadAccounting()"><option value="">All Months</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
+          </div>
+          <div>
+            <label class="fi-label text-xs">Year</label>
+            <select id="acctYear" class="fi w-24" onchange="loadAccounting()"><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option></select>
+          </div>
+          <div class="flex-1 min-w-[200px]">
+            <label class="fi-label text-xs">Search Guest / Ref</label>
+            <input type="text" id="acctSearch" class="fi" placeholder="Name, ref number…" oninput="filterAccounting()"/>
+          </div>
+          <button onclick="loadAccounting()" class="text-xs bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 self-end"><i class="fas fa-sync-alt"></i></button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Left: booking list -->
+          <div class="sc overflow-hidden">
+            <div class="p-3 border-b border-gray-100">
+              <p class="text-xs text-gray-400 uppercase font-semibold">Bookings (<span id="acctCount">0</span>)</p>
+            </div>
+            <div id="acctList" class="divide-y divide-gray-50 max-h-[680px] overflow-y-auto">
+              <p class="text-gray-300 text-center py-8 text-sm">Loading…</p>
+            </div>
+          </div>
+          <!-- Right: selected booking detail -->
+          <div class="lg:col-span-2 sc p-6" id="acctDetail">
+            <div class="flex items-center justify-center h-64 text-gray-300">
+              <div class="text-center"><i class="fas fa-arrow-left text-3xl mb-3 block"></i><p class="text-sm">Select a booking from the list to view details</p></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1117,6 +1211,9 @@ let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
 let calFilterDate=null;
 let sessionExpiry=null;
 let charts={};
+// Dashboard period filter — drives every KPI/chart on the dashboard.
+// allTime=true ignores fromMonth/toMonth/year entirely.
+let dashPeriod={allTime:false, year:new Date().getFullYear(), fromMonth:new Date().getMonth()+1, toMonth:new Date().getMonth()+1};
 
 // ═══════════════════════════════════════════════════════
 // AUTH — email + one-time code (OTP), via send-email Edge Function
@@ -1246,6 +1343,7 @@ function showView(name){
     dashboard:refreshDashboard, calendar:renderCalendar,
     bookings:loadAllBookings, inquiries:loadInquiries,
     vouchers:loadVouchers, finances:loadPL, expenses:loadExpenses,
+    accounting:loadAccounting,
     pricing:loadPricing, staff:loadStaff, tasks:loadTasks,
     inventory:loadInventory, maintenance:loadMaintenance,
     assets:loadAssets, content:loadContent, reports:()=>{},
@@ -1260,6 +1358,11 @@ function showView(name){
 async function initDashboard(){
   document.getElementById('dashDate').textContent=
     new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  // Pre-select current month in Revenue P&L tab filter
+  const plM=document.getElementById('plMonth'); if(plM) plM.value=new Date().getMonth();
+  const plY=document.getElementById('plYear'); if(plY) plY.value=new Date().getFullYear();
+  // Pre-select current year in Guest Ledger tab
+  const acY=document.getElementById('acctYear'); if(acY) acY.value=new Date().getFullYear();
   await Promise.all([loadAllBookings(true),loadAllExpenses(true),
     loadCategories(),loadInquiries(true),loadVouchers(true),loadAnnouncements()]);
   refreshDashboard();
@@ -1306,88 +1409,234 @@ function updateBadges(){
   }
   const ui=allInquiries.filter(i=>i.status==='unread').length;
   const ib=document.getElementById('inqBadge'); if(ib){ib.textContent=ui;ib.classList.toggle('hidden',ui===0);}
-  document.getElementById('kpiInquiries').textContent=ui;
+  const kpiInq=document.getElementById('kpiInquiries'); if(kpiInq) kpiInq.textContent=ui;
 }
 
 // ═══════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════
+// Statuses counted as "confirmed" bookings for revenue/occupancy figures.
+const CONFIRMED_STATUSES=['confirmed','confirmed_balance_due','fully_paid','completed_stayed'];
+
+// Local YYYY-MM-DD for "today" — avoids the UTC-shift bug that
+// new Date().toISOString().split('T')[0] has for UTC+8 (Philippines).
+function todayLocal(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function populateDashFilters(){
+  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const fm=document.getElementById('dashFromMonth'), tm=document.getElementById('dashToMonth'), yr=document.getElementById('dashYear');
+  if(!fm||!tm||!yr) return;
+  fm.innerHTML=monthNames.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('');
+  tm.innerHTML=monthNames.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('');
+  const curYear=new Date().getFullYear();
+  yr.innerHTML=[curYear-1,curYear,curYear+1].map(y=>`<option value="${y}">${y}</option>`).join('');
+  fm.value=dashPeriod.fromMonth; tm.value=dashPeriod.toMonth; yr.value=dashPeriod.year;
+}
+
+function onDashFilterChange(){
+  dashPeriod.allTime=false;
+  dashPeriod.fromMonth=parseInt(document.getElementById('dashFromMonth').value)||1;
+  dashPeriod.toMonth=parseInt(document.getElementById('dashToMonth').value)||12;
+  dashPeriod.year=parseInt(document.getElementById('dashYear').value)||new Date().getFullYear();
+  recomputeDashboard();
+}
+
+function dashQuickFilter(type){
+  const now=new Date();
+  if(type==='month'){ dashPeriod={allTime:false,year:now.getFullYear(),fromMonth:now.getMonth()+1,toMonth:now.getMonth()+1}; }
+  else if(type==='year'){ dashPeriod={allTime:false,year:now.getFullYear(),fromMonth:1,toMonth:12}; }
+  else { dashPeriod={...dashPeriod,allTime:true}; }
+  populateDashFilters();
+  recomputeDashboard();
+}
+
+// Returns {start,end} (YYYY-MM-DD, inclusive) for the current filter,
+// or null if "All Time" is selected (no date filtering at all).
+function getPeriodRange(){
+  if(dashPeriod.allTime) return null;
+  const y=dashPeriod.year;
+  const start=`${y}-${String(dashPeriod.fromMonth).padStart(2,'0')}-01`;
+  const lastDay=new Date(y,dashPeriod.toMonth,0).getDate();
+  const end=`${y}-${String(dashPeriod.toMonth).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+  return {start,end};
+}
+
 async function refreshDashboard(){
   await Promise.all([loadAllBookings(true),loadAllExpenses(true)]);
-  const now=new Date();
-  const todayStr=now.toISOString().split('T')[0];
-  const mStart=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-  const yStart=`${now.getFullYear()}-01-01`;
+  populateDashFilters();
+  recomputeDashboard();
+}
 
-  const confirmed=allBookings.filter(b=>['confirmed','confirmed_balance_due','fully_paid','completed_stayed'].includes(b.status));
-  const todayCI =confirmed.filter(b=>b.check_in_date===todayStr);
-  const todayCO =confirmed.filter(b=>b.check_out_date===todayStr);
-  const monthBk =confirmed.filter(b=>b.check_in_date>=mStart);
-  const yearBk  =confirmed.filter(b=>b.check_in_date>=yStart);
-  const pending =allBookings.filter(b=>b.status==='pending_payment_verification');
+// Recomputes every dashboard KPI/chart from the already-loaded
+// allBookings/allExpenses, scoped to the current dashPeriod filter.
+// Called on every filter change — does NOT re-fetch from the DB.
+function recomputeDashboard(){
+  const range=getPeriodRange();
+  const inRange=(ds)=> !ds ? false : (!range || (ds>=range.start && ds<=range.end));
 
-  const todayRev =todayCI.reduce((s,b)=>s+(b.total_amount||0),0);
-  const monthRev =monthBk.reduce((s,b)=>s+(b.total_amount||0),0);
-  const yearRev  =yearBk.reduce((s,b)=>s+(b.total_amount||0),0);
-  const pendDep  =pending.reduce((s,b)=>s+(b.deposit_amount||0),0);
-  const balDue   =confirmed.reduce((s,b)=>s+(b.remaining_balance||0),0);
+  const confirmedAll=allBookings.filter(b=>CONFIRMED_STATUSES.includes(b.status));
+  const periodBookings=confirmedAll.filter(b=>inRange(b.check_in_date));
+  const periodExpenses=allExpenses.filter(e=>inRange(e.date));
+  const pendingAll=allBookings.filter(b=>b.status==='pending_payment_verification');
+  // "Pending confirmation" is scoped by when the request was SUBMITTED
+  // (created_at), not the stay date — it's about incoming requests
+  // needing review during this period.
+  const pendingPeriod=pendingAll.filter(b=>inRange((b.created_at||'').split('T')[0]));
 
-  const lm=now.getMonth()===0?11:now.getMonth()-1;
-  const lmY=now.getMonth()===0?now.getFullYear()-1:now.getFullYear();
-  const lmStart=`${lmY}-${String(lm+1).padStart(2,'0')}-01`;
-  const lmEnd  =`${lmY}-${String(lm+1).padStart(2,'0')}-${new Date(lmY,lm+1,0).getDate()}`;
-  const lastMonthRev=confirmed.filter(b=>b.check_in_date>=lmStart&&b.check_in_date<=lmEnd).reduce((s,b)=>s+(b.total_amount||0),0);
-  const vsLast=lastMonthRev>0?((monthRev-lastMonthRev)/lastMonthRev*100).toFixed(0):'∞';
+  // ── Revenue / bookings ──
+  const projRevenue=periodBookings.reduce((s,b)=>s+(b.total_amount||0),0);
+  // "Current Revenue" = amount actually COLLECTED so far (total minus
+  // whatever balance is still outstanding) — distinct from the
+  // projected total, which includes unpaid balances.
+  const currentRevenue=periodBookings.reduce((s,b)=>s+((b.total_amount||0)-(b.remaining_balance||0)),0);
+  const balanceBookings=periodBookings.filter(b=>(b.remaining_balance||0)>0);
+  const balanceTotal=balanceBookings.reduce((s,b)=>s+(b.remaining_balance||0),0);
 
-  const monthExp=allExpenses.filter(e=>e.date>=mStart).reduce((s,e)=>s+(e.amount||0),0);
-  const profit=monthRev-monthExp;
-  const margin=monthRev>0?(profit/monthRev*100).toFixed(1):0;
+  // ── Expenses / profit ──
+  const expensesTotal=periodExpenses.reduce((s,e)=>s+(e.amount||0),0);
+  // Net Profit = revenue actually collected − expenses incurred, for
+  // the same period (standard cash-basis net operating income).
+  const netProfit=currentRevenue-expensesTotal;
+  const netMargin=currentRevenue>0?(netProfit/currentRevenue*100).toFixed(1):'0';
 
-  const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-  const roomDays=monthBk.reduce((s,b)=>s+Math.max(0,(new Date(b.check_out_date)-new Date(b.check_in_date))/86400000),0);
-  const occ=Math.min(100,Math.round(roomDays/(daysInMonth*4)*100));
+  // ── Occupancy (only meaningful for a bounded period) ──
+  let occ=null;
+  if(range){
+    const daysInRange=Math.round((new Date(range.end+'T00:00:00')-new Date(range.start+'T00:00:00'))/86400000)+1;
+    const rs=new Date(range.start+'T00:00:00'), re=new Date(range.end+'T00:00:00'); re.setDate(re.getDate()+1); // exclusive end
+    const roomDays=periodBookings.reduce((s,b)=>{
+      const ci=new Date(b.check_in_date+'T00:00:00'), co=new Date(b.check_out_date+'T00:00:00');
+      const clampStart=ci>rs?ci:rs, clampEnd=co<re?co:re;
+      return s+Math.max(0,(clampEnd-clampStart)/86400000);
+    },0);
+    occ=Math.min(100,Math.round(roomDays/(daysInRange*4)*100));
+  }
 
-  // KPIs
-  setT('kpiToday',  '₱'+todayRev.toLocaleString());
-  setT('kpiTodayCount',`${todayCI.length} check-in${todayCI.length!==1?'s':''} today`);
-  setT('kpiMonth',  '₱'+monthRev.toLocaleString());
-  const vl=document.getElementById('kpiVsLast');
-  if(vl){vl.textContent=`${vsLast>=0?'+':''}${vsLast}% vs last month`;vl.className=`text-xs ${vsLast>=0?'profit-pos':'profit-neg'}`;}
-  setT('kpiPending','₱'+pendDep.toLocaleString());
-  setT('kpiPendingCount',`${pending.length} pending`);
-  setT('kpiOcc',occ+'%');
-  const kp=document.getElementById('kpiProfit'); if(kp){kp.textContent='₱'+Math.abs(profit).toLocaleString();kp.className=`text-2xl font-bold ${profit>=0?'profit-pos':'profit-neg'}`;}
-  setT('kpiMargin',`${margin}% margin`);
-  setT('kpiBalance','₱'+balDue.toLocaleString());
-  setT('kpiYTD','₱'+yearRev.toLocaleString());
+  // ── KPI text ──
+  setT('kpiProjRevenue','₱'+projRevenue.toLocaleString());
+  setT('kpiProjRevenueSub',`${periodBookings.length} booking${periodBookings.length!==1?'s':''}`);
+  setT('kpiTotalBookings',periodBookings.length);
+  setT('kpiCurrentRevenue','₱'+currentRevenue.toLocaleString());
+  setT('kpiBalanceTotal','₱'+balanceTotal.toLocaleString());
+  setT('kpiBalanceCount',`${balanceBookings.length} booking${balanceBookings.length!==1?'s':''} with balance`);
+  setT('kpiExpensesTotal','₱'+expensesTotal.toLocaleString());
+  setT('kpiExpensesSub',`${periodExpenses.length} entr${periodExpenses.length!==1?'ies':'y'}`);
+  const np=document.getElementById('kpiNetProfit');
+  if(np){ np.textContent='₱'+Math.abs(netProfit).toLocaleString(); np.className=`text-2xl font-bold ${netProfit>=0?'profit-pos':'profit-neg'}`; }
+  setT('kpiNetMargin', netProfit>=0?`${netMargin}% margin`:`${netMargin}% margin (loss)`);
+  if(occ===null){ setT('kpiOccRate','—'); setT('kpiOccSub','select a date range'); }
+  else { setT('kpiOccRate',occ+'%'); setT('kpiOccSub','this period'); }
+  setT('kpiPendingConfirm',pendingPeriod.length);
+  setT('kpiPendingSub',`${pendingAll.length} total awaiting review`);
   updateBadges();
 
-  // Mini occupancy donut
+  // ── Mini occupancy donut ──
   if(charts.occMini) charts.occMini.destroy();
   const oc=document.getElementById('occMini');
-  if(oc) charts.occMini=new Chart(oc,{type:'doughnut',data:{datasets:[{data:[occ,100-occ],backgroundColor:['#2d5a3b','#e5e7eb'],borderWidth:0}]},options:{cutout:'70%',plugins:{tooltip:{enabled:false},legend:{display:false}}}});
+  if(oc && occ!==null) charts.occMini=new Chart(oc,{type:'doughnut',data:{datasets:[{data:[occ,100-occ],backgroundColor:['#2d5a3b','#e5e7eb'],borderWidth:0}]},options:{cutout:'70%',plugins:{tooltip:{enabled:false},legend:{display:false}}}});
+  else if(charts.occMini) charts.occMini=null;
 
-  // Revenue chart
-  renderRevenueChart();
-  renderRoomChart(confirmed);
+  // ── Charts ──
+  renderCashFlowChart();
+  renderExpenseCategoryChart(periodExpenses);
+  renderRoomChart(periodBookings);
 
-  // Today check-ins
-  const ciEl=document.getElementById('todayCI');
-  ciEl.innerHTML=(todayCI.length===0&&todayCO.length===0)?
-    '<p class="text-gray-300 text-center py-4">No check-ins or check-outs today.</p>':
-    [...todayCI.map(b=>`<div class="flex justify-between items-start py-2.5 border-b border-gray-50 last:border-0">
-      <div><p class="font-medium text-sm text-gray-800">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.room_type} · ${b.pax_count||b.adults} pax</p>${b.special_requests?`<p class="text-xs text-amber-600 mt-0.5">📝 ${esc(b.special_requests.substring(0,50))}…</p>`:''}</div>
-      <div class="text-right flex-shrink-0 ml-3"><span class="badge b-conf text-xs">Check-in</span>${(b.remaining_balance||0)>0?`<p class="text-xs text-red-600 mt-1">Balance: ₱${b.remaining_balance.toLocaleString()}</p>`:''}</div>
-    </div>`),
-    ...todayCO.map(b=>`<div class="flex justify-between items-center py-2.5 border-b border-gray-50 last:border-0">
-      <div><p class="font-medium text-sm text-gray-800">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.room_type}</p></div>
-      <span class="badge b-canc text-xs">Check-out</span>
-    </div>`)
-    ].join('');
+  // ── Today's check-ins/check-outs + alerts ──
+  renderTodayCards(confirmedAll);
+  renderAlerts(pendingAll);
+}
 
-  // Alerts
+// Cash Flow — full calendar year (Jan–Dec) regardless of the from/to
+// month filter, using dashPeriod.year (or the current year if "All
+// Time" is selected). Cash In = revenue collected (by check-in date),
+// Cash Out = expenses (by expense date).
+function renderCashFlowChart(){
+  const canvas=document.getElementById('cashFlowChart'); if(!canvas) return;
+  if(charts.cashFlow) charts.cashFlow.destroy();
+  const y=dashPeriod.allTime?new Date().getFullYear():dashPeriod.year;
+  setT('cashFlowYearLabel',y);
+  const confirmedAll=allBookings.filter(b=>CONFIRMED_STATUSES.includes(b.status));
+  const labels=[],cashIn=[],cashOut=[];
+  for(let m=0;m<12;m++){
+    const s=`${y}-${String(m+1).padStart(2,'0')}-01`;
+    const e=`${y}-${String(m+1).padStart(2,'0')}-${new Date(y,m+1,0).getDate()}`;
+    labels.push(new Date(y,m,1).toLocaleDateString('en-PH',{month:'short'}));
+    const monthBk=confirmedAll.filter(b=>b.check_in_date>=s&&b.check_in_date<=e);
+    cashIn.push(monthBk.reduce((sum,b)=>sum+((b.total_amount||0)-(b.remaining_balance||0)),0));
+    cashOut.push(allExpenses.filter(ex=>ex.date>=s&&ex.date<=e).reduce((sum,ex)=>sum+(ex.amount||0),0));
+  }
+  charts.cashFlow=new Chart(canvas,{type:'bar',data:{labels,datasets:[
+    {label:'Cash In',data:cashIn,backgroundColor:'#2d5a3b',borderRadius:6},
+    {label:'Cash Out',data:cashOut,backgroundColor:'#ef444480',borderRadius:6}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>'₱'+(v/1000).toFixed(0)+'k',font:{size:10}}}}}});
+}
+
+// Expense breakdown by category (doughnut + text legend w/ percentages)
+// for the currently-filtered period.
+function renderExpenseCategoryChart(periodExpenses){
+  const canvas=document.getElementById('expenseCategoryChart');
+  const legend=document.getElementById('expenseCategoryLegend');
+  if(!canvas||!legend) return;
+  if(charts.expCat){ charts.expCat.destroy(); charts.expCat=null; }
+  const byCat={};
+  periodExpenses.forEach(e=>{ const c=e.category||'Other'; byCat[c]=(byCat[c]||0)+(e.amount||0); });
+  const labels=Object.keys(byCat), data=Object.values(byCat);
+  if(!labels.length){ legend.innerHTML='<p class="text-gray-300 text-center py-2">No expenses in this period.</p>'; return; }
+  const total=data.reduce((a,b)=>a+b,0);
+  const colors=['#2d5a3b','#c9a03d','#3b82f6','#8b5cf6','#ef4444','#06b6d4','#f97316','#84cc16','#ec4899','#64748b'];
+  charts.expCat=new Chart(canvas,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'white'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  legend.innerHTML=labels.map((l,i)=>{
+    const pct=total>0?(data[i]/total*100).toFixed(1):'0';
+    return `<div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block flex-shrink-0" style="background:${colors[i%colors.length]}"></span>${esc(l)}</span><span class="font-medium flex-shrink-0 ml-2">₱${data[i].toLocaleString()} (${pct}%)</span></div>`;
+  }).join('');
+}
+
+// Detailed cards for today's check-ins / check-outs: guest, pax,
+// rooms, add-ons, balance/fully-paid status, special requests.
+// Clicking a card opens the full booking detail modal.
+function renderTodayCards(confirmedAll){
+  const todayStr=todayLocal();
+  const todayCI=confirmedAll.filter(b=>b.check_in_date===todayStr);
+  const todayCO=confirmedAll.filter(b=>b.check_out_date===todayStr);
+  setT('ciCount',todayCI.length);
+  setT('coCount',todayCO.length);
+
+  const addonLabelsFor=(b)=>{
+    const obj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
+    const labels=Object.keys(obj).filter(k=>k!=='_extra_guests').map(k=>k.replace(/_/g,' '));
+    if(obj._extra_guests) labels.push(`extra guests ×${obj._extra_guests}`);
+    return labels;
+  };
+
+  const cardHtml=(b,type)=>{
+    const bal=b.remaining_balance||0;
+    const addonLabels=addonLabelsFor(b);
+    return `<div class="border border-gray-100 rounded-xl p-3 cursor-pointer hover:border-forest transition-colors" onclick="openBookingModal('${b.id}')">
+      <div class="flex justify-between items-start mb-1 gap-2">
+        <p class="font-medium text-sm text-gray-800">${esc(b.guest_name)}</p>
+        <span class="badge ${type==='in'?'b-conf':'b-canc'} text-xs flex-shrink-0">${type==='in'?'Check-in':'Check-out'}</span>
+      </div>
+      <p class="text-xs text-gray-400">${b.pax_count||b.adults} pax · ${b.room_type}</p>
+      ${addonLabels.length?`<p class="text-xs text-gray-400 mt-1">Add-ons: ${esc(addonLabels.join(', '))}</p>`:''}
+      <p class="text-xs mt-1 font-medium ${bal>0?'text-red-600':'text-green-600'}">${bal>0?`Balance due: ₱${bal.toLocaleString()}`:'Fully paid'}</p>
+      ${b.special_requests?`<p class="text-xs text-amber-600 mt-1">📝 ${esc(b.special_requests)}</p>`:''}
+    </div>`;
+  };
+
+  document.getElementById('todayCheckins').innerHTML = todayCI.length
+    ? todayCI.map(b=>cardHtml(b,'in')).join('')
+    : '<p class="text-gray-300 text-center py-4">No check-ins today.</p>';
+  document.getElementById('todayCheckouts').innerHTML = todayCO.length
+    ? todayCO.map(b=>cardHtml(b,'out')).join('')
+    : '<p class="text-gray-300 text-center py-4">No check-outs today.</p>';
+}
+
+function renderAlerts(pendingAll){
   const alerts=[];
-  if(pending.length>0) alerts.push({t:'warn',i:'fa-file-invoice',m:`${pending.length} booking${pending.length>1?'s':''} await payment verification`});
+  if(pendingAll.length>0) alerts.push({t:'warn',i:'fa-file-invoice',m:`${pendingAll.length} booking${pendingAll.length>1?'s':''} await payment verification`});
   const lowStock=(allInventory||[]).filter(i=>(i.quantity||0)<=(i.min_stock||0));
   if(lowStock.length>0) alerts.push({t:'warn',i:'fa-boxes-stacked',m:`${lowStock.length} inventory item${lowStock.length>1?'s':''} below minimum stock`});
   const urgMaint=(allMaintenance||[]).filter(m=>m.priority==='urgent'&&m.status!=='completed');
@@ -1399,29 +1648,6 @@ async function refreshDashboard(){
     <div class="flex items-center gap-3 p-2.5 rounded-lg ${a.t==='error'?'bg-red-50 text-red-700':a.t==='warn'?'bg-amber-50 text-amber-700':a.t==='info'?'bg-blue-50 text-blue-700':'bg-green-50 text-green-700'}">
       <i class="fas ${a.i} flex-shrink-0"></i><span class="text-xs">${a.m}</span>
     </div>`).join('');
-}
-
-function renderRevenueChart(){
-  const canvas=document.getElementById('revenueChart'); if(!canvas) return;
-  if(charts.revenue) charts.revenue.destroy();
-  const now=new Date(); const months=[]; const labels=[];
-  for(let i=5;i>=0;i--){
-    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    months.push({y:d.getFullYear(),m:d.getMonth()});
-    labels.push(d.toLocaleDateString('en-PH',{month:'short',year:'2-digit'}));
-  }
-  const confirmed=allBookings.filter(b=>['confirmed','confirmed_balance_due','fully_paid','completed_stayed'].includes(b.status));
-  const revData=months.map(({y,m})=>{
-    const s=`${y}-${String(m+1).padStart(2,'0')}-01`;
-    const e=`${y}-${String(m+1).padStart(2,'0')}-${new Date(y,m+1,0).getDate()}`;
-    return confirmed.filter(b=>b.check_in_date>=s&&b.check_in_date<=e).reduce((sum,b)=>sum+(b.total_amount||0),0);
-  });
-  const expData=months.map(({y,m})=>{
-    const s=`${y}-${String(m+1).padStart(2,'0')}-01`;
-    const e=`${y}-${String(m+1).padStart(2,'0')}-${new Date(y,m+1,0).getDate()}`;
-    return allExpenses.filter(ex=>ex.date>=s&&ex.date<=e).reduce((sum,ex)=>sum+(ex.amount||0),0);
-  });
-  charts.revenue=new Chart(canvas,{type:'bar',data:{labels,datasets:[{label:'Revenue',data:revData,backgroundColor:'#2d5a3b',borderRadius:6},{label:'Expenses',data:expData,backgroundColor:'#ef444480',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{y:{ticks:{callback:v=>'₱'+(v/1000).toFixed(0)+'k',font:{size:10}}}}}}); 
 }
 
 function renderRoomChart(confirmed){
@@ -1584,12 +1810,22 @@ function openBookingModal(id){
     </div>
     <div class="bg-gray-50 rounded-xl p-4 mb-4">
       <div class="grid grid-cols-2 gap-3 text-sm">
+        <div><span class="text-gray-400 text-xs">Package</span><p class="font-medium mt-0.5">${esc(b.package_label||'—')}</p></div>
         <div><span class="text-gray-400 text-xs">Room(s)</span><p class="font-medium mt-0.5">${b.room_type}</p></div>
         <div><span class="text-gray-400 text-xs">Guests</span><p class="font-medium mt-0.5">${b.pax_count||b.adults} pax (${b.adults} adults, ${b.children||0} children)</p></div>
         <div><span class="text-gray-400 text-xs">Check-in</span><p class="font-medium mt-0.5">${fmtDate(b.check_in_date)}</p></div>
         <div><span class="text-gray-400 text-xs">Check-out</span><p class="font-medium mt-0.5">${fmtDate(b.check_out_date)} · ${Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)} nights</p></div>
         <div><span class="text-gray-400 text-xs">Add-ons</span><p class="font-medium mt-0.5 text-xs">${addonsStr}</p></div>
         ${b.special_requests?`<div class="col-span-2"><span class="text-gray-400 text-xs">Special Requests</span><p class="text-sm text-amber-700 mt-0.5">${esc(b.special_requests)}</p></div>`:''}
+      </div>
+    </div>
+    <!-- Government ID (front & back) -->
+    <div class="sc p-4 mb-4">
+      <p class="text-xs text-gray-400 uppercase mb-3"><i class="fas fa-id-card mr-1"></i>Government ID</p>
+      <div id="idViewerArea" class="grid grid-cols-2 gap-3">
+        ${b.id_front_path||b.id_back_path
+          ?'<p class="col-span-2 text-xs text-gray-400">Loading ID images…</p>'
+          :'<p class="col-span-2 text-xs text-gray-400">No ID uploaded for this booking.</p>'}
       </div>
     </div>
     <!-- Financial Summary -->
@@ -1623,6 +1859,38 @@ function openBookingModal(id){
     ${log.length?`<div><p class="text-xs text-gray-400 uppercase mb-2">Audit Log</p><div class="space-y-1.5">${log.slice(-5).reverse().map(e=>`<div class="flex items-center gap-2 text-xs text-gray-500"><i class="fas fa-circle text-gray-300" style="font-size:6px"></i><span>${fmtDateTime(e.at)}</span><span>·</span><span>${e.action}</span><span class="text-gray-300">by ${e.by}</span></div>`).join('')}</div></div>`:''}
   `;
   document.getElementById('bookingModal').classList.remove('hidden');
+  loadIdImages(b);
+}
+
+// Government IDs live in the PRIVATE 'guest-ids' bucket — generate
+// short-lived signed URLs (5 min) to display them, rather than a
+// public URL (these are sensitive PII).
+async function loadIdImages(b){
+  const area=document.getElementById('idViewerArea');
+  if(!area) return;
+  if(!b.id_front_path && !b.id_back_path){
+    area.innerHTML='<p class="col-span-2 text-xs text-gray-400">No ID uploaded for this booking.</p>';
+    return;
+  }
+  const slots=[
+    {path:b.id_front_path, label:'ID Front'},
+    {path:b.id_back_path,  label:'ID Back'},
+  ];
+  const cells=await Promise.all(slots.map(async s=>{
+    if(!s.path) return `<div class="rounded-lg border border-dashed border-gray-200 flex items-center justify-center text-xs text-gray-400 aspect-video">${s.label} not uploaded</div>`;
+    try{
+      const{data,error}=await db.storage.from('guest-ids').createSignedUrl(s.path,300);
+      if(error||!data?.signedUrl) throw error||new Error('no url');
+      const isPdf=/\.pdf$/i.test(s.path);
+      if(isPdf){
+        return `<a href="${data.signedUrl}" target="_blank" class="rounded-lg border border-gray-200 flex flex-col items-center justify-center text-xs text-forest aspect-video hover:bg-gray-50"><i class="fas fa-file-pdf text-2xl mb-1"></i>${s.label} (PDF)</a>`;
+      }
+      return `<a href="${data.signedUrl}" target="_blank" class="block rounded-lg border border-gray-200 overflow-hidden aspect-video"><img src="${data.signedUrl}" alt="${s.label}" class="w-full h-full object-cover hover:opacity-90"/></a>`;
+    }catch(e){
+      return `<div class="rounded-lg border border-dashed border-red-200 flex items-center justify-center text-xs text-red-400 aspect-video">Failed to load ${s.label}</div>`;
+    }
+  }));
+  area.innerHTML=cells.join('')+'<p class="col-span-2 text-[10px] text-gray-400 mt-1"><i class="fas fa-lock mr-1"></i>Signed link expires in 5 minutes.</p>';
 }
 
 async function updateBookingStatus(id,newStatus){
@@ -1687,8 +1955,8 @@ async function notifyAdmin(b,newStatus){
   }catch(e){ console.warn('Could not push notification to Admin:',e); }
 }
 
-async function saveAdminNotes(id){
-  const notes=document.getElementById('bkAdminNotes').value.trim();
+async function saveAdminNotes(id, textareaId='bkAdminNotes'){
+  const notes=document.getElementById(textareaId)?.value.trim()||'';
   try{await db.from('bookings').update({admin_notes:notes}).eq('id',id); toast('Notes saved!','success');}
   catch(e){toast('Failed.','error');}
 }
@@ -1877,23 +2145,31 @@ async function loadPL(){
   const year=parseInt(document.getElementById('plYear')?.value??new Date().getFullYear());
   const start=`${year}-${String(month+1).padStart(2,'0')}-01`;
   const end=`${year}-${String(month+1).padStart(2,'0')}-${new Date(year,month+1,0).getDate()}`;
-  const bk=allBookings.filter(b=>['confirmed','confirmed_balance_due','fully_paid','completed_stayed'].includes(b.status)&&b.check_in_date>=start&&b.check_in_date<=end);
+  const bk=allBookings.filter(b=>CONFIRMED_STATUSES.includes(b.status)&&b.check_in_date>=start&&b.check_in_date<=end);
   const ex=allExpenses.filter(e=>e.date>=start&&e.date<=end);
   const rev=bk.reduce((s,b)=>s+(b.total_amount||0),0);
+  const collected=bk.reduce((s,b)=>s+((b.total_amount||0)-(b.remaining_balance||0)),0);
+  const balance=bk.reduce((s,b)=>s+(b.remaining_balance||0),0);
   const exp=ex.reduce((s,e)=>s+(e.amount||0),0);
-  const profit=rev-exp;
-  const margin=rev>0?(profit/rev*100).toFixed(1):0;
+  const noi=collected-exp; // Net Operating Income = collected revenue − expenses (cash basis)
+  const margin=collected>0?(noi/collected*100).toFixed(1):0;
+
   setT('pl_revenue','₱'+rev.toLocaleString());
+  setT('pl_bookingCount',`${bk.length} booking${bk.length!==1?'s':''}`);
+  setT('pl_collected','₱'+collected.toLocaleString());
+  setT('pl_balance',`Balance pending: ₱${balance.toLocaleString()}`);
   setT('pl_expenses','₱'+exp.toLocaleString());
-  const pe=document.getElementById('pl_profit'); if(pe){pe.textContent='₱'+Math.abs(profit).toLocaleString();pe.className=`text-3xl font-bold ${profit>=0?'profit-pos':'profit-neg'}`;}
-  setT('pl_margin',`${margin}% margin`);
-  // Room breakdown
+  const pe=document.getElementById('pl_profit'); if(pe){pe.textContent='₱'+Math.abs(noi).toLocaleString();pe.className=`text-3xl font-bold ${noi>=0?'profit-pos':'profit-neg'}`;}
+  setT('pl_margin',`${margin}% margin${noi<0?' (loss)':''}`);
+
+  // Room breakdown bars
   const rooms=['Silayan','Sinta','Tahanan','Barkada','Whole Resort'];
   document.getElementById('plRoomBreak').innerHTML=rooms.map(r=>{
     const v=bk.filter(b=>(b.room_type||'').includes(r)).reduce((s,b)=>s+(b.total_amount||0),0);
     const pct=rev>0?Math.round(v/rev*100):0;
-    return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-500">${r}</span><span class="font-medium">₱${v.toLocaleString()}</span></div><div class="w-full bg-gray-100 rounded-full h-1.5"><div class="bg-forest rounded-full h-1.5" style="width:${pct}%"></div></div></div>`;
+    return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-500">${r}</span><span class="font-medium">₱${v.toLocaleString()} <span class="text-gray-400 text-xs font-normal">(${pct}%)</span></span></div><div class="w-full bg-gray-100 rounded-full h-1.5"><div class="bg-forest rounded-full h-1.5" style="width:${pct}%"></div></div></div>`;
   }).join('');
+
   // Expense category chart
   const catCanvas=document.getElementById('expCatChart'); if(catCanvas){
     if(charts.expCat) charts.expCat.destroy();
@@ -1902,10 +2178,29 @@ async function loadPL(){
     const cats=Object.keys(catMap); const vals=Object.values(catMap);
     charts.expCat=new Chart(catCanvas,{type:'pie',data:{labels:cats,datasets:[{data:vals,backgroundColor:['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4','#c9a03d'],borderWidth:2,borderColor:'white'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
   }
-  // Bookings table
+
+  // Enhanced booking list with nights, paid (dp), balance, add-ons
   const tbl=document.getElementById('plBookingsTable'); if(!tbl) return;
-  tbl.innerHTML=bk.length?bk.map(b=>`<tr><td class="font-mono text-xs text-gray-500">${b.booking_ref}</td><td class="font-medium text-sm">${esc(b.guest_name)}</td><td>${b.room_type}</td><td class="text-xs">${b.check_in_date} → ${b.check_out_date}</td><td class="font-bold text-forest">₱${(b.total_amount||0).toLocaleString()}</td><td class="text-green-600">₱${(b.deposit_amount||0).toLocaleString()}</td><td class="${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}">₱${(b.remaining_balance||0).toLocaleString()}</td><td><span class="badge ${STATUS_CSS[b.status]||'b-pend'} text-xs">${STATUS_LABELS[b.status]||b.status}</span></td></tr>`).join('')
-    :'<tr><td colspan="8" class="text-center py-6 text-gray-300">No bookings this month.</td></tr>';
+  if(!bk.length){ tbl.innerHTML='<tr><td colspan="11" class="text-center py-6 text-gray-300">No bookings this month.</td></tr>'; return; }
+  tbl.innerHTML=bk.map(b=>{
+    const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000);
+    const addonsObj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
+    const addonKeys=Object.keys(addonsObj).filter(k=>k!=='_extra_guests');
+    const addonStr=[...addonKeys.map(k=>k.replace(/_/g,' ')), ...(addonsObj._extra_guests?[`+${addonsObj._extra_guests} extra pax`]:[])].join(', ')||'—';
+    return `<tr class="cursor-pointer hover:bg-gray-50" onclick="openBookingModal('${b.id}')">
+      <td class="font-mono text-xs text-gray-500">${b.booking_ref}</td>
+      <td><p class="font-medium text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_phone||''}</p></td>
+      <td class="text-xs text-gray-600">${b.room_type}</td>
+      <td class="text-xs">${fmtDate(b.check_in_date)}<br><span class="text-gray-400">→ ${fmtDate(b.check_out_date)}</span></td>
+      <td class="text-xs text-center">${nights}</td>
+      <td class="text-xs">${esc(b.package_label||'—')}</td>
+      <td class="font-semibold text-sm">₱${(b.total_amount||0).toLocaleString()}</td>
+      <td class="text-green-600 text-sm">₱${(b.deposit_amount||0).toLocaleString()}</td>
+      <td class="text-sm ${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}">₱${(b.remaining_balance||0).toLocaleString()}</td>
+      <td class="text-xs text-gray-500 max-w-[120px] truncate" title="${esc(addonStr)}">${esc(addonStr)}</td>
+      <td><span class="badge ${STATUS_CSS[b.status]||'b-pend'} text-xs">${STATUS_LABELS[b.status]||b.status}</span></td>
+    </tr>`;
+  }).join('');
 }
 function exportPL(){
   const month=parseInt(document.getElementById('plMonth')?.value??new Date().getMonth());
@@ -1913,13 +2208,187 @@ function exportPL(){
   const start=`${year}-${String(month+1).padStart(2,'0')}-01`;
   const end=`${year}-${String(month+1).padStart(2,'0')}-${new Date(year,month+1,0).getDate()}`;
   const bk=allBookings.filter(b=>b.check_in_date>=start&&b.check_in_date<=end);
-  const h=['Ref','Guest','Email','Room','Check-in','Check-out','Pax','Total','Deposit','Balance','Status'];
-  const r=bk.map(b=>[b.booking_ref,b.guest_name,b.guest_email,b.room_type,b.check_in_date,b.check_out_date,b.adults,b.total_amount||0,b.deposit_amount||0,b.remaining_balance||0,b.status]);
+  const h=['Ref','Guest','Email','Room','Package','Check-in','Check-out','Nights','Pax','Total','Deposit','Balance','Add-ons','Status'];
+  const r=bk.map(b=>{
+    const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000);
+    const addonsObj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
+    const addonStr=Object.keys(addonsObj).filter(k=>k!=='_extra_guests').join(', ');
+    return [b.booking_ref,b.guest_name,b.guest_email,b.room_type,b.package_label||'',b.check_in_date,b.check_out_date,nights,b.pax_count||b.adults,b.total_amount||0,b.deposit_amount||0,b.remaining_balance||0,addonStr,b.status];
+  });
   dlCSV([h,...r],`pl-${year}-${month+1}.csv`); toast('Export started!','success');
 }
 
 // ═══════════════════════════════════════════════════════
-// EXPENSES
+// GUEST LEDGER (accounting department view)
+// ═══════════════════════════════════════════════════════
+let acctBookings=[], acctSelected=null;
+
+function loadAccounting(){
+  const m=parseInt(document.getElementById('acctMonth')?.value||0);
+  const y=parseInt(document.getElementById('acctYear')?.value||new Date().getFullYear());
+  if(m){
+    const s=`${y}-${String(m).padStart(2,'0')}-01`;
+    const e=`${y}-${String(m).padStart(2,'0')}-${new Date(y,m,0).getDate()}`;
+    acctBookings=allBookings.filter(b=>b.check_in_date>=s&&b.check_in_date<=e);
+  } else {
+    const s=`${y}-01-01`, e=`${y}-12-31`;
+    acctBookings=allBookings.filter(b=>b.check_in_date>=s&&b.check_in_date<=e);
+  }
+  renderAcctList(acctBookings);
+}
+
+function filterAccounting(){
+  const q=(document.getElementById('acctSearch').value||'').toLowerCase().trim();
+  const filtered = q
+    ? acctBookings.filter(b=>(b.guest_name||'').toLowerCase().includes(q)||(b.booking_ref||'').toLowerCase().includes(q))
+    : acctBookings;
+  renderAcctList(filtered);
+}
+
+function renderAcctList(list){
+  setT('acctCount', list.length);
+  const el=document.getElementById('acctList');
+  if(!list.length){ el.innerHTML='<p class="text-gray-300 text-center py-8 text-sm">No bookings found.</p>'; return; }
+  el.innerHTML=list.map(b=>{
+    const isSel=acctSelected===b.id;
+    return `<div class="p-3 cursor-pointer hover:bg-gray-50 transition-colors ${isSel?'bg-forest/5 border-l-4 border-forest':''}" onclick="openAcctDetail('${b.id}')">
+      <div class="flex justify-between items-start">
+        <p class="font-medium text-sm text-gray-800">${esc(b.guest_name)}</p>
+        <span class="badge ${STATUS_CSS[b.status]||'b-pend'} text-xs flex-shrink-0 ml-1">${STATUS_LABELS[b.status]||b.status}</span>
+      </div>
+      <p class="text-xs text-gray-400 font-mono">${b.booking_ref}</p>
+      <p class="text-xs text-gray-400 mt-0.5">${fmtDate(b.check_in_date)} → ${fmtDate(b.check_out_date)}</p>
+      <div class="flex justify-between mt-1">
+        <span class="text-xs text-forest font-medium">₱${(b.total_amount||0).toLocaleString()}</span>
+        ${(b.remaining_balance||0)>0?`<span class="text-xs text-red-500">Balance: ₱${b.remaining_balance.toLocaleString()}</span>`:'<span class="text-xs text-green-600">Fully paid</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAcctDetail(id){
+  acctSelected=id;
+  const b=allBookings.find(x=>x.id===id); if(!b) return;
+  // Re-render list so the selection highlight updates
+  filterAccounting();
+
+  const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000);
+  const addonsObj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
+  const ph=(()=>{try{return typeof b.payment_history==='string'?JSON.parse(b.payment_history):b.payment_history||[];}catch(e){return[];}})();
+  const pax=b.pax_count||b.adults;
+  const bal=b.remaining_balance||0;
+
+  // Add-ons detail
+  const addonRows=['griller','stove','pet_fee','pool_spa','ac_living'].filter(k=>addonsObj[k]).map(k=>{
+    const label={griller:'Griller',stove:'Stove',pet_fee:'Pet Fee',pool_spa:'Pool Spa (extra hrs)',ac_living:'AC in Living Area'}[k]||k.replace(/_/g,' ');
+    return `<div class="flex justify-between text-sm py-1 border-b border-gray-50"><span class="text-gray-600">${label}</span><span class="font-medium">₱${Number(addonsObj[k]).toLocaleString()}</span></div>`;
+  });
+  if(addonsObj._extra_guests){
+    const eg=parseInt(addonsObj._extra_guests)||0;
+    addonRows.push(`<div class="flex justify-between text-sm py-1 border-b border-gray-50"><span class="text-gray-600">Extra Guests ×${eg}</span><span class="font-medium">₱${(eg*1000).toLocaleString()}</span></div>`);
+  }
+
+  // Payment history rows
+  const payRows=ph.length?ph.map(p=>`
+    <div class="flex items-start justify-between py-2 border-b border-gray-50 last:border-0">
+      <div><p class="text-sm font-medium text-gray-700">${p.type||'Payment'}</p>
+        <p class="text-xs text-gray-400">${fmtDate(p.date)} · ${p.method||'—'}${p.ref?` · Ref: ${p.ref}`:''}</p></div>
+      <p class="font-semibold text-forest">₱${(p.amount||0).toLocaleString()}</p>
+    </div>`).join('') : `
+    <div class="flex items-start justify-between py-2 border-b border-gray-50">
+      <div><p class="text-sm font-medium text-gray-700">Downpayment</p>
+        <p class="text-xs text-gray-400">${b.created_at?fmtDate(b.created_at.split('T')[0]):''} · ${b.payment_type==='full'?'Full payment':'50% DP'}</p>
+        ${b.payment_ref_number?`<p class="text-xs text-gray-400">Ref: ${b.payment_ref_number}</p>`:''}
+      </div>
+      <p class="font-semibold text-forest">₱${(b.deposit_amount||0).toLocaleString()}</p>
+    </div>
+    ${bal===0&&(b.total_amount||0)>(b.deposit_amount||0)?`<div class="flex items-start justify-between py-2"><div><p class="text-sm font-medium text-gray-700">Full Payment</p><p class="text-xs text-gray-400">Paid in full</p></div><p class="font-semibold text-forest">₱${((b.total_amount||0)-(b.deposit_amount||0)).toLocaleString()}</p></div>`:''}`;
+
+  document.getElementById('acctDetail').innerHTML=`
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-5 flex-wrap gap-3">
+      <div>
+        <p class="font-mono text-xs text-gray-400">${b.booking_ref}</p>
+        <h3 class="font-heading text-xl text-gray-800 mt-0.5">${esc(b.guest_name)}</h3>
+        <p class="text-sm text-gray-400">${b.guest_email||''} · ${b.guest_phone||''}</p>
+      </div>
+      <span class="badge ${STATUS_CSS[b.status]||'b-pend'}">${STATUS_LABELS[b.status]||b.status}</span>
+    </div>
+
+    <!-- Booking details grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl mb-4 text-sm">
+      <div><p class="text-xs text-gray-400 mb-0.5">Check-in</p><p class="font-medium">${fmtDate(b.check_in_date)}</p></div>
+      <div><p class="text-xs text-gray-400 mb-0.5">Check-out</p><p class="font-medium">${fmtDate(b.check_out_date)}</p></div>
+      <div><p class="text-xs text-gray-400 mb-0.5">Nights</p><p class="font-medium">${nights}</p></div>
+      <div><p class="text-xs text-gray-400 mb-0.5">Guests</p><p class="font-medium">${pax} pax</p></div>
+      <div><p class="text-xs text-gray-400 mb-0.5">Room(s)</p><p class="font-medium">${b.room_type||'—'}</p></div>
+      <div><p class="text-xs text-gray-400 mb-0.5">Package</p><p class="font-medium text-xs">${esc(b.package_label||'—')}</p></div>
+    </div>
+
+    <!-- Financial summary -->
+    <div class="p-4 bg-forest/5 rounded-xl mb-4">
+      <p class="text-xs text-gray-400 uppercase mb-2">Financial Summary</p>
+      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Total Amount</span><span class="font-bold">₱${(b.total_amount||0).toLocaleString()}</span></div>
+      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Amount Paid</span><span class="font-bold text-forest">₱${((b.total_amount||0)-bal).toLocaleString()}</span></div>
+      <div class="flex justify-between text-sm pt-1 border-t border-gray-200 mt-1 ${bal>0?'text-red-600':'text-gray-400'}"><span>Remaining Balance</span><span class="font-bold">₱${bal.toLocaleString()}</span></div>
+      ${b.voucher_code?`<div class="flex justify-between text-sm mt-2 pt-2 border-t border-gray-200 text-green-700"><span>Voucher (${b.voucher_code})</span><span>−₱${(b.voucher_discount||0).toLocaleString()}</span></div>`:''}
+    </div>
+
+    <!-- Payment history -->
+    <div class="p-4 rounded-xl border border-gray-100 mb-4">
+      <p class="text-xs text-gray-400 uppercase mb-2">Payment History</p>
+      ${payRows}
+      ${b.payment_proof_url?`<div class="mt-2 pt-2 border-t border-gray-50"><a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest underline flex items-center gap-1"><i class="fas fa-image"></i> View Payment Screenshot</a></div>`:''}
+    </div>
+
+    ${addonRows.length?`
+    <div class="p-4 rounded-xl border border-gray-100 mb-4">
+      <p class="text-xs text-gray-400 uppercase mb-2">Add-ons</p>
+      ${addonRows.join('')}
+    </div>`:''}
+
+    <!-- Government ID -->
+    <div class="p-4 rounded-xl border border-gray-100 mb-4">
+      <p class="text-xs text-gray-400 uppercase mb-2"><i class="fas fa-id-card mr-1"></i>Government ID</p>
+      <div id="acctIdViewer" class="grid grid-cols-2 gap-3">
+        ${b.id_front_path||b.id_back_path?'<p class="col-span-2 text-xs text-gray-400">Loading ID images…</p>':'<p class="col-span-2 text-xs text-gray-400">No ID uploaded for this booking.</p>'}
+      </div>
+    </div>
+
+    ${b.special_requests?`
+    <div class="p-4 rounded-xl border border-amber-100 bg-amber-50 mb-4">
+      <p class="text-xs text-amber-700 uppercase mb-1">Special Requests</p>
+      <p class="text-sm text-amber-800">${esc(b.special_requests)}</p>
+    </div>`:''}
+
+    <!-- Admin notes -->
+    <div class="p-4 rounded-xl border border-gray-100">
+      <p class="text-xs text-gray-400 uppercase mb-2">Admin Notes</p>
+      <textarea id="acctAdminNotes" class="fi text-sm" rows="2" placeholder="Internal notes…">${b.admin_notes||''}</textarea>
+      <button onclick="saveAdminNotes('${b.id}','acctAdminNotes')" class="mt-2 text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20">Save Notes</button>
+    </div>`;
+
+  // Load signed ID images
+  loadAcctIdImages(b);
+}
+
+async function loadAcctIdImages(b){
+  const area=document.getElementById('acctIdViewer'); if(!area) return;
+  if(!b.id_front_path&&!b.id_back_path){ area.innerHTML='<p class="col-span-2 text-xs text-gray-400">No ID uploaded.</p>'; return; }
+  const slots=[{path:b.id_front_path,label:'ID Front'},{path:b.id_back_path,label:'ID Back'}];
+  const cells=await Promise.all(slots.map(async s=>{
+    if(!s.path) return `<div class="rounded-lg border border-dashed border-gray-200 flex items-center justify-center text-xs text-gray-400 aspect-video">${s.label} not uploaded</div>`;
+    try{
+      const{data,error}=await db.storage.from('guest-ids').createSignedUrl(s.path,300);
+      if(error||!data?.signedUrl) throw error;
+      const isPdf=/\.pdf$/i.test(s.path);
+      return isPdf?`<a href="${data.signedUrl}" target="_blank" class="rounded-lg border border-gray-200 flex flex-col items-center justify-center text-xs text-forest aspect-video hover:bg-gray-50"><i class="fas fa-file-pdf text-2xl mb-1"></i>${s.label}</a>`:`<a href="${data.signedUrl}" target="_blank" class="block rounded-lg border border-gray-200 overflow-hidden aspect-video"><img src="${data.signedUrl}" alt="${s.label}" class="w-full h-full object-cover hover:opacity-90"/></a>`;
+    }catch(e){ return `<div class="rounded-lg border border-dashed border-red-200 flex items-center justify-center text-xs text-red-400 aspect-video">Failed to load ${s.label}</div>`; }
+  }));
+  area.innerHTML=cells.join('')+'<p class="col-span-2 text-[10px] text-gray-400 mt-1"><i class="fas fa-lock mr-1"></i>Signed link expires in 5 minutes.</p>';
+}
+
+
 // ═══════════════════════════════════════════════════════
 async function loadExpenses(){
   await loadAllExpenses(true);
