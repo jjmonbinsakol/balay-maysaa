@@ -2360,6 +2360,7 @@ async function submitBooking(){
       children_above_3:chAbove,
       children_below_3:chBelow,
       pax_count:       pax,
+      package_label:   `${selPkg.pax_min}-${selPkg.pax_max} pax · ${selPkg.description||''}`,
       day_type:        getDayType(ci),
       total_amount:    totalAmt,
       deposit_amount:  isFull?totalAmt:depositAmt,
