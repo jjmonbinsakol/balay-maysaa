@@ -1843,24 +1843,45 @@ function renderPackageCards(eligible, natural, pax){
       wdPrice=(grpPricing.find(p=>p.day_type==='weekday'&&p.pax_min===tier.pax_min&&p.pax_max===tier.pax_max)||tier).price;
       wePrice=(grpPricing.find(p=>p.day_type==='weekend'&&p.pax_min===tier.pax_min&&p.pax_max===tier.pax_max)||tier).price;
     }
-    // Mattress inclusions: for 19-24 tier, included = pax-18 (only for actual pax ≥ 19)
-    const includedMattresses = (tier.pax_min===19 && pax>=19) ? Math.max(0,pax-18) : (tier.free_extra_mattresses||0);
+    // Mattress badge for 19-24 tier:
+    //   - pax 19-23: price already includes (pax-18) mattresses via the
+    //     ₱500/pax surcharge. No separate "included" badge needed —
+    //     the per-night breakdown makes this clear.
+    //   - pax = 24 exactly: show "6 mattresses incl." badge (max free mattresses)
+    //   - upgrade (pax < 19): no mattress badge (same as 15-18 base price)
+    //   - other tiers: use DB value (always 0 for non-19-24 tiers)
+    const includedMattresses = (tier.pax_min===19 && pax===24) ? 6 : (tier.pax_min!==19 ? (tier.free_extra_mattresses||0) : 0);
+
+    // Dynamic description for 19-24 tier based on actual pax
+    let cardDesc = tier.description||'';
+    if(tier.pax_min===19){
+      if(pax>=19 && pax<=23){
+        const mattCount=pax-18;
+        cardDesc=`All 4 rooms + free AC + ${mattCount} mattress${mattCount>1?'es':''} included`;
+      } else if(pax===24){
+        cardDesc='All 4 rooms + free AC + 6 mattresses included';
+      } else {
+        // upgrade (pax < 19) — no mattress mention, same rooms as 15-18
+        cardDesc='All 4 rooms + free AC in living area';
+      }
+    }
+
     const badges=[
       tier.free_pool_spa_hours>0?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">✓ ${tier.free_pool_spa_hours}hr pool spa</span>`:'',
       tier.free_ac_living?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Free AC</span>':'',
-      includedMattresses>0?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${includedMattresses} mattress${includedMattresses>1?'es':''} incl.</span>`:'',
+      includedMattresses>0?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">✓ ${includedMattresses} mattresses incl.</span>`:'',
     ].filter(Boolean).join('');
     return `<div class="pkg${isSel?' on':''}${isRec?' rec':''}" id="pkg-${tier.pax_min}" style="animation-delay:${idx*0.05}s" onclick="selectTier(${tier.pax_min})">
       <div class="flex justify-between items-start">
         <div class="flex-1 pr-3">
           <p class="font-semibold text-gray-800 text-sm">${tier.pax_min}–${tier.pax_max} pax · ${tier.rooms_included} room${tier.rooms_included>1?'s':''}</p>
-          <p class="text-xs text-text-muted mt-0.5">${tier.description||''}</p>
+          <p class="text-xs text-text-muted mt-0.5">${cardDesc}</p>
           ${badges?`<div class="flex flex-wrap gap-1 mt-2">${badges}</div>`:''}
         </div>
         <div class="text-right flex-shrink-0">
           <p class="text-xs text-blue-600">Weekday ₱${wdPrice.toLocaleString()}</p>
           <p class="text-xs text-amber-600">Weekend ₱${wePrice.toLocaleString()}</p>
-          ${tier.pax_min===19 ? `<p class="text-[10px] text-text-muted mt-0.5">${pax>=19?`at ${pax} pax (+${pax-18} mattress${pax-18>1?'es':''})`:''}</p>` : ''}
+          ${tier.pax_min===19 && pax>=19 ? `<p class="text-[10px] text-text-muted mt-0.5">at ${pax} pax · +${pax-18} mattress${pax-18>1?'es':''}</p>` : ''}
         </div>
       </div>
     </div>`;
