@@ -52,6 +52,23 @@
     #toast.error{background:#c0392b;color:white;}
     #toast.info{background:#1d4ed8;color:white;}
     /* SPINNER */
+    /* ── MOBILE RESPONSIVE ──────────────────────────────── */
+    @media (max-width:768px){
+      #sidebar{transform:translateX(-100%);transition:transform .25s ease;}
+      #sidebar.open{transform:translateX(0);}
+      #main{margin-left:0!important;}
+      #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:39;}
+      #sidebarOverlay.open{display:block;}
+      #mobileTopBar{display:flex;}
+      .mbox{max-width:100%!important;border-radius:16px 16px 0 0;margin:0;max-height:95vh;position:fixed;bottom:0;left:0;right:0;}
+      .mbox-lg{max-width:100%!important;}
+      .modal{align-items:flex-end;padding:0;}
+    }
+    @media (min-width:769px){
+      #mobileTopBar{display:none;}
+    }
+    #mobileTopBar{display:none;align-items:center;justify-content:space-between;background:#1a2e21;padding:12px 16px;position:sticky;top:0;z-index:38;}
+    /* ── END MOBILE ──────────────────────────────────────── */
     .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;display:inline-block;}
     @keyframes rot{to{transform:rotate(360deg);}}
     /* MODAL */
@@ -129,6 +146,14 @@
 
 <!-- ═══════════════ MAIN PANEL ═══════════════ -->
 <div id="mainPanel" class="hidden">
+  <!-- Mobile top bar -->
+  <div id="mobileTopBar">
+    <button onclick="toggleSidebar()" class="w-9 h-9 flex items-center justify-center rounded-lg bg-white/10 text-white"><i class="fas fa-bars text-sm"></i></button>
+    <p class="text-white font-semibold text-sm">Balay Maysa</p>
+    <div class="w-9"></div>
+  </div>
+  <!-- Sidebar overlay (mobile only) -->
+  <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- SIDEBAR -->
   <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex flex-col" style="background:#1a2e21;">
@@ -195,31 +220,50 @@
       <div id="view-dashboard" class="view active">
         <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div><h2 class="font-heading text-3xl text-gray-800 font-light">Business Dashboard</h2><p class="text-gray-400 text-xs mt-0.5" id="dashDate">–</p></div>
-          <div class="flex gap-2">
+          <div class="flex gap-2 flex-wrap">
+            <button onclick="openNewBookingModal()" class="text-xs bg-forest text-white px-3 py-2 rounded-lg hover:bg-forest-dark flex items-center gap-1"><i class="fas fa-plus"></i> New Booking</button>
             <button onclick="refreshDashboard()" class="text-xs bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
-            <a href="admin.html" target="_blank" class="text-xs bg-forest text-white px-3 py-2 rounded-lg hover:bg-forest-dark flex items-center gap-1"><i class="fas fa-external-link-alt"></i> Admin Panel</a>
+            <a href="admin.html" target="_blank" class="text-xs bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-external-link-alt"></i> Admin Panel</a>
           </div>
         </div>
 
-        <!-- Period filter — every KPI/chart below responds to this -->
+        <!-- 1. TODAY'S CHECK-INS & CHECK-OUTS — most operational, always first -->
+        <div class="sc p-5 mb-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-700 text-sm flex items-center gap-2"><i class="fas fa-calendar-day text-forest"></i>Today's Activity</h3>
+            <span class="text-xs text-gray-400" id="dashTodayDate">–</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <p class="text-xs text-gray-400 uppercase font-semibold mb-2">Check-ins (<span id="ciCount">0</span>)</p>
+              <div id="todayCheckins" class="space-y-3 text-sm text-gray-400">Loading…</div>
+            </div>
+            <div>
+              <p class="text-xs text-gray-400 uppercase font-semibold mb-2">Check-outs (<span id="coCount">0</span>)</p>
+              <div id="todayCheckouts" class="space-y-3 text-sm text-gray-400">Loading…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. PERIOD FILTER -->
         <div class="sc p-4 mb-5 flex flex-wrap items-center gap-2">
           <span class="text-xs text-gray-400 uppercase font-semibold tracking-wide mr-1">Period</span>
           <select id="dashFromMonth" class="fi w-32" onchange="onDashFilterChange()"></select>
           <span class="text-gray-400 text-xs">to</span>
           <select id="dashToMonth" class="fi w-32" onchange="onDashFilterChange()"></select>
           <select id="dashYear" class="fi w-24" onchange="onDashFilterChange()"></select>
-          <div class="flex gap-1.5 ml-auto">
+          <div class="flex gap-1.5 ml-auto flex-wrap">
             <button onclick="dashQuickFilter('month')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200">This Month</button>
             <button onclick="dashQuickFilter('year')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200">This Year</button>
             <button onclick="dashQuickFilter('all')" class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-200">All Time</button>
           </div>
         </div>
 
-        <!-- KPI Grid -->
+        <!-- 3. KPI GRID -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Total Projected Revenue</p><p class="text-2xl font-bold text-forest" id="kpiProjRevenue">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiProjRevenueSub">–</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Total Bookings</p><p class="text-2xl font-bold text-gray-800" id="kpiTotalBookings">–</p><p class="text-xs text-gray-400 mt-1">confirmed, this period</p></div>
-          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Current Revenue (Paid)</p><p class="text-2xl font-bold text-forest" id="kpiCurrentRevenue">₱–</p><p class="text-xs text-gray-400 mt-1">collected so far</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Projected Revenue</p><p class="text-2xl font-bold text-forest" id="kpiProjRevenue">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiProjRevenueSub">–</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Total Bookings</p><p class="text-2xl font-bold text-gray-800" id="kpiTotalBookings">–</p><p class="text-xs text-gray-400 mt-1">confirmed this period</p></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Collected (Paid)</p><p class="text-2xl font-bold text-forest" id="kpiCurrentRevenue">₱–</p><p class="text-xs text-gray-400 mt-1">revenue so far</p></div>
           <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Balance Collectible</p><p class="text-2xl font-bold text-purple-700" id="kpiBalanceTotal">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiBalanceCount">–</p></div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
@@ -229,31 +273,14 @@
           <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Pending Confirmation</p><p class="text-2xl font-bold text-yellow-600" id="kpiPendingConfirm">–</p><p class="text-xs text-gray-400 mt-1" id="kpiPendingSub">–</p></div>
         </div>
 
-        <!-- Cash Flow + Expense Category -->
+        <!-- 4. CHARTS -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
           <div class="sc md:col-span-2 p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Cash Flow — <span id="cashFlowYearLabel">–</span></h3><div class="chart-wrap"><canvas id="cashFlowChart"></canvas></div></div>
           <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Expenses by Category</h3><div class="chart-wrap"><canvas id="expenseCategoryChart"></canvas></div><div id="expenseCategoryLegend" class="mt-3 space-y-1.5 text-xs"></div></div>
         </div>
-
-        <!-- Revenue by Room + Alerts -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
           <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-4">Revenue by Room</h3><div class="chart-wrap"><canvas id="roomChart"></canvas></div></div>
-          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-3">Alerts & Notifications</h3><div id="alertsArea" class="space-y-2">Loading…</div></div>
-        </div>
-
-        <!-- Today's Check-ins & Check-outs — detailed cards -->
-        <div class="sc p-5">
-          <h3 class="font-semibold text-gray-700 text-sm mb-3">Today's Check-ins &amp; Check-outs</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <p class="text-xs text-gray-400 uppercase mb-2">Check-ins (<span id="ciCount">0</span>)</p>
-              <div id="todayCheckins" class="space-y-3 text-sm text-gray-400">Loading…</div>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 uppercase mb-2">Check-outs (<span id="coCount">0</span>)</p>
-              <div id="todayCheckouts" class="space-y-3 text-sm text-gray-400">Loading…</div>
-            </div>
-          </div>
+          <div class="sc p-5"><h3 class="font-semibold text-gray-700 text-sm mb-3">Alerts</h3><div id="alertsArea" class="space-y-2">Loading…</div></div>
         </div>
       </div>
 
@@ -837,6 +864,56 @@
 
     </div><!-- /p-8 -->
   </main>
+<!-- ═══ NEW BOOKING / REBOOK MODAL ═══ -->
+<div id="newBookingModal" class="modal hidden">
+  <div class="mbox mbox-lg">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
+      <h3 class="font-heading text-xl text-forest font-light" id="nbModalTitle">New Manual Booking</h3>
+      <button onclick="document.getElementById('newBookingModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="fi-label">Reference # (auto)</label><input type="text" id="nb_ref" class="fi font-mono text-xs bg-gray-50" readonly/></div>
+        <div><label class="fi-label">Status</label>
+          <select id="nb_status" class="fi">
+            ${Object.entries(STATUS_LABELS||{}).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="fi-label">Guest Full Name *</label><input type="text" id="nb_name" class="fi" placeholder="Juan dela Cruz"/></div>
+        <div><label class="fi-label">Phone *</label><input type="text" id="nb_phone" class="fi" placeholder="09XX XXX XXXX"/></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="fi-label">Email</label><input type="email" id="nb_email" class="fi" placeholder="juan@email.com"/></div>
+        <div><label class="fi-label">Number of Guests *</label><input type="number" id="nb_pax" class="fi" value="2" min="1" max="24"/></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="fi-label">Check-in Date *</label><input type="date" id="nb_ci" class="fi"/></div>
+        <div><label class="fi-label">Check-out Date *</label><input type="date" id="nb_co" class="fi"/></div>
+      </div>
+      <div><label class="fi-label">Room(s) * <span class="text-xs text-gray-400 font-normal">(comma-separated, e.g. Silayan, Sinta)</span></label><input type="text" id="nb_rooms" class="fi" placeholder="Silayan, Sinta, Tahanan, Barkada"/></div>
+      <div><label class="fi-label">Package Label <span class="text-xs text-gray-400 font-normal">(optional)</span></label><input type="text" id="nb_pkg" class="fi" placeholder="15-18 pax · All 4 rooms + free AC"/></div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div><label class="fi-label">Total Amount (₱) *</label><input type="number" id="nb_total" class="fi" placeholder="21000" min="0"/></div>
+        <div><label class="fi-label">Amount Paid (₱) *</label><input type="number" id="nb_deposit" class="fi" placeholder="10500" min="0"/></div>
+        <div><label class="fi-label">Payment Type</label>
+          <select id="nb_paytype" class="fi">
+            <option value="full">Full Payment</option>
+            <option value="downpayment">Downpayment (50%)</option>
+          </select>
+        </div>
+      </div>
+      <div><label class="fi-label">Payment Reference # <span class="text-xs text-gray-400 font-normal">(optional)</span></label><input type="text" id="nb_payref" class="fi" placeholder="GCash / Maya / Bank ref"/></div>
+      <div><label class="fi-label">Admin Notes</label><textarea id="nb_notes" class="fi" rows="2" placeholder="Internal notes, rebook reason, etc."></textarea></div>
+      <div class="flex gap-3 pt-2">
+        <button onclick="document.getElementById('newBookingModal').classList.add('hidden')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
+        <button onclick="saveManualBooking()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center justify-center gap-2"><i class="fas fa-save"></i> Save Booking</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /mainPanel -->
 
 <!-- TOAST -->
@@ -1527,6 +1604,8 @@ function recomputeDashboard(){
   const np=document.getElementById('kpiNetProfit');
   if(np){ np.textContent='₱'+Math.abs(netProfit).toLocaleString(); np.className=`text-2xl font-bold ${netProfit>=0?'profit-pos':'profit-neg'}`; }
   setT('kpiNetMargin', netProfit>=0?`${netMargin}% margin`:`${netMargin}% margin (loss)`);
+  setT('dashTodayDate', new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'}));
+  setT('kpiNetMargin', netProfit>=0?`${netMargin}% margin`:`${netMargin}% margin (loss)`);
   if(occ===null){ setT('kpiOccRate','—'); setT('kpiOccSub','select a date range'); }
   else { setT('kpiOccRate',occ+'%'); setT('kpiOccSub','this period'); }
   setT('kpiPendingConfirm',pendingPeriod.length);
@@ -1843,11 +1922,16 @@ function openBookingModal(id){
       ${b.payment_proof_url?`<div class="mt-3"><a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest underline flex items-center gap-1"><i class="fas fa-image"></i>View Payment Screenshot</a></div>`:''}
     </div>
     <!-- Update Status -->
-    <div class="mb-4">
-      <p class="text-xs text-gray-400 uppercase mb-3">Update Status</p>
-      <div class="flex flex-wrap gap-2">
-        ${Object.entries(STATUS_LABELS).map(([k,v])=>`<button onclick="updateBookingStatus('${b.id}','${k}')" class="text-xs px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 hover:border-forest transition-colors ${b.status===k?'bg-forest text-white border-forest':''}">${v}</button>`).join('')}
+    <div class="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+      <p class="text-xs text-gray-400 uppercase font-semibold mb-3">Update Status</p>
+      <div class="flex gap-3 items-center flex-wrap">
+        <select id="bkStatusSelect" class="fi flex-1 min-w-[180px]">
+          ${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${b.status===k?'selected':''}>${v}</option>`).join('')}
+        </select>
+        <button onclick="applyBookingStatus('${b.id}')" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center gap-2 whitespace-nowrap"><i class="fas fa-check"></i> Apply Status</button>
+        <button onclick="openRebookModal('${b.id}')" class="border border-forest text-forest px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest/5 flex items-center gap-2 whitespace-nowrap"><i class="fas fa-rotate"></i> Rebook</button>
       </div>
+      <p class="text-xs text-gray-400 mt-2"><i class="fas fa-info-circle mr-1"></i>Confirming or Declining sends an automatic email to the guest.</p>
     </div>
     <!-- Admin Notes -->
     <div class="mb-4">
@@ -1891,6 +1975,109 @@ async function loadIdImages(b){
     }
   }));
   area.innerHTML=cells.join('')+'<p class="col-span-2 text-[10px] text-gray-400 mt-1"><i class="fas fa-lock mr-1"></i>Signed link expires in 5 minutes.</p>';
+}
+
+// Reads the status select in the booking modal and applies it.
+async function applyBookingStatus(id){
+  const sel=document.getElementById('bkStatusSelect');
+  if(!sel) return;
+  await updateBookingStatus(id, sel.value);
+}
+
+// ── Mobile sidebar toggle ─────────────────────────────────────
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+
+// Auto-close sidebar when a nav item is clicked on mobile
+document.addEventListener('click', e=>{
+  if(e.target.closest('.nav-item') && window.innerWidth<769){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+});
+
+// ── Rebook ───────────────────────────────────────────────────
+// Creates a copy of an existing booking with a new reference number
+// and resets it to pending_payment_verification. The guest/room/pax
+// details are pre-filled in a modal for the admin to adjust before saving.
+async function openRebookModal(id){
+  const b=allBookings.find(x=>x.id===id); if(!b) return;
+  closeModal('bookingModal');
+  const ref='BM-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+  document.getElementById('nb_ref').value=ref;
+  document.getElementById('nb_name').value=b.guest_name||'';
+  document.getElementById('nb_email').value=b.guest_email||'';
+  document.getElementById('nb_phone').value=b.guest_phone||'';
+  document.getElementById('nb_pax').value=b.pax_count||b.adults||2;
+  document.getElementById('nb_rooms').value=b.room_type||'';
+  document.getElementById('nb_pkg').value=b.package_label||'';
+  document.getElementById('nb_ci').value=b.check_in_date||'';
+  document.getElementById('nb_co').value=b.check_out_date||'';
+  document.getElementById('nb_total').value=b.total_amount||0;
+  document.getElementById('nb_deposit').value=b.deposit_amount||0;
+  document.getElementById('nb_notes').value='Rebooked from '+b.booking_ref;
+  document.getElementById('nb_status').value='pending_payment_verification';
+  document.getElementById('nbModalTitle').textContent='Rebook — '+b.guest_name;
+  document.getElementById('newBookingModal').classList.remove('hidden');
+}
+
+// ── New Booking (manual entry) ────────────────────────────────
+function openNewBookingModal(){
+  const ref='BM-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+  document.getElementById('nb_ref').value=ref;
+  ['nb_name','nb_email','nb_phone','nb_rooms','nb_pkg','nb_ci','nb_co','nb_notes','nb_payref'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('nb_pax').value=2;
+  document.getElementById('nb_total').value='';
+  document.getElementById('nb_deposit').value='';
+  document.getElementById('nb_status').value='confirmed';
+  document.getElementById('nb_paytype').value='full';
+  document.getElementById('nbModalTitle').textContent='New Manual Booking';
+  document.getElementById('newBookingModal').classList.remove('hidden');
+}
+
+async function saveManualBooking(){
+  const ref=document.getElementById('nb_ref').value.trim();
+  const name=document.getElementById('nb_name').value.trim();
+  const email=document.getElementById('nb_email').value.trim();
+  const phone=document.getElementById('nb_phone').value.trim();
+  const pax=parseInt(document.getElementById('nb_pax').value)||1;
+  const rooms=document.getElementById('nb_rooms').value.trim();
+  const pkg=document.getElementById('nb_pkg').value.trim();
+  const ci=document.getElementById('nb_ci').value;
+  const co=document.getElementById('nb_co').value;
+  const total=parseFloat(document.getElementById('nb_total').value)||0;
+  const deposit=parseFloat(document.getElementById('nb_deposit').value)||0;
+  const status=document.getElementById('nb_status').value;
+  const payref=document.getElementById('nb_payref').value.trim();
+  const notes=document.getElementById('nb_notes').value.trim();
+  const paytype=document.getElementById('nb_paytype').value;
+  if(!name){ toast('Guest name is required.','error'); return; }
+  if(!ci||!co){ toast('Check-in and Check-out dates are required.','error'); return; }
+  if(!rooms){ toast('Room(s) are required.','error'); return; }
+  try{
+    const roomArr=rooms.split(',').map(r=>r.trim()).filter(Boolean);
+    const {error}=await db.from('bookings').insert({
+      booking_ref:ref, guest_name:name, guest_email:email||null,
+      guest_phone:phone, adults:pax, pax_count:pax,
+      room_type:rooms, rooms_selected:JSON.stringify(roomArr),
+      package_label:pkg||null, check_in_date:ci, check_out_date:co,
+      total_amount:total, deposit_amount:deposit,
+      remaining_balance:paytype==='full'?0:Math.max(0,total-deposit),
+      status, payment_ref_number:payref||null, admin_notes:notes||null,
+      day_type:['Friday','Saturday'].includes(new Date(ci+'T00:00:00').toLocaleDateString('en-US',{weekday:'long'}))?'weekend':'weekday',
+      payment_type:paytype,
+      edit_log:JSON.stringify([{action:'created',at:new Date().toISOString(),by:'superadmin-manual'}])
+    });
+    if(error) throw error;
+    toast('Booking created!','success');
+    document.getElementById('newBookingModal').classList.add('hidden');
+    await loadAllBookings();
+    recomputeDashboard();
+  }catch(e){console.error(e);toast('Failed to create booking: '+e.message,'error');}
 }
 
 async function updateBookingStatus(id,newStatus){
