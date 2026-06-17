@@ -152,69 +152,159 @@
     .btn-sheen:hover::after{left:125%;}
 
     /* ══════════════════════════════════════════════════
-       MOBILE RESPONSIVENESS
+       MOBILE-NATIVE — phone-compatible layout
+       Tested at 375px (iPhone SE) → 430px (iPhone 15 Pro Max)
        ══════════════════════════════════════════════════ */
-    @media (max-width:640px){
-      /* Hero: tighter vertical rhythm + smaller display type */
-      .hero-content{padding-top:7rem;padding-bottom:7rem;}
-      #heroTitle{font-size:2.75rem;line-height:1.15;}
-      #heroTagline{font-size:11px;}
-      #heroSubtitle{font-size:15px;}
 
-      /* Section headings scale down */
-      #aboutTitle, #roomsTitle, #contactTitle{font-size:2.5rem;}
-      h2.font-heading{font-size:2.25rem;}
+    /* iOS/Android tap & scroll fixes */
+    *{-webkit-tap-highlight-color:transparent;}
+    body{-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;}
 
-      /* Intro stats: avoid cramped 3-column on very small screens */
-      .reveal .grid.grid-cols-3{gap:0.75rem;}
-      .reveal .grid.grid-cols-3 .text-3xl{font-size:1.5rem;}
+    /* 16px minimum on inputs prevents iOS auto-zoom (critical) */
+    .fi{font-size:16px!important;}
 
-      /* Booking card: reduce padding so content has more width */
-      #booking .bg-white.rounded-3xl{padding:1.25rem;}
+    @media (max-width:767px){
+      /* ── Hero ── */
+      .hero-content{padding-top:5.5rem;padding-bottom:4.5rem;}
+      #heroTitle{font-size:2.7rem;line-height:1.1;}
+      #heroTagline{font-size:10.5px;letter-spacing:.1em;}
+      #heroSubtitle{font-size:14.5px;line-height:1.65;}
+      .hero-content .flex{flex-direction:column;align-items:stretch;}
+      .hero-content .flex a{text-align:center;padding:14px 20px;}
 
-      /* Guest count grid: tighten gaps + input padding on narrow screens */
-      #step-1 .grid.grid-cols-3{gap:0.5rem;}
-      #step-1 .grid.grid-cols-3 input.fi{padding:9px 8px;font-size:14px;text-align:center;}
+      /* ── Sections ── */
+      .py-20{padding-top:3.25rem!important;padding-bottom:3.25rem!important;}
+      .py-16{padding-top:2.5rem!important;padding-bottom:2.5rem!important;}
+      .py-14{padding-top:2.25rem!important;padding-bottom:2.25rem!important;}
+      .mb-14,.mb-12{margin-bottom:2rem!important;}
+      .max-w-6xl,.max-w-5xl,.max-w-4xl{padding-left:1rem!important;padding-right:1rem!important;}
 
-      /* Step indicator row: shrink connecting lines + dots so all 4
-         steps + 3 lines fit comfortably on narrow screens */
-      .sdot2{width:26px;height:26px;font-size:11px;}
-      .sline{width:18px;}
-      #booking .flex.justify-between.text-xs.text-text-muted span{font-size:10px;}
+      /* ── Headings ── */
+      h2.font-heading.text-6xl,h2.font-heading.text-5xl{font-size:2.3rem!important;}
+      h2.font-heading.text-4xl{font-size:2rem!important;}
+      h3.font-heading.text-2xl{font-size:1.5rem!important;}
+      #aboutTitle,#roomsTitle,#contactTitle{font-size:2.3rem!important;}
 
-      /* Room feature grids: single column for readability */
-      [data-room-features]{grid-template-columns:1fr 1fr;gap:0.5rem;}
+      /* ── Stats row ── */
+      .grid.grid-cols-3{gap:0.5rem;}
+      .grid.grid-cols-3 .text-3xl,.grid.grid-cols-3 .text-4xl{font-size:1.5rem;}
+      .grid.grid-cols-3 .text-sm,.grid.grid-cols-3 .text-xs{font-size:11px;}
 
-      /* Payment QR codes: slightly smaller on tiny screens */
-      #gcash-qr,#maya-qr{width:80px;height:80px;}
+      /* ── Room features ── */
+      [data-room-features]{grid-template-columns:1fr 1fr!important;gap:0.4rem!important;font-size:12px;}
 
-      /* Upload area: less vertical padding */
-      .upload-area{padding:20px;}
+      /* ── Amenity scroll ── */
+      .amenity-item{width:140px!important;height:105px!important;}
 
-      /* Inquiry card padding */
-      .inq-card{padding:20px;}
+      /* ── Calendar ── */
+      .cday{font-size:11px;border-radius:6px;}
+      .cgrid{gap:3px;}
 
-      /* Price box text doesn't overflow on narrow screens */
-      #priceLines > div{font-size:13px;}
-      #totalDisp{font-size:1.125rem;}
+      /* ── Booking card ── */
+      #booking .rounded-3xl{border-radius:20px!important;}
+      #booking .p-8,#booking .bg-white.rounded-3xl{padding:1.1rem!important;}
 
-      /* Calendar day cells: ensure numerals stay legible */
-      .cday{font-size:11px;}
+      /* ── Step indicators ── */
+      .sdot2{width:26px!important;height:26px!important;font-size:11px!important;}
+      .sline{width:14px!important;}
+      #booking .flex.justify-between.text-xs.text-text-muted span{font-size:9.5px!important;}
 
-      /* Payment type cards: reduce padding so two columns fit comfortably */
-      #step-3 .grid.grid-cols-2.gap-3 > label{padding:0.75rem;gap:0.5rem;}
-      #step-3 .grid.grid-cols-2.gap-3 > label p{font-size:12px;}
-      #step-3 .grid.grid-cols-2.gap-3 > label p.font-medium{font-size:13px;}
+      /* ── Guest count ── */
+      #step-1 .grid.grid-cols-3{gap:0.4rem;}
+      #step-1 .grid.grid-cols-3 input.fi{padding:10px 6px;text-align:center;}
 
-      /* Terms modal: full-height friendly on small screens */
-      .mbox{max-height:90vh;}
+      /* ── Dates: stack on phone ── */
+      .grid.grid-cols-1.md\:grid-cols-2{grid-template-columns:1fr;}
+
+      /* ── Package cards ── */
+      .pkg{padding:13px!important;}
+
+      /* ── Room picker ── */
+      #roomCards{display:grid!important;grid-template-columns:1fr 1fr;}
+
+      /* ── Price box ── */
+      .price-box{padding:14px!important;}
+      #priceLines>div{font-size:13px;}
+      #totalDisp{font-size:1.2rem!important;}
+
+      /* ── Step-3 receipt ── */
+      #step-3 .bg-cream.rounded-xl{padding:0.9rem!important;}
+
+      /* ── Payment type cards ── */
+      #step-3 .grid.grid-cols-2.gap-3>label{padding:10px 8px;gap:6px;}
+      #step-3 .grid.grid-cols-2.gap-3>label p.font-medium{font-size:12.5px;}
+      #step-3 .grid.grid-cols-2.gap-3>label p.text-xs{font-size:10.5px;}
+
+      /* ── Payment tabs: no wrap, scroll ── */
+      .flex.gap-2.mb-4.flex-wrap{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
+      .qtab{flex-shrink:0;}
+
+      /* ── QR codes ── */
+      #gcash-qr,#maya-qr{width:84px!important;height:84px!important;}
+
+      /* ── Upload areas ── */
+      .upload-area{padding:18px 14px!important;}
+      #idFrontArea,#idBackArea{padding:14px!important;}
+
+      /* ── ID upload grid: keep 2-col ── */
+      .grid.grid-cols-1.sm\:grid-cols-2{grid-template-columns:1fr 1fr;}
+
+      /* ── Contact 4-col → 2-col ── */
+      .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4{grid-template-columns:1fr 1fr;}
+
+      /* ── Social buttons ── */
+      .social-btn{width:44px!important;height:44px!important;border-radius:10px!important;}
+
+      /* ── Inquiry card ── */
+      .inq-card{padding:1.1rem!important;}
+
+      /* ── Flatpickr: full width ── */
+      .flatpickr-calendar{width:100%!important;max-width:100%!important;}
+
+      /* ── Terms modal ── */
+      .mbox{max-height:93vh;border-radius:20px 20px 0 0;}
     }
 
-    @media (max-width:400px){
+    /* Very small phones: 375px and below */
+    @media (max-width:375px){
       #heroTitle{font-size:2.25rem;}
-      .sline{width:12px;}
-      .sdot2{width:24px;height:24px;font-size:10px;}
-      #booking .bg-white.rounded-3xl{padding:1rem;}
+      .sdot2{width:23px!important;height:23px!important;font-size:10px!important;}
+      .sline{width:10px!important;}
+      #booking .rounded-3xl{padding:.9rem!important;}
+      .pkg{padding:11px!important;}
+      .grid.grid-cols-3 .text-3xl{font-size:1.35rem;}
+    }
+
+    /* Mobile nav: full-screen overlay */
+    #mobileMenu{
+      position:fixed;inset:0;background:#1a2e21;z-index:9998;
+      display:flex!important;flex-direction:column;justify-content:center;
+      align-items:center;padding:2.5rem 2rem;
+      opacity:0;visibility:hidden;pointer-events:none;
+      transition:opacity .22s ease,visibility .22s ease;
+    }
+    #mobileMenu.open{opacity:1;visibility:visible;pointer-events:all;}
+    #mobileMenu a{
+      display:block;width:100%;text-align:center;
+      color:rgba(255,255,255,.85);font-family:'Cormorant Garamond',serif;
+      font-size:1.45rem;font-weight:300;letter-spacing:.02em;
+      padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.07);
+      text-decoration:none;transition:color .15s;
+    }
+    #mobileMenu a:last-child{border-bottom:none;}
+    #mobileMenu a:hover{color:#c9a03d;}
+    #mobileMenu .menu-reserve{
+      margin-top:1.75rem;background:#c9a03d;color:white;
+      border-radius:50px;padding:.9rem 2.5rem;border-bottom:none!important;
+      font-family:'Inter',sans-serif;font-size:.9rem;font-weight:600;
+      letter-spacing:.02em;width:auto!important;
+    }
+    #mobileMenuClose{
+      position:absolute;top:1.25rem;right:1.25rem;
+      width:42px;height:42px;border-radius:50%;
+      background:rgba(255,255,255,.1);border:none;
+      color:white;font-size:1rem;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
     }
   </style>
 </head>
@@ -242,15 +332,19 @@
       <a href="#contact" class="nav-link text-white/90 hover:text-gold text-sm font-medium transition-colors">Contact</a>
       <a href="#booking" class="nav-cta bg-gold text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-gold-light transition-colors">Reserve</a>
     </div>
-    <button id="mobileMenuBtn" class="md:hidden text-white text-xl"><i class="fas fa-bars"></i></button>
+    <button id="mobileMenuBtn" class="md:hidden text-white text-2xl w-10 h-10 flex items-center justify-center" aria-label="Menu"><i class="fas fa-bars"></i></button>
   </div>
-  <div id="mobileMenu" class="hidden md:hidden mt-3 bg-white rounded-xl shadow-xl p-4 space-y-1">
-    <a href="#rooms"      class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Rooms</a>
-    <a href="#amenities"  class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Amenities</a>
-    <a href="#booking"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Book Now</a>
-    <a href="lookup.html" class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">My Booking</a>
-    <a href="#inquiry"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Inquire</a>
-    <a href="#contact"    class="block py-2 px-3 text-forest font-medium text-sm rounded-lg hover:bg-gray-50">Contact</a>
+
+  <!-- Full-screen mobile nav overlay -->
+  <div id="mobileMenu" aria-hidden="true">
+    <button id="mobileMenuClose" aria-label="Close menu"><i class="fas fa-times"></i></button>
+    <a href="#rooms"      onclick="closeMobileMenu()">Rooms</a>
+    <a href="#amenities"  onclick="closeMobileMenu()">Amenities</a>
+    <a href="#booking"    onclick="closeMobileMenu()">Book Now</a>
+    <a href="lookup.html" onclick="closeMobileMenu()">My Booking</a>
+    <a href="#inquiry"    onclick="closeMobileMenu()">Inquire</a>
+    <a href="#contact"    onclick="closeMobileMenu()">Contact</a>
+    <a href="#booking"    onclick="closeMobileMenu()" class="menu-reserve">Reserve Now</a>
   </div>
 </nav>
 
@@ -2627,9 +2721,29 @@ function resetForm(){
 window.addEventListener('scroll',()=>{
   document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>60);
 });
-document.getElementById('mobileMenuBtn').addEventListener('click',()=>{
-  document.getElementById('mobileMenu').classList.toggle('hidden');
+// Mobile nav — full-screen overlay
+function openMobileMenu(){
+  const m=document.getElementById('mobileMenu');
+  m.classList.add('open');
+  m.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+}
+function closeMobileMenu(){
+  const m=document.getElementById('mobileMenu');
+  m.classList.remove('open');
+  m.setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+}
+document.getElementById('mobileMenuBtn').addEventListener('click', openMobileMenu);
+document.getElementById('mobileMenuClose').addEventListener('click', closeMobileMenu);
+// Close on outside tap (tapping the dark overlay area)
+document.getElementById('mobileMenu').addEventListener('click', e=>{
+  if(e.target===document.getElementById('mobileMenu')) closeMobileMenu();
 });
+// Close mobile nav when page scrolls (professional UX)
+window.addEventListener('scroll',()=>{
+  if(document.getElementById('mobileMenu').classList.contains('open')) closeMobileMenu();
+},{passive:true});
 
 // ── Boot ───────────────────────────────────────────────
 boot();
