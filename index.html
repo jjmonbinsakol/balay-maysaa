@@ -2435,7 +2435,7 @@ async function submitBooking(){
     if(bookingId) await sendBookingEmail('booking_pending', bookingId);
 
     // 5. Email SUPER ADMIN only (not admin.html — super admin verifies first)
-    await sendEmail(SA_EMAIL,`🏡 New Booking + Payment – ${ref} – ${name}`, buildAdminEmail(name,email,phone,ref,ci,co,pax,isFull,payRef,proofUrl));
+    await sendEmail(SA_EMAIL, `New Booking + Payment - ${ref} - ${name}`, buildAdminEmail(name,email,phone,ref,ci,co,pax,isFull,payRef,proofUrl));
 
     // 6. Done — go to step 4
     setT('confirmRef',ref);
@@ -2467,21 +2467,21 @@ function setBtnLoad(on){
 function buildAdminEmail(name,email,phone,ref,ci,co,pax,fullPay,payRef,proofUrl){
   const addOnStr=Object.keys(selAddons).map(k=>addons.find(a=>a.key===k)?.label).filter(Boolean).join(', ')||'None';
   return `<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;">
-<div style="background:#1e3d28;padding:24px 32px;"><h2 style="color:white;font-size:20px;margin:0;">🏡 New Booking + Payment Proof Uploaded</h2></div>
+<div style="background:#1e3d28;padding:24px 32px;"><h2 style="color:white;font-size:20px;margin:0;">Balay Maysa — New Booking Received</h2></div>
 <div style="background:#f9f9f9;padding:32px;font-size:14px;line-height:1.8;">
   <p><strong>Ref:</strong> <code>${ref}</code></p>
   <p><strong>Guest:</strong> ${name}</p>
   <p><strong>Email:</strong> ${email}</p>
   <p><strong>Phone:</strong> ${phone}</p>
   <p><strong>Room(s):</strong> ${selRooms.join(', ')}</p>
-  <p><strong>Dates:</strong> ${fmtDate(ci)} → ${fmtDate(co)}</p>
+  <p><strong>Dates:</strong> ${fmtDate(ci)} to ${fmtDate(co)}</p>
   <p><strong>Pax:</strong> ${pax}</p>
   <p><strong>Add-ons:</strong> ${addOnStr}</p>
-  <p><strong>Total:</strong> ₱${totalAmt.toLocaleString()} | <strong>${fullPay?'FULLY PAID':'Downpayment ₱'+depositAmt.toLocaleString()+' | Balance ₱'+(totalAmt-depositAmt).toLocaleString()}</strong></p>
+  <p><strong>Total:</strong> &#8369;${totalAmt.toLocaleString()} | <strong>${fullPay?'FULLY PAID':'Downpayment &#8369;'+depositAmt.toLocaleString()+' | Balance &#8369;'+(totalAmt-depositAmt).toLocaleString()}</strong></p>
   <p><strong>Payment Ref:</strong> ${payRef}</p>
-  ${proofUrl?`<p><strong>Proof:</strong> <a href="${proofUrl}" style="color:#2d5a3b;">View Screenshot →</a></p>`:'<p><em>No proof uploaded.</em></p>'}
+  ${proofUrl?`<p><strong>Proof:</strong> <a href="${proofUrl}" style="color:#2d5a3b;">View Screenshot</a></p>`:'<p><em>No proof uploaded.</em></p>'}
   <p style="margin-top:20px;">
-    <a href="https://balay-maysaa.vercel.app/balay-super-secret.html" style="display:inline-block;background:#2d5a3b;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:500;">Verify in Super Admin →</a>
+    <a href="https://balay-maysaa.vercel.app/super-admin.html" style="display:inline-block;background:#2d5a3b;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:500;">Review in Super Admin</a>
   </p>
 </div>
 </div>`;
@@ -2520,7 +2520,7 @@ async function submitInquiry(){
   <p style="margin-top:8px;"><a href="https://balay-maysaa.vercel.app/balay-super-secret.html" style="background:#2d5a3b;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;font-size:13px;">View in Super Admin →</a></p>
 </div>
 </div>`;
-    const emailed = await sendEmail(SA_EMAIL,`📩 Gathering Inquiry from ${name}`,html);
+    const emailed = await sendEmail(SA_EMAIL, `Gathering Inquiry from ${name}`, html);
     if(!emailed) console.warn('Inquiry saved to database, but the notification email did not send. Check the EmailJS template "To Email" field is set to {{to_email}}.');
 
     toast('Inquiry sent! We\'ll contact you soon.','success');
