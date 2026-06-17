@@ -1843,14 +1843,11 @@ function renderPackageCards(eligible, natural, pax){
       wdPrice=(grpPricing.find(p=>p.day_type==='weekday'&&p.pax_min===tier.pax_min&&p.pax_max===tier.pax_max)||tier).price;
       wePrice=(grpPricing.find(p=>p.day_type==='weekend'&&p.pax_min===tier.pax_min&&p.pax_max===tier.pax_max)||tier).price;
     }
-    // Mattress badge for 19-24 tier:
-    //   - pax 19-23: price already includes (pax-18) mattresses via the
-    //     ₱500/pax surcharge. No separate "included" badge needed —
-    //     the per-night breakdown makes this clear.
-    //   - pax = 24 exactly: show "6 mattresses incl." badge (max free mattresses)
-    //   - upgrade (pax < 19): no mattress badge (same as 15-18 base price)
-    //   - other tiers: use DB value (always 0 for non-19-24 tiers)
-    const includedMattresses = (tier.pax_min===19 && pax===24) ? 6 : (tier.pax_min!==19 ? (tier.free_extra_mattresses||0) : 0);
+    // Mattress badge: only show at exactly pax=24 on the 19-24 tier.
+    // For pax 19-23 the mattress cost is baked into the per-pax surcharge
+    // (visible in the per-night breakdown), so no badge needed.
+    // For upgrades (pax < 19) no mattress applies at all.
+    const includedMattresses = (tier.pax_min===19 && pax===24) ? 6 : (tier.pax_min!==19 ? 0 : 0);
 
     // Dynamic description for 19-24 tier based on actual pax
     let cardDesc = tier.description||'';
