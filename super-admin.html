@@ -13,30 +13,31 @@
   </script>
   <style>
     :root{--forest:#2d5a3b;--forest-dark:#1e3d28;--gold:#c9a03d;--sw:248px;}
-    *{box-sizing:border-box;}
-    body{font-family:'Inter',sans-serif;background:#f0efeb;color:#1a1a1a;}
-    #sidebar{width:var(--sw);}
-    #main{margin-left:var(--sw);}
-    /* NAV */
-    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:10px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;width:100%;text-align:left;}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    body{font-family:'Inter',sans-serif;background:#f0efeb;color:#1a1a1a;-webkit-font-smoothing:antialiased;}
+    /* ── LAYOUT ── */
+    #sidebar{width:var(--sw);transition:transform .26s cubic-bezier(.4,0,.2,1);}
+    #main{margin-left:var(--sw);min-height:100vh;}
+    /* ── NAV ── */
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer;transition:all .18s;width:100%;text-align:left;border:none;background:none;}
     .nav-item:hover{background:rgba(255,255,255,.08);color:white;}
     .nav-item.active{background:rgba(255,255,255,.15);color:white;font-weight:500;}
     .nav-item i{width:16px;text-align:center;flex-shrink:0;}
     .nav-group-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:14px 16px 6px;}
-    /* CARDS */
-    .stat-card{background:white;border-radius:16px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);}
-    .sc{background:white;border-radius:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);overflow:hidden;}
-    /* TABLE */
-    .tbl th{padding:10px 16px;background:#f8f8f6;border-bottom:1px solid #eee;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#888;text-align:left;}
-    .tbl td{padding:11px 16px;border-bottom:1px solid #f3f3f0;font-size:13px;color:#333;vertical-align:middle;}
+    /* ── CARDS ── */
+    .stat-card{background:white;border-radius:14px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);}
+    .sc{background:white;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);overflow:hidden;}
+    /* ── TABLE ── */
+    .tbl th{padding:10px 14px;background:#f8f8f6;border-bottom:1px solid #eee;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#888;text-align:left;white-space:nowrap;}
+    .tbl td{padding:11px 14px;border-bottom:1px solid #f3f3f0;font-size:13px;color:#333;vertical-align:middle;}
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr:hover td{background:#fbfaf8;cursor:pointer;}
-    /* FORM */
-    .fi{width:100%;border:1.5px solid #ddd;border-radius:9px;padding:9px 13px;font-size:14px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;background:white;}
+    /* ── FORM ── */
+    .fi{width:100%;border:1.5px solid #ddd;border-radius:9px;padding:10px 13px;font-size:15px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;background:white;-webkit-appearance:none;appearance:none;}
     .fi:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(45,90,59,.08);}
-    .fi-label{display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:5px;}
-    /* BADGES */
-    .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;}
+    .fi-label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;letter-spacing:.01em;}
+    /* ── BADGES ── */
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
     .b-pend{background:#fef3c7;color:#92400e;}
     .b-conf{background:#d1fae5;color:#065f46;}
     .b-decl{background:#fee2e2;color:#991b1b;}
@@ -45,60 +46,91 @@
     .b-canc{background:#f3f4f6;color:#6b7280;}
     .b-unread{background:#fee2e2;color:#991b1b;}
     .b-read{background:#f3f4f6;color:#6b7280;}
-    /* TOAST */
-    #toast{position:fixed;bottom:24px;right:24px;z-index:9999;padding:13px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;max-width:360px;}
+    /* ── TOAST ── */
+    #toast{position:fixed;bottom:24px;right:16px;z-index:9999;padding:13px 18px;border-radius:12px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);}
     #toast.hidden{display:none!important;}
     #toast.success{background:#2d5a3b;color:white;}
     #toast.error{background:#c0392b;color:white;}
     #toast.info{background:#1d4ed8;color:white;}
-    /* SPINNER */
-    /* ── MOBILE RESPONSIVE ──────────────────────────────── */
-    @media (max-width:768px){
-      #sidebar{transform:translateX(-100%);transition:transform .25s ease;}
-      #sidebar.open{transform:translateX(0);}
-      #main{margin-left:0!important;}
-      #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:39;}
-      #sidebarOverlay.open{display:block;}
-      #mobileTopBar{display:flex;}
-      .mbox{max-width:100%!important;border-radius:16px 16px 0 0;margin:0;max-height:95vh;position:fixed;bottom:0;left:0;right:0;}
-      .mbox-lg{max-width:100%!important;}
-      .modal{align-items:flex-end;padding:0;}
-    }
-    @media (min-width:769px){
-      #mobileTopBar{display:none;}
-    }
-    #mobileTopBar{display:none;align-items:center;justify-content:space-between;background:#1a2e21;padding:12px 16px;position:sticky;top:0;z-index:38;}
-    /* ── END MOBILE ──────────────────────────────────────── */
-    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;display:inline-block;}
+    /* ── SPINNER ── */
+    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;display:inline-block;flex-shrink:0;}
     @keyframes rot{to{transform:rotate(360deg);}}
-    /* MODAL */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+    /* ── MODAL ── */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
     .modal.hidden{display:none!important;}
-    .mbox{background:white;border-radius:20px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;}
-    .mbox-lg{max-width:800px;}
-    /* CALENDAR */
+    .mbox{background:white;border-radius:20px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    .mbox-lg{max-width:820px;}
+    /* ── CALENDAR ── */
     .cal-day-cell{min-height:84px;border:1px solid #eee;border-radius:8px;padding:4px 6px;transition:background .15s;}
     .cal-day-cell:hover{background:#f8f8f6;}
     .cal-day-cell.today{border-color:#2d5a3b;background:#f0fdf4;}
     .cal-ev{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
-    /* CHARTS */
+    /* ── CHARTS ── */
     .chart-wrap{position:relative;height:220px;}
-    /* SESSION WARNING */
-    #sessionWarning{position:fixed;bottom:80px;right:24px;z-index:9998;background:#92400e;color:white;padding:12px 18px;border-radius:10px;font-size:13px;display:none;align-items:center;gap:8px;}
-    /* PRIORITY BORDERS */
+    /* ── SESSION WARNING ── */
+    #sessionWarning{position:fixed;bottom:80px;right:16px;z-index:9998;background:#92400e;color:white;padding:12px 16px;border-radius:10px;font-size:13px;display:none;align-items:center;gap:8px;}
+    /* ── PRIORITY BORDERS ── */
     .pri-urgent{border-left:4px solid #ef4444!important;}
     .pri-high{border-left:4px solid #f59e0b!important;}
     .pri-medium{border-left:4px solid #3b82f6!important;}
     .pri-low{border-left:4px solid #10b981!important;}
-    /* UPLOAD ZONE */
+    /* ── UPLOAD ZONE ── */
     .upload-zone{border:2px dashed #ddd;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;}
     .upload-zone:hover{border-color:var(--forest);background:rgba(45,90,59,.03);}
-    /* PROFIT COLORS */
+    /* ── PROFIT COLORS ── */
     .profit-pos{color:#059669;}.profit-neg{color:#dc2626;}
-    /* VIEW HIDDEN */
+    /* ── VIEWS ── */
     .view{display:none;}.view.active{display:block;}
-    /* CMS preview thumb */
+    /* ── CMS THUMB ── */
     .cms-thumb{width:100%;height:90px;object-fit:cover;border-radius:8px;background:#f3f4f6;}
+    /* ── MOBILE TOP BAR ── */
+    #mobileTopBar{display:none;align-items:center;justify-content:space-between;background:#1a2e21;padding:13px 16px;position:sticky;top:0;z-index:50;gap:12px;}
+
+    /* ════════════════════════════════════════════════════
+       MOBILE — everything below 768px
+       Professional mobile-native layout, not just "responsive"
+    ════════════════════════════════════════════════════ */
+    @media (max-width:768px){
+      /* Sidebar becomes a slide-in drawer */
+      #sidebar{position:fixed;inset-y:0;left:0;z-index:49;transform:translateX(-100%);width:280px;}
+      #sidebar.open{transform:translateX(0);}
+      #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:48;backdrop-filter:blur(2px);}
+      #sidebarOverlay.open{display:block;}
+      /* Main takes full width, with a sticky top bar for nav access */
+      #main{margin-left:0!important;padding-bottom:env(safe-area-inset-bottom);}
+      #mobileTopBar{display:flex;}
+      .p-8{padding:16px!important;}
+      /* KPI cards: 2-column grid on mobile */
+      .stat-card{padding:14px 16px;border-radius:12px;}
+      .stat-card .text-2xl{font-size:1.35rem;}
+      /* All tables in cards scroll horizontally — never squish or wrap */
+      .sc{overflow-x:auto;}
+      .tbl{min-width:480px;}
+      /* Charts shorter on mobile */
+      .chart-wrap{height:170px;}
+      /* Modals: full-screen bottom sheet with pull-handle aesthetics */
+      .modal{align-items:flex-end;padding:0;padding-bottom:env(safe-area-inset-bottom);}
+      .mbox,.mbox-lg{max-width:100%!important;border-radius:20px 20px 0 0;max-height:94vh;border-bottom:none;}
+      /* Touch-friendly form inputs */
+      .fi{font-size:16px;padding:12px 14px;border-radius:10px;}
+      /* Hide less-critical table columns on mobile via class */
+      .hide-mobile{display:none!important;}
+      /* Stack flex rows vertically on mobile */
+      .mobile-stack{flex-direction:column!important;align-items:stretch!important;}
+      .mobile-stack > *{width:100%!important;}
+      /* Full-width buttons on mobile */
+      .mobile-full{width:100%!important;justify-content:center;}
+      /* Reduce page heading size */
+      .font-heading.text-3xl{font-size:1.6rem!important;}
+      /* Calendar: smaller cells */
+      .cal-day-cell{min-height:56px;padding:3px 4px;}
+      .cal-ev{font-size:9px;}
+      /* Booking card compact list (used in today's check-in/out) */
+      .bk-card{padding:12px!important;}
+    }
+    @media (min-width:769px){
+      #sidebar{position:fixed;inset-y:0;left:0;z-index:40;}
+    }
   </style>
 </head>
 <body>
@@ -905,6 +937,37 @@
         </div>
       </div>
       <div><label class="fi-label">Payment Reference # <span class="text-xs text-gray-400 font-normal">(optional)</span></label><input type="text" id="nb_payref" class="fi" placeholder="GCash / Maya / Bank ref"/></div>
+
+      <!-- Payment proof upload -->
+      <div>
+        <label class="fi-label">Payment Screenshot <span class="text-xs text-gray-400 font-normal">(optional)</span></label>
+        <div class="upload-zone" onclick="document.getElementById('nb_proof').click()">
+          <input type="file" id="nb_proof" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('nb_proof_name').textContent=this.files[0]?.name||'No file selected'"/>
+          <i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-1"></i>
+          <p class="text-sm text-gray-500">Click to upload proof of payment</p>
+          <p class="text-xs text-gray-400" id="nb_proof_name">No file selected</p>
+        </div>
+      </div>
+
+      <!-- Government ID -->
+      <div>
+        <label class="fi-label">Government ID — Front &amp; Back <span class="text-xs text-gray-400 font-normal">(recommended)</span></label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="upload-zone" onclick="document.getElementById('nb_id_front').click()">
+            <input type="file" id="nb_id_front" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('nb_id_front_name').textContent=this.files[0]?.name||'No file selected'"/>
+            <i class="fas fa-id-card text-xl text-gray-300 mb-1"></i>
+            <p class="text-xs text-gray-500">ID Front</p>
+            <p class="text-xs text-gray-400 mt-0.5" id="nb_id_front_name">No file selected</p>
+          </div>
+          <div class="upload-zone" onclick="document.getElementById('nb_id_back').click()">
+            <input type="file" id="nb_id_back" class="hidden" accept="image/*,application/pdf" onchange="document.getElementById('nb_id_back_name').textContent=this.files[0]?.name||'No file selected'"/>
+            <i class="fas fa-id-card text-xl text-gray-300 mb-1"></i>
+            <p class="text-xs text-gray-500">ID Back</p>
+            <p class="text-xs text-gray-400 mt-0.5" id="nb_id_back_name">No file selected</p>
+          </div>
+        </div>
+      </div>
+
       <div><label class="fi-label">Admin Notes</label><textarea id="nb_notes" class="fi" rows="2" placeholder="Internal notes, rebook reason, etc."></textarea></div>
       <div class="flex gap-3 pt-2">
         <button onclick="document.getElementById('newBookingModal').classList.add('hidden')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
@@ -1854,103 +1917,193 @@ function openBookingModal(id){
   const b=allBookings.find(x=>x.id===id); if(!b) return;
   document.getElementById('bkModalTitle').textContent=`Booking – ${b.booking_ref}`;
 
-  // Parse addons
   const addonsObj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
-  const addonsStr=Object.keys(addonsObj).length?Object.keys(addonsObj).join(', '):'None';
-
-  // Parse payment history
-  const ph=(()=>{try{return typeof b.payment_history==='string'?JSON.parse(b.payment_history):b.payment_history||[];}catch(e){return[];}})();
-  const phHtml=ph.length?ph.map(p=>`
-    <div class="flex items-start justify-between py-2 border-b border-gray-50 last:border-0">
-      <div><p class="text-sm font-medium text-gray-800">${p.type||'Payment'}</p><p class="text-xs text-gray-400">${p.method||'—'} · ${p.ref||''}</p></div>
-      <div class="text-right"><p class="font-semibold text-forest">₱${(p.amount||0).toLocaleString()}</p><p class="text-xs text-gray-400">${p.date?fmtDate(p.date):''}</p></div>
-    </div>`).join(''):`
-    <div class="py-2 border-b border-gray-50">
-      <div class="flex justify-between"><span class="text-sm text-gray-500">Downpayment</span><span class="font-semibold text-forest">₱${(b.deposit_amount||0).toLocaleString()}</span></div>
-      ${b.payment_ref_number?`<p class="text-xs text-gray-400 mt-0.5">Ref: ${b.payment_ref_number}</p>`:''}
-    </div>
-    ${(b.remaining_balance||0)===0&&(b.total_amount||0)>(b.deposit_amount||0)?`<div class="flex justify-between py-2"><span class="text-sm text-gray-500">Full payment received</span><span class="font-semibold text-forest">₱${((b.total_amount||0)-(b.deposit_amount||0)).toLocaleString()}</span></div>`:''}`;
-
-  // Parse edit log
+  const addonsStr=Object.keys(addonsObj).filter(k=>k!=='_extra_guests').map(k=>k.replace(/_/g,' ')).join(', ')+(addonsObj._extra_guests?`, extra guests ×${addonsObj._extra_guests}`:'')||'None';
   const log=(()=>{try{return typeof b.edit_log==='string'?JSON.parse(b.edit_log):b.edit_log||[];}catch(e){return[];}})();
 
   document.getElementById('bkModalBody').innerHTML=`
-    <div class="grid grid-cols-2 gap-5 mb-5">
-      <div><p class="text-xs text-gray-400 uppercase mb-2">Guest</p>
-        <p class="font-semibold text-gray-800">${esc(b.guest_name)}</p>
-        <p class="text-sm text-gray-500"><a href="mailto:${b.guest_email}" class="hover:text-forest">${b.guest_email||'—'}</a></p>
-        <p class="text-sm text-gray-500">${b.guest_phone||'—'}</p>
-        <p class="text-xs text-gray-400 mt-1">${b.booking_type==='walk-in'?'🚶 Walk-in':'💻 Online'} · ${b.day_type||'weekday'}</p>
+    <!-- Header row: guest + status badge -->
+    <div class="flex items-start justify-between gap-3 mb-5 flex-wrap">
+      <div>
+        <p class="font-semibold text-gray-800 text-lg">${esc(b.guest_name)}</p>
+        <p class="text-sm text-gray-400">${b.guest_email||'—'} · ${b.guest_phone||'—'}</p>
+        <p class="text-xs text-gray-400 mt-0.5 font-mono">${b.booking_ref}</p>
       </div>
-      <div><p class="text-xs text-gray-400 uppercase mb-2">Status</p>
-        <span class="badge ${STATUS_CSS[b.status]||'b-pend'} mb-2">${STATUS_LABELS[b.status]||b.status}</span>
-        <p class="font-mono text-xs text-gray-400 mt-1">${b.booking_ref}</p>
+      <span class="badge ${STATUS_CSS[b.status]||'b-pend'} text-sm">${STATUS_LABELS[b.status]||b.status}</span>
+    </div>
+
+    <!-- ── EDIT FIELDS ──────────────────────────────── -->
+    <div class="space-y-4 mb-5">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Edit Booking Details</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div><label class="fi-label">Guest Name</label><input id="bk_name" class="fi" value="${esc(b.guest_name||'')}"/></div>
+        <div><label class="fi-label">Phone</label><input id="bk_phone" class="fi" value="${esc(b.guest_phone||'')}"/></div>
+        <div><label class="fi-label">Email</label><input id="bk_email" class="fi" type="email" value="${esc(b.guest_email||'')}"/></div>
+        <div><label class="fi-label">Guests (pax)</label><input id="bk_pax" class="fi" type="number" min="1" max="30" value="${b.pax_count||b.adults||1}"/></div>
+        <div><label class="fi-label">Check-in</label><input id="bk_ci" class="fi" type="date" value="${b.check_in_date||''}"/></div>
+        <div><label class="fi-label">Check-out</label><input id="bk_co" class="fi" type="date" value="${b.check_out_date||''}"/></div>
+        <div class="sm:col-span-2"><label class="fi-label">Room(s) <span class="text-gray-400 font-normal text-xs">(comma-separated)</span></label><input id="bk_rooms" class="fi" value="${esc(b.room_type||'')}"/></div>
+        <div class="sm:col-span-2"><label class="fi-label">Package Label</label><input id="bk_pkg" class="fi" value="${esc(b.package_label||'')}"/></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div><label class="fi-label">Total Amount (₱)</label><input id="bk_total" class="fi" type="number" min="0" value="${b.total_amount||0}"/></div>
+        <div><label class="fi-label">Deposit Paid (₱)</label><input id="bk_deposit" class="fi" type="number" min="0" value="${b.deposit_amount||0}"/></div>
+        <div><label class="fi-label">Balance (₱)</label><input id="bk_balance" class="fi" type="number" min="0" value="${b.remaining_balance||0}"/></div>
+      </div>
+      <div><label class="fi-label">Payment Reference #</label><input id="bk_payref" class="fi" value="${esc(b.payment_ref_number||'')}"/></div>
+      <div><label class="fi-label">Special Requests</label><textarea id="bk_special" class="fi" rows="2">${esc(b.special_requests||'')}</textarea></div>
+    </div>
+
+    <!-- ── PAYMENT PROOF ──────────────────────────────── -->
+    <div class="mb-5">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Payment Screenshot</p>
+      ${b.payment_proof_url?`<a href="${b.payment_proof_url}" target="_blank" class="flex items-center gap-2 text-sm text-forest hover:underline mb-2"><i class="fas fa-image"></i>View current screenshot</a>`:'<p class="text-xs text-gray-400 mb-2">No screenshot on file.</p>'}
+      <div class="upload-zone" onclick="document.getElementById('bk_proof_file').click()">
+        <input type="file" id="bk_proof_file" class="hidden" accept="image/*,application/pdf"/>
+        <i class="fas fa-cloud-upload-alt text-2xl text-gray-300 mb-1"></i>
+        <p class="text-sm text-gray-500">Click to replace payment screenshot</p>
+        <p class="text-xs text-gray-400" id="bk_proof_name">JPG, PNG, or PDF · max 5 MB</p>
       </div>
     </div>
-    <div class="bg-gray-50 rounded-xl p-4 mb-4">
-      <div class="grid grid-cols-2 gap-3 text-sm">
-        <div><span class="text-gray-400 text-xs">Package</span><p class="font-medium mt-0.5">${esc(b.package_label||'—')}</p></div>
-        <div><span class="text-gray-400 text-xs">Room(s)</span><p class="font-medium mt-0.5">${b.room_type}</p></div>
-        <div><span class="text-gray-400 text-xs">Guests</span><p class="font-medium mt-0.5">${b.pax_count||b.adults} pax (${b.adults} adults, ${b.children||0} children)</p></div>
-        <div><span class="text-gray-400 text-xs">Check-in</span><p class="font-medium mt-0.5">${fmtDate(b.check_in_date)}</p></div>
-        <div><span class="text-gray-400 text-xs">Check-out</span><p class="font-medium mt-0.5">${fmtDate(b.check_out_date)} · ${Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)} nights</p></div>
-        <div><span class="text-gray-400 text-xs">Add-ons</span><p class="font-medium mt-0.5 text-xs">${addonsStr}</p></div>
-        ${b.special_requests?`<div class="col-span-2"><span class="text-gray-400 text-xs">Special Requests</span><p class="text-sm text-amber-700 mt-0.5">${esc(b.special_requests)}</p></div>`:''}
+
+    <!-- ── GOVERNMENT ID ──────────────────────────────── -->
+    <div class="mb-5">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Government ID</p>
+      <div id="bk_id_viewer" class="grid grid-cols-2 gap-3 mb-3">
+        <p class="col-span-2 text-xs text-gray-400">Loading…</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="upload-zone" onclick="document.getElementById('bk_id_front_file').click()">
+          <input type="file" id="bk_id_front_file" class="hidden" accept="image/*,application/pdf"/>
+          <i class="fas fa-id-card text-xl text-gray-300 mb-1"></i>
+          <p class="text-xs text-gray-500">Replace ID Front</p>
+        </div>
+        <div class="upload-zone" onclick="document.getElementById('bk_id_back_file').click()">
+          <input type="file" id="bk_id_back_file" class="hidden" accept="image/*,application/pdf"/>
+          <i class="fas fa-id-card text-xl text-gray-300 mb-1"></i>
+          <p class="text-xs text-gray-500">Replace ID Back</p>
+        </div>
       </div>
     </div>
-    <!-- Government ID (front & back) -->
-    <div class="sc p-4 mb-4">
-      <p class="text-xs text-gray-400 uppercase mb-3"><i class="fas fa-id-card mr-1"></i>Government ID</p>
-      <div id="idViewerArea" class="grid grid-cols-2 gap-3">
-        ${b.id_front_path||b.id_back_path
-          ?'<p class="col-span-2 text-xs text-gray-400">Loading ID images…</p>'
-          :'<p class="col-span-2 text-xs text-gray-400">No ID uploaded for this booking.</p>'}
-      </div>
-    </div>
-    <!-- Financial Summary -->
-    <div class="bg-forest/5 rounded-xl p-4 mb-4">
-      <p class="text-xs text-gray-400 uppercase mb-3">Financial Summary</p>
-      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Total Amount</span><span class="font-bold">₱${(b.total_amount||0).toLocaleString()}</span></div>
-      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Deposit Paid</span><span class="font-bold text-forest">₱${(b.deposit_amount||0).toLocaleString()}</span></div>
-      <div class="flex justify-between text-sm ${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}"><span>Remaining Balance</span><span class="font-bold">₱${(b.remaining_balance||0).toLocaleString()}</span></div>
-      ${b.voucher_code?`<div class="flex justify-between text-sm mt-2 pt-2 border-t border-gray-200 text-green-700"><span>Voucher (${b.voucher_code})</span><span>−₱${(b.voucher_discount||0).toLocaleString()}</span></div>`:''}
-    </div>
-    <!-- Payment History -->
-    <div class="sc p-4 mb-4">
-      <p class="text-xs text-gray-400 uppercase mb-3">Payment History</p>
-      ${phHtml}
-      ${b.payment_proof_url?`<div class="mt-3"><a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest underline flex items-center gap-1"><i class="fas fa-image"></i>View Payment Screenshot</a></div>`:''}
-    </div>
-    <!-- Update Status -->
-    <div class="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+
+    <!-- ── UPDATE STATUS ──────────────────────────────── -->
+    <div class="mb-5 p-4 bg-gray-50 rounded-xl border border-gray-100">
       <p class="text-xs text-gray-400 uppercase font-semibold mb-3">Update Status</p>
-      <div class="flex gap-3 items-center flex-wrap">
-        <select id="bkStatusSelect" class="fi flex-1 min-w-[180px]">
+      <div class="flex gap-3 items-center flex-wrap mobile-stack">
+        <select id="bkStatusSelect" class="fi flex-1">
           ${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${b.status===k?'selected':''}>${v}</option>`).join('')}
         </select>
-        <button onclick="applyBookingStatus('${b.id}')" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center gap-2 whitespace-nowrap"><i class="fas fa-check"></i> Apply Status</button>
-        <button onclick="openRebookModal('${b.id}')" class="border border-forest text-forest px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest/5 flex items-center gap-2 whitespace-nowrap"><i class="fas fa-rotate"></i> Rebook</button>
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="applyBookingStatus('${b.id}')" class="flex-1 bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center justify-center gap-2 whitespace-nowrap"><i class="fas fa-check"></i> Apply</button>
+          <button onclick="openRebookModal('${b.id}')" class="flex-1 border border-forest text-forest px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest/5 flex items-center justify-center gap-2 whitespace-nowrap"><i class="fas fa-rotate"></i> Rebook</button>
+        </div>
       </div>
       <p class="text-xs text-gray-400 mt-2"><i class="fas fa-info-circle mr-1"></i>Confirming or Declining sends an automatic email to the guest.</p>
     </div>
-    <!-- Admin Notes -->
-    <div class="mb-4">
-      <p class="text-xs text-gray-400 uppercase mb-2">Admin Notes</p>
-      <textarea id="bkAdminNotes" class="fi text-sm" rows="3" placeholder="Internal notes…">${b.admin_notes||''}</textarea>
+
+    <!-- ── SAVE EDITS BUTTON ──────────────────────────── -->
+    <button onclick="saveBookingEdits('${b.id}')" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center justify-center gap-2 mb-5"><i class="fas fa-save"></i> Save All Changes</button>
+
+    <!-- ── ADMIN NOTES ──────────────────────────────────── -->
+    <div class="mb-5">
+      <label class="fi-label">Admin Notes (Internal)</label>
+      <textarea id="bkAdminNotes" class="fi text-sm" rows="3" placeholder="Internal notes…">${esc(b.admin_notes||'')}</textarea>
       <button onclick="saveAdminNotes('${b.id}')" class="mt-2 text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20">Save Notes</button>
     </div>
-    <!-- Audit Log -->
-    ${log.length?`<div><p class="text-xs text-gray-400 uppercase mb-2">Audit Log</p><div class="space-y-1.5">${log.slice(-5).reverse().map(e=>`<div class="flex items-center gap-2 text-xs text-gray-500"><i class="fas fa-circle text-gray-300" style="font-size:6px"></i><span>${fmtDateTime(e.at)}</span><span>·</span><span>${e.action}</span><span class="text-gray-300">by ${e.by}</span></div>`).join('')}</div></div>`:''}
+
+    <!-- ── FINANCIAL SUMMARY (read-only) ──────────────── -->
+    <div class="bg-forest/5 rounded-xl p-4 mb-4">
+      <p class="text-xs text-gray-400 uppercase mb-3">Financial Summary</p>
+      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Total</span><span class="font-bold">₱${(b.total_amount||0).toLocaleString()}</span></div>
+      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Deposit Paid</span><span class="font-bold text-forest">₱${(b.deposit_amount||0).toLocaleString()}</span></div>
+      <div class="flex justify-between text-sm ${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}"><span>Remaining Balance</span><span class="font-bold">₱${(b.remaining_balance||0).toLocaleString()}</span></div>
+    </div>
+
+    <!-- ── AUDIT LOG ──────────────────────────────────── -->
+    ${log.length?`<div><p class="text-xs text-gray-400 uppercase mb-2">Audit Log</p><div class="space-y-1.5">${log.slice(-6).reverse().map(e=>`<div class="flex items-center gap-2 text-xs text-gray-500"><i class="fas fa-circle text-gray-300" style="font-size:6px"></i><span>${fmtDateTime(e.at)}</span><span>·</span><span>${e.action}</span><span class="text-gray-300">by ${e.by}</span></div>`).join('')}</div></div>`:''}
   `;
+
+  // Attach proof file label update
+  document.getElementById('bk_proof_file').addEventListener('change',e=>{
+    const f=e.target.files[0];
+    if(f) document.getElementById('bk_proof_name').textContent=f.name;
+  });
+
   document.getElementById('bookingModal').classList.remove('hidden');
-  loadIdImages(b);
+  loadIdImages(b,'bk_id_viewer');
+}
+
+// Saves all editable fields from the booking modal, including
+// optional new uploads for payment proof and government ID images.
+async function saveBookingEdits(id){
+  const b=allBookings.find(x=>x.id===id); if(!b) return;
+  const log=(()=>{try{return typeof b.edit_log==='string'?JSON.parse(b.edit_log):b.edit_log||[];}catch(e){return[];}})();
+  const updates={
+    guest_name:   document.getElementById('bk_name')?.value.trim()||b.guest_name,
+    guest_phone:  document.getElementById('bk_phone')?.value.trim()||b.guest_phone,
+    guest_email:  document.getElementById('bk_email')?.value.trim()||b.guest_email,
+    pax_count:    parseInt(document.getElementById('bk_pax')?.value)||b.pax_count,
+    adults:       parseInt(document.getElementById('bk_pax')?.value)||b.adults,
+    check_in_date: document.getElementById('bk_ci')?.value||b.check_in_date,
+    check_out_date:document.getElementById('bk_co')?.value||b.check_out_date,
+    room_type:    document.getElementById('bk_rooms')?.value.trim()||b.room_type,
+    package_label:document.getElementById('bk_pkg')?.value.trim()||b.package_label,
+    total_amount: parseFloat(document.getElementById('bk_total')?.value)||b.total_amount,
+    deposit_amount:parseFloat(document.getElementById('bk_deposit')?.value)||b.deposit_amount,
+    remaining_balance:parseFloat(document.getElementById('bk_balance')?.value)||b.remaining_balance,
+    payment_ref_number:document.getElementById('bk_payref')?.value.trim()||b.payment_ref_number,
+    special_requests:document.getElementById('bk_special')?.value.trim()||null,
+    edit_log: JSON.stringify([...log,{action:'edited',at:new Date().toISOString(),by:'superadmin'}])
+  };
+
+  // Upload new payment proof if a file was selected
+  const proofFile=document.getElementById('bk_proof_file')?.files[0];
+  if(proofFile){
+    try{
+      const ext=proofFile.name.split('.').pop();
+      const path=`proofs/${b.booking_ref}-edit-${Date.now()}.${ext}`;
+      const{error:ue}=await db.storage.from('payment-proofs').upload(path,proofFile,{cacheControl:'3600',upsert:false});
+      if(!ue){ const{data:ud}=db.storage.from('payment-proofs').getPublicUrl(path); updates.payment_proof_url=ud.publicUrl; }
+    }catch(e){console.warn('Proof upload:',e);}
+  }
+
+  // Upload new ID front if selected
+  const idFrontFile=document.getElementById('bk_id_front_file')?.files[0];
+  if(idFrontFile){
+    try{
+      const ext=idFrontFile.name.split('.').pop();
+      const path=`ids/${b.booking_ref}-front-edit-${Date.now()}.${ext}`;
+      const{error}=await db.storage.from('guest-ids').upload(path,idFrontFile,{cacheControl:'3600'});
+      if(!error) updates.id_front_path=path;
+    }catch(e){console.warn('ID front:',e);}
+  }
+
+  // Upload new ID back if selected
+  const idBackFile=document.getElementById('bk_id_back_file')?.files[0];
+  if(idBackFile){
+    try{
+      const ext=idBackFile.name.split('.').pop();
+      const path=`ids/${b.booking_ref}-back-edit-${Date.now()}.${ext}`;
+      const{error}=await db.storage.from('guest-ids').upload(path,idBackFile,{cacheControl:'3600'});
+      if(!error) updates.id_back_path=path;
+    }catch(e){console.warn('ID back:',e);}
+  }
+
+  try{
+    const{error}=await db.from('bookings').update(updates).eq('id',id);
+    if(error) throw error;
+    toast('Booking updated!','success');
+    await loadAllBookings();
+    // Refresh the modal with updated data
+    openBookingModal(id);
+  }catch(e){console.error(e);toast('Failed to save: '+e.message,'error');}
 }
 
 // Government IDs live in the PRIVATE 'guest-ids' bucket — generate
 // short-lived signed URLs (5 min) to display them, rather than a
 // public URL (these are sensitive PII).
-async function loadIdImages(b){
-  const area=document.getElementById('idViewerArea');
+async function loadIdImages(b, containerId='bk_id_viewer'){
+  const area=document.getElementById(containerId);
   if(!area) return;
   if(!b.id_front_path && !b.id_back_path){
     area.innerHTML='<p class="col-span-2 text-xs text-gray-400">No ID uploaded for this booking.</p>';
@@ -2015,13 +2168,17 @@ async function openRebookModal(id){
   document.getElementById('nb_pax').value=b.pax_count||b.adults||2;
   document.getElementById('nb_rooms').value=b.room_type||'';
   document.getElementById('nb_pkg').value=b.package_label||'';
-  document.getElementById('nb_ci').value=b.check_in_date||'';
-  document.getElementById('nb_co').value=b.check_out_date||'';
-  document.getElementById('nb_total').value=b.total_amount||0;
-  document.getElementById('nb_deposit').value=b.deposit_amount||0;
-  document.getElementById('nb_notes').value='Rebooked from '+b.booking_ref;
+  document.getElementById('nb_ci').value='';
+  document.getElementById('nb_co').value='';
+  document.getElementById('nb_total').value=b.total_amount||'';
+  document.getElementById('nb_deposit').value='';
+  document.getElementById('nb_notes').value=`Rebooked from ${b.booking_ref}`;
   document.getElementById('nb_status').value='pending_payment_verification';
-  document.getElementById('nbModalTitle').textContent='Rebook — '+b.guest_name;
+  document.getElementById('nb_paytype').value='downpayment';
+  document.getElementById('nbModalTitle').textContent=`Rebook — ${b.guest_name}`;
+  // Clear any previously selected files
+  ['nb_proof','nb_id_front','nb_id_back'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['nb_proof_name','nb_id_front_name','nb_id_back_name'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='No file selected';});
   document.getElementById('newBookingModal').classList.remove('hidden');
 }
 
@@ -2060,6 +2217,34 @@ async function saveManualBooking(){
   if(!rooms){ toast('Room(s) are required.','error'); return; }
   try{
     const roomArr=rooms.split(',').map(r=>r.trim()).filter(Boolean);
+
+    // Upload payment proof if provided
+    let proofUrl=null;
+    const proofFile=document.getElementById('nb_proof')?.files[0];
+    if(proofFile){
+      const ext=proofFile.name.split('.').pop();
+      const path=`proofs/${ref}-${Date.now()}.${ext}`;
+      const{error:ue}=await db.storage.from('payment-proofs').upload(path,proofFile,{cacheControl:'3600'});
+      if(!ue){ const{data:ud}=db.storage.from('payment-proofs').getPublicUrl(path); proofUrl=ud.publicUrl; }
+    }
+
+    // Upload ID front/back to private guest-ids bucket
+    let idFrontPath=null, idBackPath=null;
+    const idFront=document.getElementById('nb_id_front')?.files[0];
+    const idBack=document.getElementById('nb_id_back')?.files[0];
+    if(idFront){
+      const ext=idFront.name.split('.').pop();
+      const path=`ids/${ref}-front-${Date.now()}.${ext}`;
+      const{error}=await db.storage.from('guest-ids').upload(path,idFront,{cacheControl:'3600'});
+      if(!error) idFrontPath=path;
+    }
+    if(idBack){
+      const ext=idBack.name.split('.').pop();
+      const path=`ids/${ref}-back-${Date.now()}.${ext}`;
+      const{error}=await db.storage.from('guest-ids').upload(path,idBack,{cacheControl:'3600'});
+      if(!error) idBackPath=path;
+    }
+
     const {error}=await db.from('bookings').insert({
       booking_ref:ref, guest_name:name, guest_email:email||null,
       guest_phone:phone, adults:pax, pax_count:pax,
@@ -2067,7 +2252,9 @@ async function saveManualBooking(){
       package_label:pkg||null, check_in_date:ci, check_out_date:co,
       total_amount:total, deposit_amount:deposit,
       remaining_balance:paytype==='full'?0:Math.max(0,total-deposit),
-      status, payment_ref_number:payref||null, admin_notes:notes||null,
+      status, payment_ref_number:payref||null,
+      payment_proof_url:proofUrl, id_front_path:idFrontPath, id_back_path:idBackPath,
+      admin_notes:notes||null,
       day_type:['Friday','Saturday'].includes(new Date(ci+'T00:00:00').toLocaleDateString('en-US',{weekday:'long'}))?'weekend':'weekday',
       payment_type:paytype,
       edit_log:JSON.stringify([{action:'created',at:new Date().toISOString(),by:'superadmin-manual'}])
