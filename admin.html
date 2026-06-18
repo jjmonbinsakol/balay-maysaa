@@ -1,426 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Balay Maysa – Admin Panel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script>
-    tailwind.config={theme:{extend:{colors:{forest:'#2d5a3b','forest-dark':'#1e3d28',gold:'#c9a03d'},fontFamily:{heading:['"Cormorant Garamond"','serif'],body:['Inter','sans-serif']}}}};
-  </script>
+  <script>tailwind.config={theme:{extend:{colors:{forest:"#2d5a3b","forest-dark":"#1e3d28",gold:"#c9a03d",cream:"#f7f5f0"},fontFamily:{heading:["\"Cormorant Garamond\"","serif"],body:["Inter","sans-serif"]}}}};</script>
   <style>
-    body{font-family:'Inter',sans-serif;background:#f3f4f1;}
-    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
-    @keyframes spin{to{transform:rotate(360deg);}}
-    #toast{position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;max-width:360px;}
-    #toast.hidden{display:none!important;}#toast.success{background:#2d5a3b;color:white;}#toast.error{background:#c0392b;color:white;}#toast.info{background:#1d4ed8;color:white;}
-    .tc{padding:11px 16px;border-bottom:1px solid #eee;font-size:13px;}
-    .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:500;}
-    .b-pending{background:#fef3c7;color:#92400e;}.b-confirmed{background:#d1fae5;color:#065f46;}.b-declined{background:#fee2e2;color:#991b1b;}.b-walkin{background:#ede9fe;color:#5b21b6;}.b-paid{background:#d1fae5;color:#065f46;}.b-cash{background:#e0f2fe;color:#0369a1;}
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
-    .modal.hidden{display:none!important;}
-    .modal-box{background:white;border-radius:20px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;}
-    .fi{width:100%;border:1.5px solid #ddd;border-radius:9px;padding:9px 13px;font-size:14px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;}
-    .fi:focus{border-color:#2d5a3b;box-shadow:0 0 0 3px rgba(45,90,59,.08);}
-    .fi-label{display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:5px;}
-    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:10px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;width:100%;text-align:left;}
+    :root{--forest:#2d5a3b;--forest-dark:#1e3d28;--gold:#c9a03d;--sw:240px;}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    body{font-family:"Inter",sans-serif;background:#f0efeb;color:#1a1a1a;-webkit-font-smoothing:antialiased;}
+    #sidebar{width:var(--sw);transition:transform .26s cubic-bezier(.4,0,.2,1);}
+    #main{margin-left:var(--sw);}
+    .view{display:none;}.view.active{display:block;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer;transition:all .18s;width:100%;text-align:left;border:none;background:none;}
     .nav-item:hover{background:rgba(255,255,255,.08);color:white;}
-    .nav-item.active{background:rgba(255,255,255,.14);color:white;font-weight:500;}
+    .nav-item.active{background:rgba(255,255,255,.15);color:white;font-weight:500;}
     .nav-item i{width:16px;text-align:center;flex-shrink:0;}
-    .cal-event{font-size:10px;padding:1px 5px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f3;}
-    .activity-item:last-child{border:none;}
-    .act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+    .nav-group{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:14px 16px 6px;}
     .stat-card{background:white;border-radius:14px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);}
     .sc{background:white;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.04);overflow:hidden;}
+    .tbl th{padding:10px 14px;background:#f8f8f6;border-bottom:1px solid #eee;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#888;text-align:left;white-space:nowrap;}
+    .tbl td{padding:11px 14px;border-bottom:1px solid #f3f3f0;font-size:13px;color:#333;vertical-align:middle;}
+    .tbl tr:last-child td{border-bottom:none;}
+    .tbl tr:hover td{background:#fbfaf8;cursor:pointer;}
+    .fi{width:100%;border:1.5px solid #ddd;border-radius:9px;padding:10px 13px;font-size:16px;outline:none;font-family:"Inter",sans-serif;transition:border-color .2s;background:white;-webkit-appearance:none;}
+    .fi:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(45,90,59,.08);}
+    .fi-label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;}
+    .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+    .b-pend{background:#fef3c7;color:#92400e;}.b-conf{background:#d1fae5;color:#065f46;}
+    .b-decl{background:#fee2e2;color:#991b1b;}.b-paid{background:#d1fae5;color:#065f46;}
+    .b-comp{background:#ede9fe;color:#5b21b6;}.b-canc{background:#f3f4f6;color:#6b7280;}
+    #toast{position:fixed;bottom:24px;right:16px;z-index:9999;padding:13px 18px;border-radius:12px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);}
+    #toast.hidden{display:none!important;}
+    #toast.success{background:#2d5a3b;color:white;}#toast.error{background:#c0392b;color:white;}#toast.info{background:#1d4ed8;color:white;}
+    .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:rot .7s linear infinite;display:inline-block;flex-shrink:0;}
+    @keyframes rot{to{transform:rotate(360deg);}}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
+    .modal.hidden{display:none!important;}
+    .mbox{background:white;border-radius:20px;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    .mbox-lg{max-width:820px;}
+    .cal-cell{border:1px solid #eee;border-radius:8px;padding:4px 6px;min-height:76px;transition:background .15s;}
+    .cal-cell.today{border-color:#2d5a3b;background:#f0fdf4;}
+    .cal-ev{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .upload-zone{border:2px dashed #ddd;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;}
+    .upload-zone:hover{border-color:var(--forest);background:rgba(45,90,59,.03);}
+    #mobileTopBar{display:none;align-items:center;justify-content:space-between;background:#1a2e21;padding:13px 16px;position:sticky;top:0;z-index:50;}
+    @media(max-width:768px){
+      #sidebar{position:fixed;inset-y:0;left:0;z-index:49;transform:translateX(-100%);width:280px;}
+      #sidebar.open{transform:translateX(0);}
+      #sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:48;backdrop-filter:blur(2px);}
+      #sidebarOverlay.open{display:block;}
+      #main{margin-left:0!important;}
+      #mobileTopBar{display:flex;}
+      .modal{align-items:flex-end;padding:0;padding-bottom:env(safe-area-inset-bottom);}
+      .mbox,.mbox-lg{max-width:100%!important;border-radius:20px 20px 0 0;max-height:94vh;}
+      .sc{overflow-x:auto;}.tbl{min-width:480px;}
+      .stat-card{padding:14px 16px;}
+      .p-8{padding:16px!important;}
+    }
+    @media(min-width:769px){#sidebar{position:fixed;inset-y:0;left:0;z-index:40;}}
   </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginScreen" class="min-h-screen flex items-center justify-center bg-forest px-4">
+<!-- ═══ LOGIN ═══ -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center px-4" style="background:linear-gradient(135deg,#1e3d28,#2d5a3b 60%,#3d7a52);">
   <div class="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-sm">
     <div class="text-center mb-8">
-      <h1 class="font-heading text-4xl text-forest font-light mb-1">Balay Maysa</h1>
-      <p class="text-xs text-gray-400 uppercase tracking-widest">Admin Panel</p>
+      <div class="w-14 h-14 bg-forest/10 rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-leaf text-forest text-xl"></i></div>
+      <h1 class="font-heading text-3xl text-forest font-light mb-1">Balay Maysa</h1>
+      <p class="text-xs text-gray-400 uppercase tracking-widest">Caretaker Panel</p>
     </div>
-    <div class="mb-4"><label class="block text-xs font-medium text-gray-500 mb-1.5">Username</label><input id="loginUser" type="text" class="fi" placeholder="balayadmin" /></div>
-    <div class="mb-6"><label class="block text-xs font-medium text-gray-500 mb-1.5">Password</label><input id="loginPass" type="password" class="fi" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" /></div>
-    <p id="loginErr" class="hidden text-red-500 text-xs mb-3 text-center">Invalid credentials.</p>
-    <button onclick="doLogin()" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark transition-colors">Log In</button>
+    <div class="mb-4"><label class="block text-xs font-medium text-gray-500 mb-1.5">Username</label><input id="loginUser" type="text" class="fi" placeholder="balayadmin" autocomplete="username"/></div>
+    <div class="mb-6"><label class="block text-xs font-medium text-gray-500 mb-1.5">Password</label><input id="loginPass" type="password" class="fi" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <p id="loginErr" class="hidden text-red-500 text-xs mb-4 text-center">Invalid credentials. Please try again.</p>
+    <button onclick="doLogin()" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark">Log In</button>
+    <p class="text-center mt-5 text-xs text-gray-400"><a href="super-admin.html" class="hover:text-forest">→ Super Admin Panel</a></p>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel" class="hidden min-h-screen">
+<!-- ═══ MAIN PANEL ═══ -->
+<div id="mainPanel" class="hidden">
+  <div id="mobileTopBar">
+    <button onclick="toggleSidebar()" class="w-9 h-9 flex items-center justify-center rounded-lg bg-white/10 text-white"><i class="fas fa-bars text-sm"></i></button>
+    <p class="text-white font-semibold text-sm">Balay Maysa</p>
+    <div class="w-9"></div>
+  </div>
+  <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
   <!-- Sidebar -->
-  <aside class="fixed inset-y-0 left-0 w-56 z-40 flex flex-col" style="background:#1a2e21;">
+  <aside id="sidebar" class="flex flex-col" style="background:#1a2e21;">
     <div class="px-5 py-5 border-b border-white/10">
-      <p class="text-white font-semibold text-sm">Balay Maysa</p>
-      <p class="text-white/40 text-xs">Operations Panel</p>
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-gold/20 rounded-lg flex items-center justify-center"><i class="fas fa-leaf text-gold text-sm"></i></div>
+        <div><p class="text-white font-semibold text-sm">Balay Maysa</p><p class="text-white/40 text-xs">Caretaker Panel</p></div>
+      </div>
     </div>
     <nav class="flex-1 px-3 py-3 overflow-y-auto space-y-0.5">
-      <button class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard"><i class="fas fa-chart-bar"></i> Dashboard</button>
-      <button class="nav-item" onclick="showTab('notifications')" id="nav-notifications"><i class="fas fa-bell"></i> Notifications <span id="notifBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
-      <button class="nav-item" onclick="showTab('verification')" id="nav-verification"><i class="fas fa-file-invoice-dollar"></i> Verification <span id="verifBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
-      <button class="nav-item" onclick="showTab('confirmed')" id="nav-confirmed"><i class="fas fa-check-circle"></i> Confirmed</button>
-      <button class="nav-item" onclick="showTab('all')" id="nav-all"><i class="fas fa-list"></i> All Bookings</button>
-      <button class="nav-item" onclick="showTab('calendar')" id="nav-calendar"><i class="fas fa-calendar-days"></i> Calendar</button>
-      <button class="nav-item" onclick="showTab('guestlog')" id="nav-guestlog"><i class="fas fa-clipboard-list"></i> Guest Log</button>
-      <button class="nav-item" onclick="showTab('walkin')" id="nav-walkin"><i class="fas fa-walking"></i> Walk-in Booking</button>
-      <button class="nav-item" onclick="showTab('personnel')" id="nav-personnel"><i class="fas fa-users"></i> Personnel</button>
-      <button class="nav-item" onclick="showTab('inventory')" id="nav-inventory"><i class="fas fa-boxes-stacked"></i> Inventory <span id="invBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
-      <button class="nav-item" onclick="showTab('announcements')" id="nav-announcements"><i class="fas fa-bullhorn"></i> Announcements <span id="annBadge" class="ml-auto bg-gold text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
-      <button class="nav-item" onclick="showTab('inquiries')" id="nav-inquiries"><i class="fas fa-envelope"></i> Inquiries <span id="inqBadge" class="ml-auto bg-gold text-white text-xs px-1.5 py-0.5 rounded-full hidden"></span></button>
+      <button class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard"><i class="fas fa-chart-bar"></i> Dashboard</button>
+      <button class="nav-item" onclick="showView('notifications')" id="nav-notifications"><i class="fas fa-bell"></i> Notifications <span id="notifBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden">0</span></button>
+      <p class="nav-group">Bookings</p>
+      <button class="nav-item" onclick="showView('bookings')" id="nav-bookings"><i class="fas fa-list"></i> All Bookings <span id="pendingBadge" class="ml-auto bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden">0</span></button>
+      <button class="nav-item" onclick="showView('walkin')" id="nav-walkin"><i class="fas fa-walking"></i> Walk-in Booking</button>
+      <p class="nav-group">Guests</p>
+      <button class="nav-item" onclick="showView('guestlog')" id="nav-guestlog"><i class="fas fa-clipboard-list"></i> Guest Log</button>
+      <p class="nav-group">Operations</p>
+      <button class="nav-item" onclick="showView('calendar')" id="nav-calendar"><i class="fas fa-calendar-days"></i> Calendar</button>
+      <button class="nav-item" onclick="showView('personnel')" id="nav-personnel"><i class="fas fa-users"></i> Personnel</button>
+      <button class="nav-item" onclick="showView('inventory')" id="nav-inventory"><i class="fas fa-boxes-stacked"></i> Inventory <span id="invBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden">0</span></button>
+      <button class="nav-item" onclick="showView('announcements')" id="nav-announcements"><i class="fas fa-bullhorn"></i> Announcements <span id="annBadge" class="ml-auto bg-gold text-white text-xs px-1.5 py-0.5 rounded-full hidden">0</span></button>
     </nav>
-    <div class="p-4 border-t border-white/10">
+    <div class="p-3 border-t border-white/10">
       <button onclick="doLogout()" class="nav-item w-full"><i class="fas fa-sign-out-alt"></i> Log Out</button>
     </div>
   </aside>
 
-  <!-- Main -->
-  <main class="ml-56 p-7">
+  <main id="main" class="min-h-screen">
+    <div class="p-8">
 
-    <!-- ===== DASHBOARD ===== -->
-    <div id="tab-dashboard" class="tab-view">
-      <div class="flex items-center justify-between mb-5">
-        <div><h2 class="font-heading text-3xl text-gray-800 font-light">Operations Dashboard</h2><p class="text-gray-400 text-xs" id="dashDateDisplay">–</p></div>
-        <div class="flex gap-2">
-          <button onclick="loadAll()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
-          <a href="balay-super-secret.html" target="_blank" class="text-xs bg-forest text-white px-3 py-2 rounded-lg hover:bg-forest-dark flex items-center gap-1"><i class="fas fa-crown"></i> Super Admin</a>
-        </div>
-      </div>
-      <!-- Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-        <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Check-ins Today</p><p class="text-3xl font-bold text-forest" id="dashCICount">–</p></div>
-        <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Check-outs Today</p><p class="text-3xl font-bold text-gray-700" id="dashCOCount">–</p></div>
-        <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Pending Verification</p><p class="text-3xl font-bold text-yellow-600" id="dashPendingCount">–</p></div>
-        <div class="stat-card"><p class="text-xs text-gray-400 mb-1">Balance Collectible</p><p class="text-2xl font-bold text-purple-700" id="dashBalance">₱–</p></div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-        <!-- Today's Check-ins -->
-        <div class="sc">
-          <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="font-semibold text-gray-700 text-sm">Today's Check-ins</h3>
-            <button onclick="showTab('guestlog')" class="text-xs text-forest hover:underline">Log Guest →</button>
+      <!-- ═══ DASHBOARD ═══ -->
+      <div id="view-dashboard" class="view active">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div><h2 class="font-heading text-3xl text-gray-800 font-light">Operations Dashboard</h2><p class="text-gray-400 text-xs mt-0.5" id="dashDate">–</p></div>
+          <div class="flex gap-2 flex-wrap">
+            <button onclick="loadAll()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <button onclick="showView('walkin')" class="text-xs bg-forest text-white px-3 py-2 rounded-lg hover:bg-forest-dark flex items-center gap-1"><i class="fas fa-plus"></i> Walk-in</button>
           </div>
-          <div class="divide-y divide-gray-50" id="todayCI"><div class="p-4 text-sm text-gray-300 text-center">Loading...</div></div>
         </div>
-        <!-- Today's Check-outs -->
-        <div class="sc">
-          <div class="p-4 border-b border-gray-100"><h3 class="font-semibold text-gray-700 text-sm">Today's Check-outs</h3></div>
-          <div class="divide-y divide-gray-50" id="todayCO"><div class="p-4 text-sm text-gray-300 text-center">Loading...</div></div>
+        <!-- 1. TODAY CHECK-IN / CHECK-OUT — always first -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div class="sc">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 class="font-semibold text-gray-700 text-sm flex items-center gap-2"><i class="fas fa-sign-in-alt text-green-600"></i> Check-ins Today (<span id="dashCICount">0</span>)</h3>
+              <button onclick="showView('guestlog')" class="text-xs text-forest hover:underline">Log Guest →</button>
+            </div>
+            <div id="todayCI" class="divide-y divide-gray-50 min-h-[80px]"><div class="p-5 text-sm text-gray-300 text-center">Loading…</div></div>
+          </div>
+          <div class="sc">
+            <div class="p-4 border-b border-gray-100">
+              <h3 class="font-semibold text-gray-700 text-sm flex items-center gap-2"><i class="fas fa-sign-out-alt text-blue-600"></i> Check-outs Today (<span id="dashCOCount">0</span>)</h3>
+            </div>
+            <div id="todayCO" class="divide-y divide-gray-50 min-h-[80px]"><div class="p-5 text-sm text-gray-300 text-center">Loading…</div></div>
+          </div>
         </div>
-      </div>
-      <!-- Activity log + Tasks -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="sc p-5">
-          <h3 class="font-semibold text-gray-700 text-sm mb-3">Real-time Activity Log</h3>
-          <div id="activityLog" class="text-sm text-gray-400">Loading...</div>
+        <!-- 2. Mini calendar -->
+        <div class="sc p-5 mb-5">
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 class="font-semibold text-gray-700 text-sm flex items-center gap-2"><i class="fas fa-calendar text-gold"></i> Calendar</h3>
+            <div class="flex items-center gap-2">
+              <button onclick="dashCalPrev()" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xs"><i class="fas fa-chevron-left"></i></button>
+              <span class="text-sm font-medium text-gray-700 min-w-[110px] text-center" id="dashCalLabel">–</span>
+              <button onclick="dashCalNext()" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-xs"><i class="fas fa-chevron-right"></i></button>
+              <button onclick="showView('calendar')" class="text-xs text-forest hover:underline ml-1">Full →</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-7 gap-0.5 mb-1 text-center text-[11px] font-semibold text-gray-400">
+            <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div class="text-amber-500">F</div><div class="text-amber-500">S</div>
+          </div>
+          <div id="dashCalGrid" class="grid grid-cols-7 gap-0.5"></div>
+          <div class="flex gap-3 mt-2 text-xs text-gray-400 flex-wrap">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 bg-green-400 rounded-full inline-block"></span>Check-in</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 bg-blue-400 rounded-full inline-block"></span>Check-out</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 bg-purple-400 rounded-full inline-block"></span>Task</span>
+          </div>
         </div>
-        <div class="sc p-5">
-          <div class="flex items-center justify-between mb-3"><h3 class="font-semibold text-gray-700 text-sm">Tasks from Super Admin</h3><span class="text-xs text-gray-400" id="taskCount">–</span></div>
-          <div id="tasksList" class="space-y-2 text-sm"></div>
+        <!-- 3. Tasks + Reminders -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div class="sc p-5">
+            <h3 class="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2"><i class="fas fa-tasks text-forest"></i> Tasks from Super Admin <span id="taskCount" class="ml-auto text-xs text-gray-400">0 active</span></h3>
+            <div id="tasksList" class="space-y-2"><p class="text-gray-300 text-xs text-center py-4">No tasks assigned.</p></div>
+          </div>
+          <div class="sc p-5">
+            <h3 class="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2"><i class="fas fa-bell text-gold"></i> Reminders from Super Admin</h3>
+            <div id="remindersList" class="space-y-2"><p class="text-gray-300 text-xs text-center py-4">No reminders.</p></div>
+          </div>
         </div>
-      </div>
-    </div>
-
-    <!-- ===== NOTIFICATIONS ===== -->
-    <div id="tab-notifications" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-5">
-        <div><h2 class="font-heading text-3xl text-gray-800 font-light">Notifications</h2><p class="text-gray-400 text-xs">Updates from Super Admin — booking confirmations, payments, and more.</p></div>
-        <button onclick="markAllNotifsRead()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50">Mark all as read</button>
-      </div>
-      <div id="notificationsList" class="space-y-3"><p class="text-center text-gray-300 py-8">Loading...</p></div>
-    </div>
-
-    <!-- ===== VERIFICATION ===== -->
-    <div id="tab-verification" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="font-heading text-3xl text-gray-800 font-light">Payment Verification</h2>
-        <button onclick="loadAll()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
-      </div>
-      <div class="sc overflow-hidden">
-        <table class="w-full">
-          <thead><tr class="bg-gray-50 border-b border-gray-100">
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Date</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Guest</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Rooms</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Dates</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Amount</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Proof</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Actions</th>
-          </tr></thead>
-          <tbody id="verifTable"><tr><td colspan="7" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ===== CONFIRMED ===== -->
-    <div id="tab-confirmed" class="tab-view hidden">
-      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Confirmed Bookings</h2>
-      <div class="sc overflow-hidden">
-        <table class="w-full">
-          <thead><tr class="bg-gray-50 border-b border-gray-100">
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Ref</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Guest</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Rooms</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Check-in</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Check-out</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Balance</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Actions</th>
-          </tr></thead>
-          <tbody id="confirmedTable"><tr><td colspan="7" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ===== ALL BOOKINGS ===== -->
-    <div id="tab-all" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="font-heading text-3xl text-gray-800 font-light">All Bookings</h2>
-        <input type="text" id="searchAll" placeholder="Search..." class="fi w-56" oninput="filterAll()" />
-      </div>
-      <div class="sc overflow-hidden overflow-x-auto">
-        <table class="w-full min-w-max">
-          <thead><tr class="bg-gray-50 border-b border-gray-100">
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Ref</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Guest</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Rooms</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Check-in</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Total</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Pmt Type</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Status</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Actions</th>
-          </tr></thead>
-          <tbody id="allTable"><tr><td colspan="8" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ===== CALENDAR ===== -->
-    <div id="tab-calendar" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="font-heading text-3xl text-gray-800 font-light">Operations Calendar</h2>
-        <div class="flex gap-2">
-          <button onclick="opCalPrev()" class="bg-white border border-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-chevron-left"></i></button>
-          <span id="opCalLabel" class="bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 min-w-[140px] text-center">–</span>
-          <button onclick="opCalNext()" class="bg-white border border-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-chevron-right"></i></button>
+        <!-- 4. Staff + Activity -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="sc p-5">
+            <h3 class="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2"><i class="fas fa-users text-gray-400"></i> Staff on Duty</h3>
+            <div id="staffToday" class="space-y-2"></div>
+          </div>
+          <div class="sc p-5">
+            <h3 class="font-semibold text-gray-700 text-sm mb-3 flex items-center gap-2"><i class="fas fa-clock-rotate-left text-gray-400"></i> Activity Log</h3>
+            <div id="activityLog" class="space-y-1.5"></div>
+          </div>
         </div>
       </div>
-      <div class="flex gap-3 mb-3 text-xs flex-wrap">
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-green-200 inline-block border border-green-400"></span> Check-in</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-200 inline-block border border-blue-400"></span> Check-out</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-purple-200 inline-block border border-purple-400"></span> Task Due</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-200 inline-block border border-red-400"></span> Maintenance</div>
-      </div>
-      <div class="sc p-4">
-        <div class="grid grid-cols-7 gap-1 mb-1">
-          <div class="text-center text-xs font-semibold text-gray-400 py-2">SUN</div><div class="text-center text-xs font-semibold text-gray-400 py-2">MON</div><div class="text-center text-xs font-semibold text-gray-400 py-2">TUE</div><div class="text-center text-xs font-semibold text-gray-400 py-2">WED</div><div class="text-center text-xs font-semibold text-gray-400 py-2">THU</div><div class="text-center text-xs font-semibold text-gray-400 py-2">FRI</div><div class="text-center text-xs font-semibold text-gray-400 py-2">SAT</div>
-        </div>
-        <div id="opCalGrid" class="grid grid-cols-7 gap-1"></div>
-      </div>
-    </div>
 
-    <!-- ===== GUEST LOG ===== -->
-    <div id="tab-guestlog" class="tab-view hidden">
-      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Guest Check-in Log</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Log form -->
-        <div class="sc p-6">
-          <h3 class="font-semibold text-gray-700 mb-4">Log Guest Check-in</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="fi-label">Booking Reference *</label>
-              <div class="flex gap-2">
-                <input type="text" id="gl_ref" class="fi" placeholder="BM-20260528-XXXX" style="text-transform:uppercase;" />
-                <button onclick="fetchBookingForLog()" class="px-4 py-2 bg-forest text-white rounded-lg text-sm hover:bg-forest-dark">Fetch</button>
+      <!-- ═══ NOTIFICATIONS ═══ -->
+      <div id="view-notifications" class="view">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <h2 class="font-heading text-3xl text-gray-800 font-light">Notifications</h2>
+          <button onclick="markAllNotifsRead()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50">Mark all read</button>
+        </div>
+        <div id="notifList" class="space-y-3"><p class="text-center text-gray-300 py-8">Loading…</p></div>
+      </div>
+
+      <!-- ═══ ALL BOOKINGS ═══ -->
+      <div id="view-bookings" class="view">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <h2 class="font-heading text-3xl text-gray-800 font-light">All Bookings</h2>
+          <div class="flex gap-2 flex-wrap">
+            <input type="text" id="bkSearch" placeholder="Search…" class="fi w-44 text-sm py-2" oninput="filterBookings()"/>
+            <select id="bkStatusFilter" class="fi w-40 text-sm py-2" onchange="filterBookings()">
+              <option value="">All Statuses</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="confirmed_balance_due">Balance Due</option>
+              <option value="fully_paid">Fully Paid</option>
+              <option value="pending_payment_verification">Pending</option>
+              <option value="completed_stayed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="sc overflow-hidden">
+          <table class="tbl w-full">
+            <thead><tr>
+              <th>Ref</th><th>Guest</th><th>Room(s)</th><th>Check-in</th><th>Check-out</th>
+              <th>Pax</th><th>Total</th><th>Balance</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody id="bookingsTable"><tr><td colspan="10" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ═══ WALK-IN BOOKING ═══ -->
+      <div id="view-walkin" class="view">
+        <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Walk-in Booking</h2>
+        <div class="max-w-2xl">
+          <div class="sc p-6 space-y-4">
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700"><i class="fas fa-info-circle mr-1"></i>Walk-in bookings are confirmed immediately. All changes after creation require Super Admin approval.</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><label class="fi-label">Guest Name *</label><input type="text" id="wi_name" class="fi"/></div>
+              <div><label class="fi-label">Phone *</label><input type="tel" id="wi_phone" class="fi"/></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><label class="fi-label">Email</label><input type="email" id="wi_email" class="fi"/></div>
+              <div><label class="fi-label">Number of Guests *</label><input type="number" id="wi_pax" class="fi" value="2" min="1" max="30" oninput="calcWI()"/></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><label class="fi-label">Check-in *</label><input type="date" id="wi_ci" class="fi" onchange="calcWI()"/></div>
+              <div><label class="fi-label">Check-out *</label><input type="date" id="wi_co" class="fi" onchange="calcWI()"/></div>
+            </div>
+            <div><label class="fi-label">Room(s) * <span class="text-gray-400 font-normal text-xs">(comma-separated: Silayan, Sinta, Tahanan, Barkada)</span></label><input type="text" id="wi_rooms" class="fi" placeholder="e.g. Silayan, Sinta"/></div>
+            <div><label class="fi-label">Package <span class="text-gray-400 font-normal text-xs">(optional — e.g. 15-18 pax · All 4 rooms)</span></label><input type="text" id="wi_pkg" class="fi"/></div>
+            <div id="wiPriceInfo" class="hidden bg-forest/5 rounded-xl p-4 text-sm space-y-1">
+              <div class="flex justify-between"><span class="text-gray-500">Nights</span><span class="font-medium" id="wi_nights">–</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">Day Type</span><span class="font-medium" id="wi_daytype">–</span></div>
+              <div class="flex justify-between"><span class="text-gray-500">Suggested Rate</span><span class="font-bold text-forest" id="wi_suggested">–</span></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div><label class="fi-label">Total Amount (₱) *</label><input type="number" id="wi_total" class="fi" min="0"/></div>
+              <div><label class="fi-label">Amount Paid Now (₱)</label><input type="number" id="wi_paid" class="fi" min="0"/></div>
+              <div><label class="fi-label">Payment Method</label>
+                <select id="wi_method" class="fi"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="maya">Maya</option><option value="bank_transfer">Bank Transfer</option></select>
               </div>
             </div>
-            <div id="gl_bookingInfo" class="hidden bg-gray-50 rounded-xl p-3 text-sm">
-              <p class="font-semibold text-gray-800" id="gl_guestName">–</p>
-              <p class="text-gray-500 text-xs" id="gl_bookingDetails">–</p>
-            </div>
-            <div>
-              <label class="fi-label">Guest Names (one per line) *</label>
-              <textarea id="gl_names" class="fi" rows="4" placeholder="Juan dela Cruz&#10;Maria dela Cruz&#10;..."></textarea>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div><label class="fi-label">Adults</label><input type="number" id="gl_adults" class="fi" value="2" min="0" /></div>
-              <div><label class="fi-label">Children (3+yrs)</label><input type="number" id="gl_ch_above" class="fi" value="0" min="0" /></div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div><label class="fi-label">Infants (below 3)</label><input type="number" id="gl_ch_below" class="fi" value="0" min="0" /></div>
-              <div><label class="fi-label">Pets</label><input type="number" id="gl_pets" class="fi" value="0" min="0" /></div>
-            </div>
-            <div><label class="fi-label">Security Deposit (₱)</label><input type="number" id="gl_deposit" class="fi" value="0" /></div>
-            <div><label class="fi-label">Special Notes</label><textarea id="gl_notes" class="fi" rows="2" placeholder="Any special notes for this check-in..."></textarea></div>
-            <label class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl cursor-pointer">
-              <input type="checkbox" id="gl_agree" class="w-4 h-4 accent-forest mt-0.5 flex-shrink-0" />
-              <span class="text-xs text-gray-600">Guest agrees to <strong>house rules, terms & conditions</strong>. Security deposit will be refunded accordingly upon checkout.</span>
-            </label>
-            <button onclick="submitGuestLog()" id="glSubmitBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center justify-center gap-2">
-              <span id="glSubmitText">Log Check-in</span><div class="spin hidden" id="glSpin"></div>
+            <div><label class="fi-label">Payment Reference #</label><input type="text" id="wi_payref" class="fi" placeholder="GCash/bank ref (optional)"/></div>
+            <div><label class="fi-label">Special Requests / Notes</label><textarea id="wi_notes" class="fi" rows="2"></textarea></div>
+            <button onclick="submitWalkIn()" id="wiBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center justify-center gap-2">
+              <span id="wiText">Create Walk-in Booking</span><div class="spin hidden" id="wiSpin"></div>
             </button>
           </div>
         </div>
-        <!-- Recent logs -->
-        <div class="sc p-6">
-          <h3 class="font-semibold text-gray-700 mb-4">Recent Check-in Logs</h3>
-          <div id="recentLogs" class="space-y-3 text-sm">Loading...</div>
-        </div>
       </div>
-    </div>
 
-    <!-- ===== WALK-IN BOOKING ===== -->
-    <div id="tab-walkin" class="tab-view hidden">
-      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Walk-in Booking</h2>
-      <div class="max-w-xl">
-        <div class="sc p-7 space-y-4">
-          <div class="p-3 bg-blue-50 rounded-xl text-xs text-blue-700 border border-blue-200"><i class="fas fa-info-circle mr-1"></i> Walk-in bookings are marked as <strong>Confirmed</strong> immediately. No payment upload required.</div>
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="fi-label">Guest Name *</label><input type="text" id="wi_name" class="fi" /></div>
-            <div><label class="fi-label">Phone *</label><input type="tel" id="wi_phone" class="fi" /></div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="fi-label">Email</label><input type="email" id="wi_email" class="fi" /></div>
-            <div><label class="fi-label">Room(s) *</label>
-              <select id="wi_room" class="fi">
-                <option value="Silayan">Silayan</option><option value="Sinta">Sinta</option>
-                <option value="Tahanan">Tahanan</option><option value="Barkada">Barkada</option>
-                <option value="All Rooms">All Rooms (Whole Resort)</option>
-              </select>
+      <!-- ═══ GUEST LOG ═══ -->
+      <div id="view-guestlog" class="view">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div><h2 class="font-heading text-3xl text-gray-800 font-light">Guest Check-in Log</h2>
+          <p class="text-gray-400 text-xs mt-0.5">Fetch a booking reference to auto-populate — guest names tally to the booked pax count.</p></div>
+          <button onclick="showGuestLogList()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-list"></i> View All Logs</button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <!-- Form -->
+          <div class="lg:col-span-3 sc p-6">
+            <h3 class="font-semibold text-gray-700 mb-4">Log Check-in</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="fi-label">Booking Reference *</label>
+                <div class="flex gap-2">
+                  <input type="text" id="gl_ref" class="fi" placeholder="BM-20260617-XXXX" style="text-transform:uppercase"/>
+                  <button onclick="fetchForLog()" class="px-4 py-2 bg-forest text-white rounded-lg text-sm hover:bg-forest-dark whitespace-nowrap flex items-center gap-1"><i class="fas fa-search"></i> Fetch</button>
+                </div>
+              </div>
+              <!-- Booking info after fetch -->
+              <div id="glBookingCard" class="hidden bg-forest/5 border border-forest/20 rounded-xl p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <p class="font-semibold text-gray-800 text-base" id="glGuestName">–</p>
+                  <span class="badge b-conf text-xs" id="glStatus">–</span>
+                </div>
+                <p class="text-gray-500 text-sm" id="glBookingDetails">–</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3 text-xs">
+                  <div><span class="text-gray-400">Booked Pax:</span><br/><span class="font-semibold text-forest" id="glBookedPax">–</span></div>
+                  <div><span class="text-gray-400">Room(s):</span><br/><span class="font-medium" id="glRooms">–</span></div>
+                  <div><span class="text-gray-400">Check-in:</span><br/><span class="font-medium" id="glCI">–</span></div>
+                  <div><span class="text-gray-400">Check-out:</span><br/><span class="font-medium" id="glCO">–</span></div>
+                  <div><span class="text-gray-400">Balance Due:</span><br/><span class="font-semibold text-red-600" id="glBalance">–</span></div>
+                  <div><span class="text-gray-400">Security Deposit:</span><br/><span class="font-semibold text-forest">₱1,500</span></div>
+                </div>
+              </div>
+              <!-- Guest count -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div><label class="fi-label">Adults *</label><input type="number" id="gl_adults" class="fi" value="0" min="0" oninput="buildGuestNameFields()"/></div>
+                <div><label class="fi-label">Children 3+</label><input type="number" id="gl_ch_above" class="fi" value="0" min="0" oninput="buildGuestNameFields()"/></div>
+                <div><label class="fi-label">Infants &lt;3</label><input type="number" id="gl_ch_below" class="fi" value="0" min="0"/></div>
+                <div><label class="fi-label">Pets</label><input type="number" id="gl_pets" class="fi" value="0" min="0"/></div>
+              </div>
+              <!-- Pax tally -->
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                <span class="text-sm text-gray-500">Total billable guests (adults + children 3+)</span>
+                <span class="font-bold text-forest text-lg" id="glPaxTally">0</span>
+              </div>
+              <!-- Dynamic name inputs -->
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="fi-label mb-0">Guest Names *</label>
+                  <span class="text-xs text-gray-400">Fill in all <span id="glNameCount">0</span> name(s)</span>
+                </div>
+                <div id="glNameFields" class="space-y-2"><p class="text-xs text-gray-400 text-center py-2">Enter guest counts above to generate name fields.</p></div>
+              </div>
+              <!-- Security deposit -->
+              <div><label class="fi-label">Security Deposit (₱) — refundable upon checkout</label>
+                <input type="number" id="gl_deposit" class="fi" value="1500" min="0"/>
+              </div>
+              <!-- Notes -->
+              <div><label class="fi-label">Special Notes <span class="text-gray-400 font-normal text-xs">(car plate, items, etc.)</span></label>
+                <textarea id="gl_notes" class="fi" rows="2"></textarea>
+              </div>
+              <!-- Agreement -->
+              <label class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl cursor-pointer">
+                <input type="checkbox" id="gl_agree" class="w-4 h-4 accent-forest mt-0.5 flex-shrink-0"/>
+                <span class="text-xs text-gray-700">Guest has read and agrees to all <strong>House Rules, Terms &amp; Conditions</strong>. Security deposit will be collected and refunded accordingly upon checkout.</span>
+              </label>
+              <input type="hidden" id="gl_editing_id"/>
+              <button onclick="submitGuestLog()" id="glBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center justify-center gap-2">
+                <span id="glBtnText">Save Check-in Log</span><div class="spin hidden" id="glSpin"></div>
+              </button>
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="fi-label">Check-in *</label><input type="date" id="wi_ci" class="fi" onchange="calcWIPrice()" /></div>
-            <div><label class="fi-label">Check-out *</label><input type="date" id="wi_co" class="fi" onchange="calcWIPrice()" /></div>
-          </div>
-          <div class="grid grid-cols-3 gap-3">
-            <div><label class="fi-label">Adults *</label><input type="number" id="wi_adults" class="fi" value="2" min="1" oninput="calcWIPrice()" /></div>
-            <div><label class="fi-label">Children (3+)</label><input type="number" id="wi_ch" class="fi" value="0" min="0" /></div>
-            <div><label class="fi-label">Infants</label><input type="number" id="wi_inf" class="fi" value="0" min="0" /></div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="fi-label">Total Amount (₱) *</label><input type="number" id="wi_total" class="fi" /></div>
-            <div><label class="fi-label">Payment Status</label>
-              <select id="wi_paystatus" class="fi">
-                <option value="fully_paid">Fully Paid (Cash)</option>
-                <option value="deposit_paid">Downpayment Only</option>
-                <option value="pending">Pending (no payment yet)</option>
-              </select>
+          <!-- Recent logs panel -->
+          <div class="lg:col-span-2 sc p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-gray-700 text-sm">Recent Logs</h3>
+              <span class="text-xs text-gray-400" id="logCount">–</span>
             </div>
+            <div id="recentLogs" class="space-y-3"><p class="text-gray-300 text-xs">No logs yet.</p></div>
           </div>
-          <div><label class="fi-label">Special Requests / Notes</label><textarea id="wi_notes" class="fi" rows="2"></textarea></div>
-          <div id="wiPriceBox" class="hidden bg-gray-50 rounded-xl p-4 text-sm">
-            <div class="flex justify-between mb-1"><span class="text-gray-500">Nights</span><span id="wi_nights">–</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">Suggested Total</span><span class="font-bold text-forest" id="wi_suggested">–</span></div>
+        </div>
+      </div>
+
+      <!-- ═══ CALENDAR ═══ -->
+      <div id="view-calendar" class="view">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <h2 class="font-heading text-3xl text-gray-800 font-light">Operations Calendar</h2>
+          <div class="flex items-center gap-2">
+            <button onclick="calPrev()" class="w-9 h-9 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center"><i class="fas fa-chevron-left text-xs"></i></button>
+            <span id="calLabel" class="bg-white border border-gray-200 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 min-w-[160px] text-center">–</span>
+            <button onclick="calNext()" class="w-9 h-9 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center justify-center"><i class="fas fa-chevron-right text-xs"></i></button>
           </div>
-          <button onclick="submitWalkIn()" id="wiBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center justify-center gap-2">
-            <span id="wiText">Create Walk-in Booking</span><div class="spin hidden" id="wiSpin"></div>
-          </button>
+        </div>
+        <div class="flex gap-4 mb-3 text-xs text-gray-500 flex-wrap">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-green-200 border border-green-400 inline-block"></span>Check-in</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-blue-200 border border-blue-400 inline-block"></span>Check-out</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-purple-200 border border-purple-400 inline-block"></span>Task Due</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-red-200 border border-red-400 inline-block"></span>Maintenance</span>
+        </div>
+        <div class="sc p-4">
+          <div class="grid grid-cols-7 gap-1 mb-1 text-center text-xs font-semibold text-gray-400">
+            <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div class="text-amber-500">FRI</div><div class="text-amber-500">SAT</div>
+          </div>
+          <div id="calGrid" class="grid grid-cols-7 gap-1"></div>
         </div>
       </div>
-    </div>
 
-    <!-- ===== PERSONNEL ===== -->
-    <div id="tab-personnel" class="tab-view hidden">
-      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Personnel</h2>
-      <div id="personnelGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"><p class="text-gray-400 text-sm">Loading...</p></div>
-    </div>
-
-    <!-- ===== INVENTORY ===== -->
-    <div id="tab-inventory" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-5">
-        <div><h2 class="font-heading text-3xl text-gray-800 font-light">Inventory</h2><p class="text-gray-400 text-xs">Shared with Super Admin — updates here reflect there instantly, and vice versa.</p></div>
-      </div>
-      <div id="lowStockBanner" class="hidden mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800"><i class="fas fa-exclamation-triangle mr-2"></i><span id="lowStockMsg">–</span></div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="sc overflow-hidden">
-          <table class="w-full">
-            <thead><tr class="bg-gray-50 border-b border-gray-100">
-              <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Item</th>
-              <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Qty</th>
-              <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Status</th>
-              <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Update Stock</th>
-            </tr></thead>
-            <tbody id="inventoryTable"><tr><td colspan="4" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
-          </table>
+      <!-- ═══ PERSONNEL ═══ -->
+      <div id="view-personnel" class="view">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div><h2 class="font-heading text-3xl text-gray-800 font-light">Personnel</h2>
+          <p class="text-gray-400 text-xs">Real-time sync with Super Admin.</p></div>
+          <button onclick="openStaffModal()" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-plus"></i> Add Staff</button>
         </div>
-        <div class="sc p-5">
-          <h3 class="font-semibold text-gray-700 text-sm mb-3">Recent Stock Changes</h3>
-          <div id="inventoryLog" class="space-y-2 text-sm"><p class="text-gray-300 text-xs">Loading...</p></div>
-        </div>
+        <div id="personnelGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"><p class="text-gray-400 text-sm col-span-3">Loading…</p></div>
       </div>
-    </div>
 
-    <!-- ===== ANNOUNCEMENTS ===== -->
-    <div id="tab-announcements" class="tab-view hidden">
-      <div class="flex items-center justify-between mb-5">
-        <div><h2 class="font-heading text-3xl text-gray-800 font-light">Announcements</h2><p class="text-gray-400 text-xs">Shared notice board with Super Admin — post shift notes, mark reminders done.</p></div>
-      </div>
-      <div class="sc p-5 mb-5">
-        <label class="fi-label">Post a note for the next shift / Super Admin</label>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <input type="text" id="ann_message" class="fi" placeholder="e.g. Room Tahanan AC remote needs new batteries"/>
-          <button onclick="postAnnouncement()" class="bg-forest text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-forest-dark whitespace-nowrap">Post</button>
+      <!-- ═══ INVENTORY ═══ -->
+      <div id="view-inventory" class="view">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div><h2 class="font-heading text-3xl text-gray-800 font-light">Inventory</h2>
+          <p class="text-gray-400 text-xs">Live sync with Super Admin — every change reflects instantly.</p></div>
+        </div>
+        <div id="lowStockAlert" class="hidden mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800"></div>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
+          <div class="md:col-span-3 sc overflow-hidden">
+            <div class="p-4 border-b border-gray-100"><h3 class="font-semibold text-gray-700 text-sm">Stock Levels</h3></div>
+            <table class="tbl w-full">
+              <thead><tr><th>Item</th><th>Category</th><th>Qty</th><th>Status</th><th>Adjust</th></tr></thead>
+              <tbody id="inventoryTable"><tr><td colspan="5" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody>
+            </table>
+          </div>
+          <div class="md:col-span-2 sc p-5">
+            <h3 class="font-semibold text-gray-700 text-sm mb-3">Recent Changes</h3>
+            <div id="inventoryLog" class="space-y-2 text-sm"><p class="text-gray-300 text-xs">Loading…</p></div>
+          </div>
         </div>
       </div>
-      <div id="announcementsList" class="space-y-3"><p class="text-center text-gray-300 py-8">Loading...</p></div>
-    </div>
 
-    <!-- ===== INQUIRIES ===== -->
-    <div id="tab-inquiries" class="tab-view hidden">
-      <h2 class="font-heading text-3xl text-gray-800 font-light mb-5">Guest Inquiries</h2>
-      <div class="sc overflow-hidden">
-        <table class="w-full">
-          <thead><tr class="bg-gray-50 border-b border-gray-100">
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Date</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Name</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Contact</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Guests</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Message</th>
-            <th class="tc text-left font-medium text-gray-500 text-xs uppercase">Actions</th>
-          </tr></thead>
-          <tbody id="inquiriesTable"><tr><td colspan="6" class="tc text-center text-gray-300 py-8">Loading...</td></tr></tbody>
-        </table>
+      <!-- ═══ ANNOUNCEMENTS ═══ -->
+      <div id="view-announcements" class="view">
+        <div class="flex items-center justify-between mb-5">
+          <div><h2 class="font-heading text-3xl text-gray-800 font-light">Announcements</h2>
+          <p class="text-gray-400 text-xs">Shared notice board with Super Admin.</p></div>
+        </div>
+        <div class="sc p-5 mb-5">
+          <label class="fi-label">Post a note for the next shift or Super Admin</label>
+          <div class="flex gap-2 mt-1"><input type="text" id="annMsg" class="fi" placeholder="e.g. Room Tahanan AC needs attention"/>
+            <button onclick="postAnnouncement()" class="bg-forest text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-forest-dark whitespace-nowrap">Post</button>
+          </div>
+        </div>
+        <div id="annList" class="space-y-3"><p class="text-center text-gray-300 py-8">Loading…</p></div>
       </div>
-    </div>
 
+    </div><!-- /p-8 -->
   </main>
-</div>
+</div><!-- /mainPanel -->
 
-<!-- Booking Detail Modal -->
+<!-- ═══ BOOKING MODAL ═══ -->
 <div id="bookingModal" class="modal hidden">
-  <div class="modal-box">
-    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+  <div class="mbox mbox-lg">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
       <h3 class="font-heading text-xl text-forest font-light" id="bmTitle">Booking Details</h3>
-      <button onclick="closeModal('bookingModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-sm"><i class="fas fa-times text-gray-500"></i></button>
+      <button onclick="closeModal('bookingModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
     </div>
-    <div class="p-5" id="bmContent">Loading...</div>
+    <div class="p-6" id="bmBody">Loading…</div>
   </div>
 </div>
 
-<!-- Payment Mark Modal -->
-<div id="paymentModal" class="modal hidden">
-  <div class="modal-box">
+<!-- ═══ PAYMENT DIFFERENCE MODAL ═══ -->
+<div id="payDiffModal" class="modal hidden">
+  <div class="mbox">
     <div class="p-5 border-b border-gray-100 flex justify-between items-center">
-      <h3 class="font-heading text-xl text-forest font-light">Mark Cash Payment</h3>
-      <button onclick="closeModal('paymentModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-sm"><i class="fas fa-times text-gray-500"></i></button>
+      <h3 class="font-heading text-xl text-forest font-light">Additional Payment Required</h3>
+      <button onclick="closeModal('payDiffModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
     </div>
     <div class="p-5 space-y-4">
-      <input type="hidden" id="pm_bookingId" />
-      <div><label class="fi-label">Amount Received (₱) *</label><input type="number" id="pm_amount" class="fi" /></div>
-      <div><label class="fi-label">Payment Method</label>
-        <select id="pm_method" class="fi"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="maya">Maya</option><option value="bank_transfer">Bank Transfer</option></select>
+      <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800" id="payDiffInfo">–</div>
+      <div><label class="fi-label">Amount Collected Now (₱) *</label><input type="number" id="pd_amount" class="fi" min="0"/></div>
+      <div><label class="fi-label">Payment Method *</label>
+        <select id="pd_method" class="fi"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="maya">Maya</option><option value="bank_transfer">Bank Transfer</option></select>
       </div>
-      <div><label class="fi-label">Reference / Notes</label><input type="text" id="pm_ref" class="fi" placeholder="GCash ref or receipt note" /></div>
+      <div><label class="fi-label">Reference #</label><input type="text" id="pd_ref" class="fi" placeholder="GCash/bank ref (optional)"/></div>
+      <input type="hidden" id="pd_booking_id"/>
+      <input type="hidden" id="pd_old_total"/>
+      <input type="hidden" id="pd_new_total"/>
       <div class="flex gap-3">
-        <button onclick="closeModal('paymentModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600">Cancel</button>
-        <button onclick="savePayment()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save Payment</button>
+        <button onclick="closeModal('payDiffModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
+        <button onclick="confirmPayDiff()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Record Additional Payment</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ INVENTORY ADJUST MODAL ═══ -->
+<div id="invAdjModal" class="modal hidden">
+  <div class="mbox">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+      <h3 class="font-heading text-xl text-forest font-light" id="invAdjTitle">Adjust Stock</h3>
+      <button onclick="closeModal('invAdjModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <input type="hidden" id="invAdjId"/><input type="hidden" id="invAdjCurrentQty"/><input type="hidden" id="invAdjItemName"/>
+      <div id="invAdjInfo" class="bg-gray-50 rounded-xl p-3 text-sm"></div>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="setInvMode('use')" id="invBtnUse" class="p-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-red-400 hover:bg-red-50 transition-colors flex items-center justify-center gap-2"><i class="fas fa-minus text-red-500"></i> Use / Consume</button>
+        <button onclick="setInvMode('add')" id="invBtnAdd" class="p-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-green-400 hover:bg-green-50 transition-colors flex items-center justify-center gap-2"><i class="fas fa-plus text-green-600"></i> Add / Restock</button>
+      </div>
+      <input type="hidden" id="invAdjMode" value="use"/>
+      <div><label class="fi-label" id="invAdjQtyLabel">Quantity to use</label>
+        <input type="number" id="invAdjQty" class="fi" min="1" placeholder="Enter amount" oninput="previewInvAdj()"/>
+      </div>
+      <div><label class="fi-label">Reason <span class="text-gray-400 font-normal text-xs">(optional)</span></label>
+        <input type="text" id="invAdjReason" class="fi" placeholder="e.g. Used for guest turnover"/>
+      </div>
+      <div id="invAdjPreview" class="hidden p-3 rounded-xl text-sm font-medium text-center"></div>
+      <div class="flex gap-3">
+        <button onclick="closeModal('invAdjModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
+        <button onclick="confirmInvAdj()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Confirm Change</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STAFF MODAL ═══ -->
+<div id="staffModal" class="modal hidden">
+  <div class="mbox">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+      <h3 class="font-heading text-xl text-forest font-light" id="sfTitle">Add Staff</h3>
+      <button onclick="closeModal('staffModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
+    </div>
+    <div class="p-5 grid grid-cols-2 gap-4">
+      <input type="hidden" id="sf_id"/>
+      <div><label class="fi-label">Full Name *</label><input type="text" id="sf_name" class="fi"/></div>
+      <div><label class="fi-label">Role *</label><input type="text" id="sf_role" class="fi" placeholder="e.g. Housekeeping"/></div>
+      <div><label class="fi-label">Phone</label><input type="tel" id="sf_phone" class="fi"/></div>
+      <div><label class="fi-label">Email</label><input type="email" id="sf_email" class="fi"/></div>
+      <div><label class="fi-label">Daily Rate (₱)</label><input type="number" id="sf_rate" class="fi"/></div>
+      <div><label class="fi-label">Status</label>
+        <select id="sf_status" class="fi"><option value="active">Active</option><option value="inactive">Inactive</option><option value="on_leave">On Leave</option></select>
+      </div>
+      <div class="col-span-2 flex gap-3 mt-2">
+        <button onclick="closeModal('staffModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
+        <button onclick="saveStaff()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save Staff</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GUEST LOG LIST MODAL ═══ -->
+<div id="guestLogListModal" class="modal hidden">
+  <div class="mbox mbox-lg">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
+      <h3 class="font-heading text-xl text-forest font-light">All Guest Logs</h3>
+      <button onclick="closeModal('guestLogListModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
+    </div>
+    <div class="p-4">
+      <input type="text" id="logSearch" class="fi mb-4" placeholder="Search by ref or guest name…" oninput="filterLogList()"/>
+      <div id="guestLogListBody" class="space-y-3"></div>
     </div>
   </div>
 </div>
@@ -429,801 +537,871 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-emailjs.init('yupgCoqLB4unb0OAz');
 const SB_URL  = 'https://vhtcefsfvpeafukzdxmj.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZodGNlZnNmdnBlYWZ1a3pkeG1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NzM1NDksImV4cCI6MjA5NDI0OTU0OX0.toThEUKVE1ib5lLvT3M_OOKNiOpvKeTDmZ3Tj8Ary8A';
-const EMAILJS_SID  = 'service_t13ealt';
-const EMAILJS_TMPL = 'template_s17clcj';
-const ADMIN_USER   = 'balayadmin';
-const ADMIN_PASS   = 'BalayMaysa2026';
-const SA_EMAIL     = 'balaymaysa@gmail.com';
-const db = window.supabase.createClient(SB_URL, SB_ANON);
+const SEND_EMAIL_URL = `${SB_URL}/functions/v1/hyper-task`;
+const ADMIN_USER='balayadmin', ADMIN_PASS='BalayMaysa2026';
+const SECURITY_DEPOSIT=1500;
+const db=window.supabase.createClient(SB_URL,SB_ANON);
+const STATUS_LABELS={pending_payment_verification:'Pending Verification',deposit_paid:'Deposit Paid',confirmed:'Confirmed',confirmed_balance_due:'Balance Due',fully_paid:'Fully Paid',cancelled:'Cancelled',declined:'Declined',completed_stayed:'Completed'};
+const STATUS_CSS={pending_payment_verification:'b-pend',deposit_paid:'b-pend',confirmed:'b-conf',confirmed_balance_due:'b-conf',fully_paid:'b-paid',cancelled:'b-canc',declined:'b-decl',completed_stayed:'b-comp'};
+const CONFIRMED=['confirmed','confirmed_balance_due','fully_paid','completed_stayed'];
 
-const STATUS_LABELS = {pending_payment_verification:'Pending Payment',deposit_paid_waiting_confirmation:'Deposit Paid',confirmed:'Confirmed',confirmed_balance_due:'Balance Due',fully_paid:'Fully Paid',cancelled:'Cancelled',declined:'Declined',completed_stayed:'Completed'};
-const STATUS_CSS    = {pending_payment_verification:'b-pending',deposit_paid_waiting_confirmation:'b-pending',confirmed:'b-confirmed',confirmed_balance_due:'b-confirmed',fully_paid:'b-paid',cancelled:'b-declined',declined:'b-declined',completed_stayed:'badge bg-purple-100 text-purple-700'};
+let allBookings=[],allStaff=[],allTasks=[],allInventory=[],allInventoryLog=[];
+let allNotifications=[],allAnnouncements=[],allMaintenance=[],grpPricing=[],allGuestLogs=[];
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+let dashCalYear=new Date().getFullYear(),dashCalMonth=new Date().getMonth();
+let glBookingData=null;
 
-let allBookings = [], allStaff = [], allTasks = [], allInventory = [], allInquiries = [], allMaintenance = [];
-let allNotifications = [], allAnnouncements = [], allInventoryLog = [];
-let opCalYear = new Date().getFullYear(), opCalMonth = new Date().getMonth();
-
-// ── Auth ──────────────────────────────────────────────────────────────────────
-function doLogin() {
-  const u = document.getElementById('loginUser').value.trim();
-  const p = document.getElementById('loginPass').value;
-  if ((u === ADMIN_USER && p === ADMIN_PASS) || (u === 'superadmin' && p === 'SecurePass2026')) {
-    sessionStorage.setItem('bm_admin', '1');
+// ── AUTH ──
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(u===ADMIN_USER&&p===ADMIN_PASS){
+    sessionStorage.setItem('bm_admin','1');
     document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('adminPanel').classList.remove('hidden');
-    showTab('dashboard'); loadAll();
-    subscribeRealtime();
-    showToast('Welcome!', 'success');
-  } else {
-    const e = document.getElementById('loginErr'); e.classList.remove('hidden'); setTimeout(()=>e.classList.add('hidden'),3000);
-  }
+    document.getElementById('mainPanel').classList.remove('hidden');
+    init();
+  }else{ const e=document.getElementById('loginErr'); e.classList.remove('hidden'); setTimeout(()=>e.classList.add('hidden'),3000); }
 }
-function doLogout() { sessionStorage.removeItem('bm_admin'); location.reload(); }
-if (sessionStorage.getItem('bm_admin')==='1') { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); showTab('dashboard'); loadAll(); subscribeRealtime(); }
-
-// ── Tabs ──────────────────────────────────────────────────────────────────────
-function showTab(name) {
-  document.querySelectorAll('.tab-view').forEach(v=>v.classList.add('hidden'));
-  document.getElementById('tab-'+name).classList.remove('hidden');
-  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  const nb = document.getElementById('nav-'+name); if(nb) nb.classList.add('active');
-  const tabLoaders = { dashboard:renderDashboard, notifications:renderNotifications, verification:renderVerification, confirmed:renderConfirmed, all:()=>renderAll(allBookings), calendar:renderOpCal, guestlog:renderRecentLogs, personnel:renderPersonnel, inventory:renderInventory, announcements:renderAnnouncements, inquiries:renderInquiries };
-  if (tabLoaders[name]) tabLoaders[name]();
+function doLogout(){ sessionStorage.removeItem('bm_admin'); location.reload(); }
+if(sessionStorage.getItem('bm_admin')==='1'){
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainPanel').classList.remove('hidden');
+  init();
 }
 
-// ── Load All Data ─────────────────────────────────────────────────────────────
-async function loadAll() {
-  try {
-    const [bkRes, sfRes, tkRes, invRes, inqRes, mntRes, notifRes, annRes, invLogRes] = await Promise.all([
+async function init(){
+  setT('dashDate',new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'}));
+  await loadAll();
+  subscribeRealtime();
+  setInterval(()=>{ if(sessionStorage.getItem('bm_admin')==='1') loadAll(); },60000);
+}
+
+async function loadAll(){
+  try{
+    const [bk,sf,tk,inv,mnt,notif,ann,invLog,gp,gl]=await Promise.all([
       db.from('bookings').select('*').order('created_at',{ascending:false}),
       db.from('staff').select('*').order('name'),
-      db.from('staff_tasks').select('*,staff(name)').order('created_at',{ascending:false}),
+      db.from('staff_tasks').select('*').order('created_at',{ascending:false}),
       db.from('inventory').select('*').order('item_name'),
-      db.from('inquiries').select('*').order('created_at',{ascending:false}),
       db.from('maintenance').select('*').order('created_at',{ascending:false}),
-      db.from('notifications').select('*').eq('target','admin').order('created_at',{ascending:false}).limit(50),
+      db.from('notifications').select('*').eq('target','admin').order('created_at',{ascending:false}).limit(60),
       db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false}),
-      db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(20),
+      db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(30),
+      db.from('group_pricing').select('*').order('pax_min'),
+      db.from('guest_logs').select('*').order('checked_in_at',{ascending:false}).limit(50),
     ]);
-    allBookings   = bkRes.data  || [];
-    allStaff      = sfRes.data  || [];
-    allTasks      = tkRes.data  || [];
-    allInventory  = invRes.data || [];
-    allInquiries  = inqRes.data || [];
-    allMaintenance= mntRes.data || [];
-    allNotifications = notifRes.data || [];
-    allAnnouncements  = annRes.data || [];
-    allInventoryLog   = invLogRes.data || [];
-    updateBadges();
-    renderDashboard();
-  } catch(e) { console.error(e); showToast('Failed to load data.','error'); }
+    allBookings=bk.data||[]; allStaff=sf.data||[]; allTasks=tk.data||[];
+    allInventory=inv.data||[]; allMaintenance=mnt.data||[];
+    allNotifications=notif.data||[]; allAnnouncements=ann.data||[];
+    allInventoryLog=invLog.data||[]; grpPricing=gp.data||[]; allGuestLogs=gl.data||[];
+    updateBadges(); renderDashboard();
+  }catch(e){ console.error(e); toast('Failed to load data.','error'); }
 }
 
-function updateBadges() {
-  const vp = allBookings.filter(b=>b.status==='pending_payment_verification').length;
-  const ub = document.getElementById('verifBadge'); if(vp>0){ub.textContent=vp;ub.classList.remove('hidden');}else ub.classList.add('hidden');
-  const ui = allInquiries.filter(i=>i.status==='unread').length;
-  const ib = document.getElementById('inqBadge'); if(ui>0){ib.textContent=ui;ib.classList.remove('hidden');}else ib.classList.add('hidden');
-  const un = allNotifications.filter(n=>!n.is_read).length;
-  const nb = document.getElementById('notifBadge'); if(un>0){nb.textContent=un;nb.classList.remove('hidden');}else nb.classList.add('hidden');
-  const low = allInventory.filter(i=>parseFloat(i.quantity||0)<=parseFloat(i.min_stock||0)).length;
-  const invb = document.getElementById('invBadge'); if(low>0){invb.textContent=low;invb.classList.remove('hidden');}else invb.classList.add('hidden');
-  const ua = allAnnouncements.filter(a=>!a.acknowledged&&a.posted_by==='superadmin').length;
-  const ab = document.getElementById('annBadge'); if(ua>0){ab.textContent=ua;ab.classList.remove('hidden');}else ab.classList.add('hidden');
+// ── NAV ──
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-'+name)?.classList.add('active');
+  const map={dashboard:renderDashboard,notifications:renderNotifications,bookings:()=>renderBookings(),
+    calendar:()=>renderCal('cal'),guestlog:renderRecentLogs,personnel:renderPersonnel,
+    inventory:renderInventory,announcements:renderAnnouncements,walkin:()=>{}};
+  if(map[name]) map[name]();
+  if(window.innerWidth<769){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
 }
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+function updateBadges(){
+  setBadge('notifBadge',allNotifications.filter(n=>!n.is_read).length);
+  setBadge('pendingBadge',allBookings.filter(b=>b.status==='pending_payment_verification').length);
+  setBadge('invBadge',allInventory.filter(i=>(i.quantity||0)<=(i.min_stock||0)).length);
+  setBadge('annBadge',allAnnouncements.filter(a=>!a.acknowledged&&a.posted_by==='superadmin').length);
+}
+function setBadge(id,n){ const el=document.getElementById(id); if(!el)return; el.textContent=n; el.classList.toggle('hidden',n===0); }
 
-// ── Notifications (from Super Admin) ───────────────────────────────────────────
-function renderNotifications() {
-  const list = document.getElementById('notificationsList');
-  if (!allNotifications.length) { list.innerHTML = '<p class="text-center text-gray-300 py-8">No notifications yet. You\'ll see booking updates from Super Admin here.</p>'; return; }
-  list.innerHTML = allNotifications.map(n=>{
-    const payload = n.payload || {};
-    const calUrl = payload.calendar_url;
-    const iconMap = { booking_confirmed:'✅', booking_thrown:'❌', payment_received:'💰', guest_checked_in:'🏠', low_stock:'📦', announcement:'📣', task_assigned:'📌' };
-    const icon = iconMap[n.type] || '🔔';
-    return `<div class="sc p-4 ${!n.is_read?'border-l-4 border-gold':''}">
-      <div class="flex justify-between items-start gap-3">
-        <div class="flex-1">
-          <p class="font-semibold text-sm text-gray-800">${icon} ${esc(n.title)}</p>
-          ${n.message?`<p class="text-xs text-gray-500 mt-1">${esc(n.message)}</p>`:''}
-          ${payload.guest_phone?`<p class="text-xs text-gray-400 mt-1"><i class="fas fa-phone text-gold mr-1"></i>${esc(payload.guest_phone)}</p>`:''}
-          <p class="text-xs text-gray-400 mt-1">${fmtDateTime(n.created_at)}</p>
-        </div>
-        ${!n.is_read?`<button onclick="markNotifRead('${n.id}')" class="text-xs text-gray-400 hover:text-gray-600 flex-shrink-0">Mark read</button>`:''}
-      </div>
-      ${calUrl?`<div class="mt-3 flex flex-wrap gap-2">
-        <a href="${calUrl}" target="_blank" onclick="markCalendarSynced('${n.id}','${payload.booking_id||''}')" class="text-xs bg-forest text-white px-3 py-1.5 rounded-lg hover:bg-forest-dark inline-flex items-center gap-1"><i class="fas fa-calendar-plus"></i> ${n.calendar_added?'Added to Calendar ✓':'Add to Google Calendar'}</a>
-        ${n.booking_ref?`<button onclick="openBookingModal('${payload.booking_id}')" class="text-xs border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50">View Booking</button>`:''}
-      </div>`:''}
-    </div>`;
-  }).join('');
-}
-async function markNotifRead(id) {
-  await db.from('notifications').update({is_read:true}).eq('id',id);
-  allNotifications = allNotifications.map(n=>n.id===id?{...n,is_read:true}:n);
-  updateBadges(); renderNotifications();
-}
-async function markAllNotifsRead() {
-  const unread = allNotifications.filter(n=>!n.is_read);
-  if (!unread.length) return;
-  await db.from('notifications').update({is_read:true}).eq('target','admin').eq('is_read',false);
-  allNotifications = allNotifications.map(n=>({...n,is_read:true}));
-  updateBadges(); renderNotifications();
-  showToast('All notifications marked as read.','success');
-}
-// "Add to Google Calendar" opens in a new tab (manual save) — we just
-// remember it was clicked so the button shows "Added ✓" afterwards.
-async function markCalendarSynced(notifId, bookingId) {
-  allNotifications = allNotifications.map(n=>n.id===notifId?{...n,calendar_added:true}:n);
-  renderNotifications();
-  if (bookingId) { try { await db.from('bookings').update({calendar_synced:true}).eq('id',bookingId); } catch(e){} }
-}
+// ── DASHBOARD ──
+function renderDashboard(){
+  const today=todayLocal();
+  const ci=allBookings.filter(b=>b.check_in_date===today&&CONFIRMED.includes(b.status));
+  const co=allBookings.filter(b=>b.check_out_date===today&&CONFIRMED.includes(b.status));
+  setT('dashCICount',ci.length); setT('dashCOCount',co.length);
 
-// ── Announcements (shared notice board with Super Admin) ───────────────────────
-function renderAnnouncements() {
-  const list = document.getElementById('announcementsList');
-  if (!allAnnouncements.length) { list.innerHTML = '<p class="text-center text-gray-300 py-8">No announcements yet. Post one above to share with Super Admin.</p>'; return; }
-  list.innerHTML = allAnnouncements.map(a=>{
-    const who = a.posted_by==='superadmin' ? '👑 Super Admin (Boss)' : '🧑‍💼 You (Admin)';
-    return `<div class="sc p-4 flex items-start gap-3 ${a.pinned?'border-l-4 border-gold':''}">
-      <div class="flex-1">
-        <p class="text-sm text-gray-800">${a.pinned?'📌 ':''}${esc(a.message)}</p>
-        <p class="text-xs text-gray-400 mt-1">${who} · ${fmtDateTime(a.created_at)} ${a.acknowledged?'· <span class="text-forest">✓ Done</span>':''}</p>
-      </div>
-      <div class="flex gap-2 flex-shrink-0">
-        ${!a.acknowledged?`<button onclick="toggleAnnouncementAck('${a.id}',true)" class="text-xs text-forest hover:underline">Mark Done</button>`:`<button onclick="toggleAnnouncementAck('${a.id}',false)" class="text-xs text-gray-400 hover:underline">Undo</button>`}
-      </div>
-    </div>`;
-  }).join('');
-}
-async function postAnnouncement() {
-  const msg = document.getElementById('ann_message').value.trim();
-  if (!msg) { showToast('Write a message first.','error'); return; }
-  try {
-    await db.from('announcements').insert({message:msg, posted_by:'admin', pinned:false, acknowledged:false});
-    document.getElementById('ann_message').value = '';
-    showToast('Posted! Visible to Super Admin instantly.','success');
-    await refreshAnnouncements();
-  } catch(e) { console.error(e); showToast('Failed to post.','error'); }
-}
-async function toggleAnnouncementAck(id, ack) {
-  try { await db.from('announcements').update({acknowledged:ack}).eq('id',id); await refreshAnnouncements(); } catch(e){}
-}
-async function refreshAnnouncements() {
-  const { data } = await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
-  allAnnouncements = data || [];
-  updateBadges(); renderAnnouncements();
-}
-
-// ── Notify Super Admin (boss) of something happening on the ground ─────────────
-async function notifySuperAdmin(type, title, message, extra={}) {
-  try {
-    await db.from('notifications').insert({ type, title, message, payload: extra, target:'superadmin', created_by:'admin' });
-  } catch(e) { console.warn('Could not notify Super Admin:', e); }
-}
-
-// ── Realtime: instant sync with Super Admin panel ───────────────────────────────
-function subscribeRealtime() {
-  // New notifications addressed to Admin → toast + refresh badge/list
-  db.channel('admin-notifications')
-    .on('postgres_changes', {event:'INSERT', schema:'public', table:'notifications', filter:'target=eq.admin'}, (payload)=>{
-      const n = payload.new;
-      allNotifications = [n, ...allNotifications];
-      updateBadges();
-      if (document.getElementById('tab-notifications') && !document.getElementById('tab-notifications').classList.contains('hidden')) renderNotifications();
-      showToast(`🔔 ${n.title}`,'info');
-    })
-    .subscribe();
-
-  // Inventory changes from Super Admin (or this panel) → live refresh
-  db.channel('admin-inventory-sync')
-    .on('postgres_changes', {event:'*', schema:'public', table:'inventory'}, async ()=>{
-      const { data } = await db.from('inventory').select('*').order('item_name');
-      allInventory = data || [];
-      updateBadges();
-      if (document.getElementById('tab-inventory') && !document.getElementById('tab-inventory').classList.contains('hidden')) renderInventory();
-    })
-    .subscribe();
-
-  // Inventory log → refresh recent activity feed
-  db.channel('admin-inventory-log')
-    .on('postgres_changes', {event:'INSERT', schema:'public', table:'inventory_log'}, async ()=>{
-      const { data } = await db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(20);
-      allInventoryLog = data || [];
-      if (document.getElementById('tab-inventory') && !document.getElementById('tab-inventory').classList.contains('hidden')) renderInventory();
-    })
-    .subscribe();
-
-  // Announcements from Super Admin → live refresh
-  db.channel('admin-announcements')
-    .on('postgres_changes', {event:'*', schema:'public', table:'announcements'}, async ()=>{
-      await refreshAnnouncements();
-    })
-    .subscribe();
-}
-
-// ── Dashboard ─────────────────────────────────────────────────────────────────
-function renderDashboard() {
-  document.getElementById('dashDateDisplay').textContent = new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const todayStr = new Date().toISOString().split('T')[0];
-  const ciToday  = allBookings.filter(b=>b.check_in_date===todayStr && ['confirmed','confirmed_balance_due','fully_paid'].includes(b.status));
-  const coToday  = allBookings.filter(b=>b.check_out_date===todayStr && ['confirmed','confirmed_balance_due','fully_paid'].includes(b.status));
-  const pending  = allBookings.filter(b=>b.status==='pending_payment_verification');
-  const balance  = allBookings.filter(b=>['confirmed','confirmed_balance_due'].includes(b.status)).reduce((s,b)=>s+(b.remaining_balance||0),0);
-
-  document.getElementById('dashCICount').textContent = ciToday.length;
-  document.getElementById('dashCOCount').textContent = coToday.length;
-  document.getElementById('dashPendingCount').textContent = pending.length;
-  document.getElementById('dashBalance').textContent = '₱'+balance.toLocaleString();
-
-  // CI list
-  document.getElementById('todayCI').innerHTML = ciToday.length===0 ?
-    '<div class="p-4 text-sm text-gray-300 text-center">No check-ins today.</div>' :
-    ciToday.map(b=>`<div class="p-4">
-      <div class="flex justify-between items-start">
+  document.getElementById('todayCI').innerHTML=ci.length
+    ?ci.map(b=>`<div class="p-4 border-b border-gray-50 last:border-0">
+      <div class="flex justify-between items-start gap-2">
         <div><p class="font-semibold text-gray-800 text-sm">${esc(b.guest_name)}</p>
           <p class="text-xs text-gray-400">${b.room_type} · ${b.pax_count||b.adults} pax</p>
-          ${b.special_requests?`<p class="text-xs text-amber-600 mt-1"><i class="fas fa-comment mr-1"></i>${esc(b.special_requests.substring(0,60))}${b.special_requests.length>60?'...':''}</p>`:''}
+          ${b.special_requests?`<p class="text-xs text-amber-600 mt-1"><i class="fas fa-comment mr-1"></i>${esc(b.special_requests.slice(0,60))}</p>`:''}
         </div>
-        <div class="text-right">
-          <span class="badge b-confirmed text-xs">Check-in</span>
-          ${(b.remaining_balance||0)>0?`<p class="text-xs text-red-600 mt-1 font-medium">Balance: ₱${b.remaining_balance.toLocaleString()}</p>`:'<p class="text-xs text-green-600 mt-1">Fully Paid ✓</p>'}
-        </div>
+        <div class="text-right flex-shrink-0">${(b.remaining_balance||0)>0?`<p class="text-xs text-red-600 font-medium">Balance: &#8369;${b.remaining_balance.toLocaleString()}</p>`:'<p class="text-xs text-green-600">Fully Paid ✓</p>'}</div>
       </div>
-      <div class="flex gap-2 mt-3">
-        <button onclick="openBookingModal('${b.id}')" class="text-xs border border-gray-200 px-3 py-1 rounded-lg hover:bg-gray-50">View</button>
-        <button onclick="showTab('guestlog')" class="text-xs bg-forest/10 text-forest px-3 py-1 rounded-lg hover:bg-forest/20">Log Guest</button>
-        ${(b.remaining_balance||0)>0?`<button onclick="openPaymentModal('${b.id}',${b.remaining_balance})" class="text-xs bg-gold/10 text-yellow-700 px-3 py-1 rounded-lg hover:bg-gold/20">Mark Payment</button>`:''}
+      <div class="flex gap-2 mt-2 flex-wrap">
+        <button onclick="openBookingModal('${b.id}')" class="text-xs border border-gray-200 px-3 py-1 rounded-lg hover:bg-gray-50">View / Edit</button>
+        <button onclick="openGuestLogForRef('${b.booking_ref}')" class="text-xs bg-forest/10 text-forest px-3 py-1 rounded-lg hover:bg-forest/20">Log Guest</button>
       </div>
-    </div>`).join('');
+    </div>`).join('')
+    :'<div class="p-5 text-sm text-gray-300 text-center">No check-ins today.</div>';
 
-  // CO list
-  document.getElementById('todayCO').innerHTML = coToday.length===0 ?
-    '<div class="p-4 text-sm text-gray-300 text-center">No check-outs today.</div>' :
-    coToday.map(b=>`<div class="p-4 flex justify-between items-center">
+  document.getElementById('todayCO').innerHTML=co.length
+    ?co.map(b=>`<div class="p-4 border-b border-gray-50 last:border-0 flex justify-between items-center gap-2">
       <div><p class="font-semibold text-gray-800 text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.room_type}</p></div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 flex-shrink-0">
         <button onclick="openBookingModal('${b.id}')" class="text-xs border border-gray-200 px-3 py-1 rounded-lg hover:bg-gray-50">View</button>
         <button onclick="markCompleted('${b.id}')" class="text-xs bg-forest text-white px-3 py-1 rounded-lg hover:bg-forest-dark">Done ✓</button>
       </div>
-    </div>`).join('');
+    </div>`).join('')
+    :'<div class="p-5 text-sm text-gray-300 text-center">No check-outs today.</div>';
 
-  // Activity log (last 10 bookings as activity)
-  const recent = allBookings.slice(0,8);
-  document.getElementById('activityLog').innerHTML = recent.length===0 ? '<p class="text-gray-300">No activity yet.</p>' :
-    recent.map(b=>{
-      const dotColor = b.status==='confirmed'?'bg-green-500':b.status==='pending_payment_verification'?'bg-yellow-500':b.status==='declined'?'bg-red-500':'bg-gray-400';
-      const action = b.status==='pending_payment_verification'?'Submitted booking':b.status==='confirmed'?'Booking confirmed':STATUS_LABELS[b.status]||b.status;
-      return `<div class="activity-item"><div class="act-dot ${dotColor}"></div><div><p class="text-sm text-gray-700">${esc(b.guest_name)} – ${esc(b.room_type)}</p><p class="text-xs text-gray-400">${action} · ${fmtDateTime(b.created_at)}</p></div></div>`;
-    }).join('');
+  renderCal('dash');
 
-  // Tasks
-  const activeTasks = allTasks.filter(t=>t.status==='pending'||t.status==='in_progress');
-  document.getElementById('taskCount').textContent = activeTasks.length + ' active';
-  document.getElementById('tasksList').innerHTML = activeTasks.length===0 ? '<p class="text-gray-300 text-xs">No tasks assigned.</p>' :
-    activeTasks.slice(0,6).map(t=>`<div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+  const tasks=allTasks.filter(t=>['pending','in_progress'].includes(t.status));
+  setT('taskCount',tasks.length+' active');
+  document.getElementById('tasksList').innerHTML=tasks.length
+    ?tasks.slice(0,6).map(t=>`<div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
       <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${t.priority==='urgent'?'bg-red-500':t.priority==='high'?'bg-orange-400':'bg-blue-400'}"></span>
-      <div class="flex-1 min-w-0"><p class="font-medium text-xs text-gray-800 truncate">${esc(t.task_name)}</p><p class="text-xs text-gray-400">${t.staff?.name||'Unassigned'} ${t.due_date?'· Due '+t.due_date:''}</p></div>
-      <button onclick="updateTask('${t.id}','completed')" class="text-xs text-green-600 hover:underline flex-shrink-0">Done</button>
-    </div>`).join('');
-}
+      <div class="flex-1 min-w-0">
+        <p class="font-medium text-xs text-gray-800 truncate">${esc(t.task_name)}</p>
+        <p class="text-xs text-gray-400">${t.due_date?'Due '+fmtDate(t.due_date):''}</p>
+      </div>
+      <button onclick="completeTask('${t.id}')" class="text-xs text-green-600 hover:underline flex-shrink-0">Done</button>
+    </div>`).join('')
+    :'<p class="text-gray-300 text-xs text-center py-4">No active tasks.</p>';
 
-// ── Verification ──────────────────────────────────────────────────────────────
-function renderVerification() {
-  const pending = allBookings.filter(b=>b.status==='pending_payment_verification');
-  const tbl = document.getElementById('verifTable');
-  tbl.innerHTML = pending.length===0 ? `<tr><td colspan="7" class="tc text-center text-gray-300 py-8">No bookings pending verification. ✅</td></tr>` :
-    pending.map(b=>`<tr class="hover:bg-gray-50">
-      <td class="tc text-xs text-gray-400">${fmtDate(b.created_at)}</td>
-      <td class="tc"><p class="font-medium text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_email}</p></td>
-      <td class="tc text-sm text-gray-700">${b.room_type}</td>
-      <td class="tc text-xs text-gray-600">${fmtDate(b.check_in_date)}<br/><span class="text-gray-400">→ ${fmtDate(b.check_out_date)}</span></td>
-      <td class="tc"><p class="font-bold text-forest text-sm">₱${(b.deposit_amount||0).toLocaleString()}</p><p class="text-xs text-gray-400">${b.payment_type==='full'?'Full payment':'50% downpayment'}</p></td>
-      <td class="tc">${b.payment_proof_url?`<a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest underline flex items-center gap-1"><i class="fas fa-image"></i> View</a>`:'<span class="text-xs text-gray-300">No file</span>'}</td>
-      <td class="tc">
-        <div class="flex flex-col gap-1">
-          <button onclick="approveBooking('${b.id}','confirmed')" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg">✓ Confirm</button>
-          <button onclick="approveBooking('${b.id}','declined')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg">✗ Decline</button>
-        </div>
-      </td>
-    </tr>`).join('');
-}
+  const reminders=allAnnouncements.filter(a=>a.posted_by==='superadmin'&&!a.acknowledged).slice(0,4);
+  document.getElementById('remindersList').innerHTML=reminders.length
+    ?reminders.map(a=>`<div class="flex items-start gap-2 p-3 bg-amber-50 border border-amber-100 rounded-xl ${a.pinned?'border-l-4 border-gold':''}">
+      <i class="fas fa-thumbtack text-gold flex-shrink-0 mt-0.5 text-xs"></i>
+      <div class="flex-1 min-w-0"><p class="text-xs text-gray-700">${esc(a.message)}</p><p class="text-xs text-gray-400 mt-0.5">${fmtDateTime(a.created_at)}</p></div>
+      <button onclick="ackAnnouncement('${a.id}')" class="text-xs text-forest hover:underline flex-shrink-0">Done</button>
+    </div>`).join('')
+    :'<p class="text-gray-300 text-xs text-center py-4">No reminders from Super Admin.</p>';
 
-async function approveBooking(id, newStatus) {
-  const b = allBookings.find(x=>x.id===id);
-  if (!b) return;
-  const msg = newStatus==='confirmed' ? `Confirm booking for ${b.guest_name}?` : `Decline booking for ${b.guest_name}? They will be notified.`;
-  if (!confirm(msg)) return;
-  try {
-    const updates = { status: newStatus };
-    if (newStatus==='confirmed') updates.confirmed_at = new Date().toISOString();
-    const { error } = await db.from('bookings').update(updates).eq('id', id);
-    if (error) throw error;
-    if (newStatus==='confirmed') await sendConfirmEmail(b);
-    else await sendDeclineEmail(b);
-    showToast(newStatus==='confirmed'?`✅ Booking confirmed for ${b.guest_name}!`:'Booking declined.','success');
-    await loadAll();
-    renderVerification();
-  } catch(e) { console.error(e); showToast('Action failed.','error'); }
-}
+  const active=allStaff.filter(s=>s.status==='active');
+  document.getElementById('staffToday').innerHTML=active.length
+    ?active.map(s=>`<div class="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl">
+      <div class="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center font-bold text-forest text-sm flex-shrink-0">${s.name.charAt(0)}</div>
+      <div class="flex-1 min-w-0"><p class="font-medium text-sm text-gray-800 truncate">${esc(s.name)}</p><p class="text-xs text-gray-400">${s.role}</p></div>
+      <span class="badge b-conf text-xs">Active</span>
+    </div>`).join('')
+    :'<p class="text-gray-300 text-xs text-center py-4">No active staff.</p>';
 
-async function sendConfirmEmail(b) {
-  const calStart = b.check_in_date.replace(/-/g,'');
-  const calEnd   = b.check_out_date.replace(/-/g,'');
-  const calUrl   = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Balay Maysa '+b.booking_ref)}&dates=${calStart}/${calEnd}&location=${encodeURIComponent('Blk 8 Lot 12 M.Cuenco St., Caloocan North')}`;
-  const html = `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;background:#faf8f5;border-radius:16px;overflow:hidden;">
-  <div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1><p style="color:rgba(255,255,255,.7);font-size:13px;margin:8px 0 0;">🎉 Booking Confirmed!</p></div>
-  <div style="padding:40px;">
-    <p>Hello <strong>${esc(b.guest_name)}</strong>,</p>
-    <p style="color:#666;line-height:1.7;">Great news! Your booking has been <strong style="color:#2d5a3b;">CONFIRMED</strong>. We look forward to welcoming you at Balay Maysa!</p>
-    <div style="background:white;border-radius:12px;padding:24px;margin:24px 0;border-left:4px solid #c9a03d;">
-      <table style="width:100%;font-size:14px;border-collapse:collapse;">
-        <tr><td style="padding:6px 0;color:#666;width:160px;">Reference</td><td style="font-weight:700;font-family:monospace;">${b.booking_ref}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Room(s)</td><td>${b.room_type}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Check-in</td><td>${fmtDate(b.check_in_date)}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Check-out</td><td>${fmtDate(b.check_out_date)}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;">Balance on Arrival</td><td style="color:#dc2626;font-weight:600;">₱${(b.remaining_balance||0).toLocaleString()}</td></tr>
-      </table>
-    </div>
-    <div style="text-align:center;margin:24px 0;"><a href="${calUrl}" style="background:#2d5a3b;color:white;padding:14px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:500;">📅 Add to Google Calendar</a></div>
-    <div style="background:#fef9ee;border-radius:12px;padding:18px 24px;"><p style="margin:0;color:#92400e;font-size:13px;"><strong>📍</strong> Blk 8 Lot 12 M.Cuenco St., Congress Village, Caloocan North</p><p style="margin:6px 0 0;color:#92400e;font-size:13px;"><strong>📞</strong> <a href="tel:09175657918" style="color:#92400e;">0917 565 7918</a></p></div>
-  </div>
-  <div style="background:#2d5a3b;padding:20px;text-align:center;"><p style="color:rgba(255,255,255,.6);font-size:12px;margin:0;">Balay Maysa Resort · Congress Village, Caloocan North</p></div>
-</div>`;
-  await sendEmail(b.guest_email, `Balay Maysa CONFIRMED – ${b.booking_ref}`, html);
-}
-
-async function sendDeclineEmail(b) {
-  const html = `<div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;"><div style="background:#2d5a3b;padding:32px 40px;text-align:center;"><h1 style="font-family:Georgia,serif;color:white;font-size:28px;font-weight:300;margin:0;">Balay Maysa Resort</h1></div><div style="padding:40px;"><p>Hello <strong>${esc(b.guest_name)}</strong>,</p><p style="color:#666;line-height:1.7;">We regret that your booking (<strong>${b.booking_ref}</strong>) could not be accommodated. Please contact us to explore other dates.</p><p style="color:#666;font-size:13px;">📞 <a href="tel:09175657918" style="color:#2d5a3b;">0917 565 7918</a></p></div></div>`;
-  await sendEmail(b.guest_email, `Balay Maysa Booking Update – ${b.booking_ref}`, html);
-}
-
-// ── Confirmed / All ───────────────────────────────────────────────────────────
-function renderConfirmed() {
-  const confirmed = allBookings.filter(b=>['confirmed','confirmed_balance_due','fully_paid'].includes(b.status));
-  const tbl = document.getElementById('confirmedTable');
-  tbl.innerHTML = confirmed.length===0 ? `<tr><td colspan="7" class="tc text-center text-gray-300 py-8">No confirmed bookings.</td></tr>` :
-    confirmed.map(b=>`<tr class="hover:bg-gray-50 cursor-pointer" onclick="openBookingModal('${b.id}')">
-      <td class="tc text-xs font-mono text-gray-500">${b.booking_ref}</td>
-      <td class="tc font-medium">${esc(b.guest_name)}</td>
-      <td class="tc text-sm text-gray-600">${b.room_type}</td>
-      <td class="tc text-xs text-gray-600">${fmtDate(b.check_in_date)}</td>
-      <td class="tc text-xs text-gray-600">${fmtDate(b.check_out_date)}</td>
-      <td class="tc font-semibold ${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}">₱${(b.remaining_balance||0).toLocaleString()}</td>
-      <td class="tc" onclick="event.stopPropagation()">
-        <div class="flex gap-2">
-          ${(b.remaining_balance||0)>0?`<button onclick="openPaymentModal('${b.id}',${b.remaining_balance})" class="text-xs text-green-600 hover:underline">Mark Paid</button>`:''}
-          <button onclick="markCompleted('${b.id}')" class="text-xs text-purple-600 hover:underline">Completed</button>
-        </div>
-      </td>
-    </tr>`).join('');
-}
-
-function renderAll(data) {
-  const tbl = document.getElementById('allTable');
-  tbl.innerHTML = data.length===0 ? `<tr><td colspan="8" class="tc text-center text-gray-300 py-8">No bookings.</td></tr>` :
-    data.map(b=>`<tr class="hover:bg-gray-50 cursor-pointer" onclick="openBookingModal('${b.id}')">
-      <td class="tc text-xs font-mono text-gray-500">${b.booking_ref}</td>
-      <td class="tc"><p class="font-medium text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_phone||''}</p></td>
-      <td class="tc text-sm text-gray-600">${b.room_type}</td>
-      <td class="tc text-xs text-gray-600">${fmtDate(b.check_in_date)}</td>
-      <td class="tc font-medium text-gray-700">${b.total_amount?'₱'+b.total_amount.toLocaleString():'—'}</td>
-      <td class="tc"><span class="badge ${b.payment_type==='full'?'b-paid':'b-pending'} text-xs">${b.payment_type==='full'?'Full':'Down'}</span></td>
-      <td class="tc"><span class="badge ${STATUS_CSS[b.status]||'b-pending'} text-xs">${STATUS_LABELS[b.status]||b.status}</span></td>
-      <td class="tc" onclick="event.stopPropagation()"><button onclick="openBookingModal('${b.id}')" class="text-xs text-forest underline">Details</button></td>
-    </tr>`).join('');
-}
-
-function filterAll() {
-  const q = document.getElementById('searchAll').value.toLowerCase();
-  const filtered = allBookings.filter(b=>(b.guest_name||'').toLowerCase().includes(q)||(b.booking_ref||'').toLowerCase().includes(q)||(b.room_type||'').toLowerCase().includes(q));
-  renderAll(filtered);
-}
-
-// ── Calendar ──────────────────────────────────────────────────────────────────
-function opCalPrev() { opCalMonth--; if(opCalMonth<0){opCalMonth=11;opCalYear--;} renderOpCal(); }
-function opCalNext() { opCalMonth++; if(opCalMonth>11){opCalMonth=0;opCalYear++;} renderOpCal(); }
-
-function renderOpCal() {
-  const label = new Date(opCalYear, opCalMonth, 1).toLocaleDateString('en-PH',{month:'long',year:'numeric'});
-  document.getElementById('opCalLabel').textContent = label;
-  const firstDay   = new Date(opCalYear, opCalMonth, 1).getDay();
-  const daysInMonth= new Date(opCalYear, opCalMonth+1, 0).getDate();
-  const todayStr   = new Date().toISOString().split('T')[0];
-
-  const events = {};
-  const addEv  = (date, ev) => { if(!events[date]) events[date]=[]; events[date].push(ev); };
-
-  allBookings.filter(b=>['confirmed','confirmed_balance_due','fully_paid'].includes(b.status)).forEach(b=>{
-    addEv(b.check_in_date,  {label:`↓ ${b.guest_name.split(' ')[0]}`, color:'bg-green-100 text-green-800'});
-    addEv(b.check_out_date, {label:`↑ ${b.guest_name.split(' ')[0]}`, color:'bg-blue-100 text-blue-800'});
-  });
-  allTasks.filter(t=>t.due_date&&t.status!=='completed').forEach(t=>{
-    addEv(t.due_date,{label:`📌 ${t.task_name.substring(0,12)}`,color:'bg-purple-100 text-purple-800'});
-  });
-  allMaintenance.filter(m=>m.status!=='completed').forEach(m=>{
-    addEv(m.reported_date,{label:`🔧 ${m.room_name}`,color:'bg-red-100 text-red-700'});
-  });
-
-  let html = '';
-  for (let i=0;i<firstDay;i++) html += '<div class="bg-gray-50 rounded-lg opacity-30" style="min-height:72px;"></div>';
-  for (let d=1;d<=daysInMonth;d++) {
-    const ds = `${opCalYear}-${String(opCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday = ds===todayStr;
-    const dayEvs  = events[ds]||[];
-    html += `<div class="rounded-lg border ${isToday?'border-forest ring-2 ring-forest bg-forest/5':'border-gray-100 bg-white hover:bg-gray-50'} p-1.5" style="min-height:72px;">
-      <p class="text-xs font-bold mb-1 ${isToday?'text-forest':'text-gray-500'}">${d}</p>
-      ${dayEvs.slice(0,3).map(e=>`<div class="cal-event ${e.color}">${e.label}</div>`).join('')}
-      ${dayEvs.length>3?`<div class="cal-event bg-gray-100 text-gray-500">+${dayEvs.length-3}</div>`:''}
+  document.getElementById('activityLog').innerHTML=allBookings.slice(0,8).map(b=>{
+    const dot=b.status==='confirmed'?'bg-green-500':b.status==='pending_payment_verification'?'bg-yellow-500':b.status==='declined'?'bg-red-500':'bg-gray-400';
+    return `<div class="flex items-start gap-2.5 py-1.5 border-b border-gray-50 last:border-0">
+      <span class="w-2 h-2 rounded-full ${dot} flex-shrink-0 mt-1.5"></span>
+      <div class="flex-1 min-w-0"><p class="text-xs text-gray-700 truncate">${esc(b.guest_name)} — ${esc(b.room_type||'')}</p>
+      <p class="text-xs text-gray-400">${STATUS_LABELS[b.status]||b.status} · ${fmtDateTime(b.created_at)}</p></div>
     </div>`;
-  }
-  document.getElementById('opCalGrid').innerHTML = html;
+  }).join('')||'<p class="text-gray-300 text-xs">No activity.</p>';
 }
 
-// ── Guest Log ─────────────────────────────────────────────────────────────────
-async function fetchBookingForLog() {
-  const ref = document.getElementById('gl_ref').value.trim().toUpperCase();
-  if (!ref) { showToast('Enter a booking reference.','error'); return; }
-  try {
-    const { data, error } = await db.from('bookings').select('*').ilike('booking_ref', ref).single();
-    if (error || !data) { showToast('Booking not found.','error'); return; }
-    document.getElementById('gl_guestName').textContent    = data.guest_name;
-    document.getElementById('gl_bookingDetails').textContent = `${data.room_type} · ${fmtDate(data.check_in_date)} → ${fmtDate(data.check_out_date)}`;
-    document.getElementById('gl_adults').value  = data.adults||2;
-    document.getElementById('gl_bookingInfo').classList.remove('hidden');
-    showToast('Booking found!','success');
-  } catch(e) { showToast('Booking not found.','error'); }
-}
-
-async function submitGuestLog() {
-  const ref   = document.getElementById('gl_ref').value.trim().toUpperCase();
-  const names = document.getElementById('gl_names').value.trim().split('\n').filter(n=>n.trim());
-  if (!ref || names.length===0) { showToast('Please enter the booking ref and at least one guest name.','error'); return; }
-  if (!document.getElementById('gl_agree').checked) { showToast('Guest must agree to house rules.','error'); return; }
-
-  document.getElementById('glSubmitText').textContent='Saving...';
-  document.getElementById('glSpin').classList.remove('hidden');
-  document.getElementById('glSubmitBtn').disabled=true;
-  try {
-    const { error } = await db.from('guest_logs').insert({
-      booking_ref: ref,
-      guest_names: JSON.stringify(names),
-      adults_count: parseInt(document.getElementById('gl_adults').value)||0,
-      children_above_3: parseInt(document.getElementById('gl_ch_above').value)||0,
-      children_below_3: parseInt(document.getElementById('gl_ch_below').value)||0,
-      pets_count: parseInt(document.getElementById('gl_pets').value)||0,
-      house_rules_agreed: true,
-      security_deposit: parseInt(document.getElementById('gl_deposit').value)||0,
-      special_notes: document.getElementById('gl_notes').value.trim()||null,
-      logged_by: 'admin',
-    });
-    if (error) throw error;
-    showToast('Guest check-in logged!','success');
-    await notifySuperAdmin('guest_checked_in', `🏠 Guest Checked In — ${ref}`, `${names.length} guest(s) logged in. ${document.getElementById('gl_deposit').value>0?'Security deposit: ₱'+document.getElementById('gl_deposit').value:''}`, {booking_ref:ref});
-    ['gl_ref','gl_names','gl_notes'].forEach(f=>document.getElementById(f).value='');
-    document.getElementById('gl_agree').checked=false;
-    document.getElementById('gl_bookingInfo').classList.add('hidden');
-    await renderRecentLogs();
-  } catch(e) { console.error(e); showToast('Failed to save log.','error'); }
-  finally {
-    document.getElementById('glSubmitText').textContent='Log Check-in';
-    document.getElementById('glSpin').classList.add('hidden');
-    document.getElementById('glSubmitBtn').disabled=false;
-  }
-}
-
-async function renderRecentLogs() {
-  try {
-    const { data } = await db.from('guest_logs').select('*').order('checked_in_at',{ascending:false}).limit(10);
-    const el = document.getElementById('recentLogs');
-    el.innerHTML = (data||[]).length===0 ? '<p class="text-gray-300 text-xs">No guest logs yet.</p>' :
-      (data||[]).map(l=>{
-        const names = (() => { try { const n = typeof l.guest_names==='string'?JSON.parse(l.guest_names):l.guest_names; return Array.isArray(n)?n:n; } catch(e){return [];} })();
-        return `<div class="p-3 bg-gray-50 rounded-xl">
-          <div class="flex justify-between items-start mb-1">
-            <p class="font-semibold text-sm text-gray-800">${l.booking_ref}</p>
-            <p class="text-xs text-gray-400">${fmtDateTime(l.checked_in_at)}</p>
-          </div>
-          <p class="text-xs text-gray-500">${l.adults_count} adults, ${l.children_above_3} kids (3+), ${l.children_below_3} infants · ${l.pets_count} pets</p>
-          <p class="text-xs text-gray-400 mt-1">${Array.isArray(names)?names.join(', '):names}</p>
-          ${l.security_deposit>0?`<p class="text-xs text-green-600 mt-1">Security deposit: ₱${l.security_deposit.toLocaleString()}</p>`:''}
-        </div>`;
-      }).join('');
-  } catch(e) { console.error(e); }
-}
-
-// ── Walk-in Booking ───────────────────────────────────────────────────────────
-function calcWIPrice() {
-  const ci = document.getElementById('wi_ci').value;
-  const co = document.getElementById('wi_co').value;
-  const box = document.getElementById('wiPriceBox');
-  if (!ci || !co) { box.classList.add('hidden'); return; }
-  const nights = Math.max(0,(new Date(co)-new Date(ci))/86400000);
-  document.getElementById('wi_nights').textContent = nights + ' night' + (nights!==1?'s':'');
-  document.getElementById('wi_suggested').textContent = '(enter manually)';
-  box.classList.remove('hidden');
-}
-
-async function submitWalkIn() {
-  const name  = document.getElementById('wi_name').value.trim();
-  const phone = document.getElementById('wi_phone').value.trim();
-  const room  = document.getElementById('wi_room').value;
-  const ci    = document.getElementById('wi_ci').value;
-  const co    = document.getElementById('wi_co').value;
-  const total = parseInt(document.getElementById('wi_total').value)||0;
-  const adults= parseInt(document.getElementById('wi_adults').value)||1;
-  if (!name||!phone||!ci||!co||!total) { showToast('Please fill all required fields.','error'); return; }
-
-  const payStatus = document.getElementById('wi_paystatus').value;
-  const balance   = payStatus==='fully_paid' ? 0 : payStatus==='deposit_paid' ? Math.ceil(total*0.5) : total;
-  const ref = `BM-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
-
-  document.getElementById('wiText').textContent='Saving...'; document.getElementById('wiSpin').classList.remove('hidden'); document.getElementById('wiBtn').disabled=true;
-  try {
-    const { error } = await db.from('bookings').insert({
-      booking_ref: ref, guest_name: name, guest_phone: phone,
-      guest_email: document.getElementById('wi_email').value||null,
-      room_type: room, rooms_selected: JSON.stringify([room]),
-      check_in_date: ci, check_out_date: co,
-      adults, children: parseInt(document.getElementById('wi_ch').value)||0,
-      children_below_3: parseInt(document.getElementById('wi_inf').value)||0,
-      pax_count: adults,
-      total_amount: total,
-      deposit_amount: payStatus==='fully_paid'?total:Math.ceil(total*0.5),
-      remaining_balance: balance,
-      payment_status: payStatus,
-      payment_type: payStatus==='fully_paid'?'full':'downpayment',
-      status: 'confirmed',
-      booking_type: 'walk-in',
-      special_requests: document.getElementById('wi_notes').value||null,
-      confirmed_at: new Date().toISOString(),
-      edit_log: JSON.stringify([{action:'created as walk-in',at:new Date().toISOString(),by:'admin'}]),
-    });
-    if (error) throw error;
-    showToast(`Walk-in booking created! Ref: ${ref}`,'success');
-    ['wi_name','wi_phone','wi_email','wi_ci','wi_co','wi_total','wi_notes'].forEach(f=>document.getElementById(f).value='');
-    document.getElementById('wi_adults').value='2';
-    await loadAll();
-  } catch(e) { console.error(e); showToast('Failed.','error'); }
-  finally { document.getElementById('wiText').textContent='Create Walk-in Booking'; document.getElementById('wiSpin').classList.add('hidden'); document.getElementById('wiBtn').disabled=false; }
-}
-
-// ── Personnel ─────────────────────────────────────────────────────────────────
-function renderPersonnel() {
-  const grid = document.getElementById('personnelGrid');
-  grid.innerHTML = allStaff.length===0 ? '<p class="text-gray-400 text-sm col-span-3">No staff added. Add staff in Super Admin.</p>' :
-    allStaff.map(s=>`<div class="sc p-5">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-10 h-10 rounded-full bg-forest/10 flex items-center justify-center font-bold text-forest flex-shrink-0">${s.name.charAt(0)}</div>
-        <div><p class="font-semibold text-gray-800 text-sm">${esc(s.name)}</p><p class="text-xs text-gray-400">${s.role}</p></div>
-        <span class="ml-auto badge ${s.status==='active'?'b-confirmed':'badge bg-gray-100 text-gray-500'} text-xs">${s.status}</span>
+// ── NOTIFICATIONS ──
+function renderNotifications(){
+  const el=document.getElementById('notifList');
+  if(!allNotifications.length){el.innerHTML='<p class="text-center text-gray-300 py-8">No notifications yet.</p>';return;}
+  el.innerHTML=allNotifications.map(n=>`<div class="sc p-4 ${!n.is_read?'border-l-4 border-gold':''}">
+    <div class="flex justify-between items-start gap-3">
+      <div class="flex-1"><p class="font-semibold text-sm text-gray-800">${esc(n.title)}</p>
+        ${n.message?`<p class="text-xs text-gray-500 mt-1">${esc(n.message)}</p>`:''}
+        <p class="text-xs text-gray-400 mt-1">${fmtDateTime(n.created_at)}</p>
       </div>
-      <p class="text-xs text-gray-500"><i class="fas fa-phone text-gold mr-1"></i>${s.phone||'—'}</p>
-    </div>`).join('');
-}
-
-// ── Inventory ─────────────────────────────────────────────────────────────────
-function renderInventory() {
-  const low = allInventory.filter(i=>parseFloat(i.quantity||0)<=parseFloat(i.min_stock||0));
-  const banner = document.getElementById('lowStockBanner');
-  if (low.length>0) { banner.classList.remove('hidden'); document.getElementById('lowStockMsg').textContent=`${low.length} item(s) below minimum stock: ${low.map(i=>i.item_name).join(', ')}`; }
-  else banner.classList.add('hidden');
-  const tbl = document.getElementById('inventoryTable');
-  tbl.innerHTML = allInventory.length===0 ? `<tr><td colspan="4" class="tc text-center text-gray-300 py-8">No inventory. Add items in Super Admin.</td></tr>` :
-    allInventory.map(i=>{
-      const isLow = parseFloat(i.quantity||0)<=parseFloat(i.min_stock||0);
-      return `<tr class="${isLow?'bg-amber-50':'hover:bg-gray-50'}">
-        <td class="tc font-medium ${isLow?'text-amber-700':''}">${esc(i.item_name)} ${isLow?'<span class="text-xs text-red-500 ml-1">⚠ LOW</span>':''}<p class="text-xs text-gray-400">${i.category||'—'}</p></td>
-        <td class="tc font-bold ${isLow?'text-red-600':'text-gray-800'}">${i.quantity||0} ${i.unit||''}<p class="text-xs text-gray-400 font-normal">min ${i.min_stock||0}</p></td>
-        <td class="tc"><span class="badge ${isLow?'b-declined':'b-confirmed'} text-xs">${isLow?'Low Stock':'OK'}</span></td>
-        <td class="tc">
-          <div class="flex gap-2">
-            <button onclick="adjustInventory('${i.id}','${esc(i.item_name)}',${i.quantity||0},'use')" class="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 flex items-center gap-1"><i class="fas fa-minus"></i> Use</button>
-            <button onclick="adjustInventory('${i.id}','${esc(i.item_name)}',${i.quantity||0},'restock')" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Restock</button>
-          </div>
-        </td>
-      </tr>`;
-    }).join('');
-
-  // Recent stock changes feed
-  const logEl = document.getElementById('inventoryLog');
-  if (logEl) {
-    logEl.innerHTML = allInventoryLog.length===0 ? '<p class="text-gray-300 text-xs">No stock changes logged yet.</p>' :
-      allInventoryLog.map(l=>{
-        const isUse = l.change_amount < 0;
-        const who = l.logged_by==='superadmin' ? 'Super Admin' : 'Admin';
-        return `<div class="flex justify-between items-start p-2.5 bg-gray-50 rounded-xl">
-          <div>
-            <p class="text-sm text-gray-700">${esc(l.item_name||'Item')} <span class="${isUse?'text-red-600':'text-green-600'} font-semibold">${isUse?'':'+'}${l.change_amount}</span></p>
-            <p class="text-xs text-gray-400">${l.reason||(isUse?'Used':'Restocked')} · by ${who} · ${fmtDateTime(l.created_at)}</p>
-          </div>
-          <span class="text-xs font-medium text-gray-500">→ ${l.new_quantity}</span>
-        </div>`;
-      }).join('');
-  }
-}
-
-// Simple "Use" / "Restock" prompt — friendly for non-technical staff.
-// Logs every change to inventory_log so both panels see an audit trail,
-// and updates the shared `inventory` table (Realtime pushes the change
-// to Super Admin instantly).
-async function adjustInventory(id, name, currentQty, mode) {
-  const verb = mode==='use' ? 'use' : 'add (restock)';
-  const amountStr = prompt(`How many ${name} did you ${verb}?`, mode==='use'?'1':'');
-  if (amountStr===null) return;
-  const amount = parseFloat(amountStr);
-  if (!amount || amount<=0) { showToast('Enter a number greater than 0.','error'); return; }
-
-  const change = mode==='use' ? -Math.abs(amount) : Math.abs(amount);
-  const newQty = Math.max(0, (parseFloat(currentQty)||0) + change);
-
-  try {
-    await db.from('inventory').update({ quantity:newQty, updated_at:new Date().toISOString() }).eq('id', id);
-    await db.from('inventory_log').insert({
-      item_id:id, item_name:name, change_amount:change, new_quantity:newQty,
-      reason: mode==='use' ? 'Used by Admin' : 'Restocked by Admin',
-      logged_by:'admin',
-    });
-    showToast(`${name} updated: ${newQty} left.`,'success');
-
-    // If this just dropped below minimum, let the boss know.
-    const item = allInventory.find(i=>i.id===id);
-    if (item && newQty<=(item.min_stock||0) && (parseFloat(currentQty)||0)>(item.min_stock||0)) {
-      await notifySuperAdmin('low_stock', `📦 Low Stock — ${name}`, `${name} is now at ${newQty} ${item.unit||''} (minimum: ${item.min_stock||0}).`, {item_id:id});
-    }
-
-    const { data } = await db.from('inventory').select('*').order('item_name');
-    allInventory = data || [];
-    const { data: logData } = await db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(20);
-    allInventoryLog = logData || [];
-    updateBadges();
-    renderInventory();
-  } catch(e) { console.error(e); showToast('Failed to update stock.','error'); }
-}
-
-// ── Inquiries ─────────────────────────────────────────────────────────────────
-async function renderInquiries() {
-  const tbl = document.getElementById('inquiriesTable');
-  tbl.innerHTML = allInquiries.length===0 ? `<tr><td colspan="6" class="tc text-center text-gray-300 py-8">No inquiries yet.</td></tr>` :
-    allInquiries.map(i=>`<tr class="hover:bg-gray-50">
-      <td class="tc text-xs text-gray-400">${fmtDate(i.created_at)}</td>
-      <td class="tc font-medium text-sm">${esc(i.name)} ${i.status==='unread'?'<span class="ml-1 badge bg-red-100 text-red-700" style="font-size:9px;">NEW</span>':''}</td>
-      <td class="tc text-xs text-gray-500">${i.email||'—'}<br/>${i.phone||'—'}</td>
-      <td class="tc text-xs">${i.adults} adults, ${i.children} children</td>
-      <td class="tc text-xs text-gray-500 max-w-xs truncate">${esc(i.message||'—')}</td>
-      <td class="tc"><div class="flex gap-2">
-        <a href="tel:${i.phone}" class="text-xs text-forest hover:underline">Call</a>
-        ${i.status==='unread'?`<button onclick="markInquiryRead('${i.id}')" class="text-xs text-gray-400 hover:text-gray-600">Mark Read</button>`:''}
-      </div></td>
-    </tr>`).join('');
-}
-
-async function markInquiryRead(id) {
-  await db.from('inquiries').update({status:'read'}).eq('id',id);
-  allInquiries = allInquiries.map(i=>i.id===id?{...i,status:'read'}:i);
-  updateBadges();
-  renderInquiries();
-}
-
-// ── Booking Modal ─────────────────────────────────────────────────────────────
-function openBookingModal(id) {
-  const b = allBookings.find(x=>x.id===id);
-  if (!b) return;
-  document.getElementById('bmTitle').textContent = `Booking – ${b.booking_ref}`;
-  const addons = (() => { try { const a=typeof b.addons==='string'?JSON.parse(b.addons):b.addons; return a||{}; } catch(e){return {};} })();
-  const addonStr = Object.keys(addons).length>0 ? Object.keys(addons).join(', ') : 'None';
-  document.getElementById('bmContent').innerHTML = `
-    <div class="grid grid-cols-2 gap-5 mb-5">
-      <div><p class="text-xs text-gray-400 uppercase mb-2">Guest</p>
-        <p class="font-semibold text-gray-800">${esc(b.guest_name)}</p>
-        <p class="text-sm text-gray-500"><a href="mailto:${b.guest_email}" class="hover:text-forest">${b.guest_email||'—'}</a></p>
-        <p class="text-sm text-gray-500">${b.guest_phone||'—'}</p>
-        <p class="text-xs text-gray-400 mt-1">${b.booking_type==='walk-in'?'🚶 Walk-in':'💻 Online'}</p>
-      </div>
-      <div><p class="text-xs text-gray-400 uppercase mb-2">Status</p>
-        <span class="badge ${STATUS_CSS[b.status]||'b-pending'} mb-2">${STATUS_LABELS[b.status]||b.status}</span>
-        <p class="text-xs text-gray-400 mt-2 font-mono">${b.booking_ref}</p>
-      </div>
+      ${!n.is_read?`<button onclick="markNotifRead('${n.id}')" class="text-xs text-gray-400 hover:text-forest flex-shrink-0">Mark read</button>`:''}
     </div>
-    <div class="bg-gray-50 rounded-xl p-4 mb-4">
-      <div class="grid grid-cols-2 gap-3 text-sm">
-        <div><span class="text-gray-400 text-xs">Rooms</span><p class="font-medium mt-0.5">${b.room_type}</p></div>
-        <div><span class="text-gray-400 text-xs">Pax</span><p class="font-medium mt-0.5">${b.pax_count||b.adults} pax (${b.adults} adults)</p></div>
-        <div><span class="text-gray-400 text-xs">Check-in</span><p class="font-medium mt-0.5">${fmtDate(b.check_in_date)}</p></div>
-        <div><span class="text-gray-400 text-xs">Check-out</span><p class="font-medium mt-0.5">${fmtDate(b.check_out_date)}</p></div>
-        <div><span class="text-gray-400 text-xs">Add-ons</span><p class="font-medium mt-0.5 text-xs">${addonStr}</p></div>
-        <div><span class="text-gray-400 text-xs">Day type</span><p class="font-medium mt-0.5 capitalize">${b.day_type||'weekday'}</p></div>
+  </div>`).join('');
+}
+async function markNotifRead(id){
+  await db.from('notifications').update({is_read:true}).eq('id',id);
+  allNotifications=allNotifications.map(n=>n.id===id?{...n,is_read:true}:n);
+  updateBadges(); renderNotifications();
+}
+async function markAllNotifsRead(){
+  await db.from('notifications').update({is_read:true}).eq('target','admin').eq('is_read',false);
+  allNotifications=allNotifications.map(n=>({...n,is_read:true}));
+  updateBadges(); renderNotifications(); toast('All marked as read.','success');
+}
+
+// ── BOOKINGS ──
+function renderBookings(data){
+  const src=data||allBookings;
+  const tbl=document.getElementById('bookingsTable');if(!tbl)return;
+  tbl.innerHTML=src.length?src.map(b=>`<tr onclick="openBookingModal('${b.id}')" class="cursor-pointer">
+    <td class="font-mono text-xs text-gray-400">${b.booking_ref}</td>
+    <td><p class="font-medium text-sm">${esc(b.guest_name)}</p><p class="text-xs text-gray-400">${b.guest_phone||''}</p></td>
+    <td class="text-xs text-gray-600">${b.room_type}</td>
+    <td class="text-xs">${fmtDate(b.check_in_date)}</td>
+    <td class="text-xs">${fmtDate(b.check_out_date)}</td>
+    <td class="text-xs text-center">${b.pax_count||b.adults||1}</td>
+    <td class="font-semibold text-sm">&#8369;${(b.total_amount||0).toLocaleString()}</td>
+    <td class="text-sm ${(b.remaining_balance||0)>0?'text-red-600 font-medium':'text-gray-400'}">&#8369;${(b.remaining_balance||0).toLocaleString()}</td>
+    <td><span class="badge ${STATUS_CSS[b.status]||'b-pend'} text-xs">${STATUS_LABELS[b.status]||b.status}</span></td>
+    <td onclick="event.stopPropagation()"><button onclick="openBookingModal('${b.id}')" class="text-xs text-forest hover:underline">Details</button></td>
+  </tr>`).join('')
+  :'<tr><td colspan="10" class="text-center py-8 text-gray-300">No bookings found.</td></tr>';
+}
+function filterBookings(){
+  const q=(document.getElementById('bkSearch')?.value||'').toLowerCase();
+  const s=document.getElementById('bkStatusFilter')?.value||'';
+  let f=allBookings;
+  if(q) f=f.filter(b=>(b.guest_name||'').toLowerCase().includes(q)||(b.booking_ref||'').toLowerCase().includes(q));
+  if(s) f=f.filter(b=>b.status===s);
+  renderBookings(f);
+}
+
+// ── BOOKING MODAL (edit) ──
+function openBookingModal(id){
+  const b=allBookings.find(x=>x.id===id);if(!b)return;
+  setT('bmTitle','Booking – '+b.booking_ref);
+  const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000);
+  const log=(()=>{try{return typeof b.edit_log==='string'?JSON.parse(b.edit_log):b.edit_log||[];}catch(e){return[];}})();
+  document.getElementById('bmBody').innerHTML=`
+    <div class="flex items-start justify-between gap-3 mb-5 flex-wrap">
+      <div>
+        <p class="font-semibold text-gray-800 text-lg">${esc(b.guest_name)}</p>
+        <p class="text-sm text-gray-400">${b.guest_email||'—'} · ${b.guest_phone||'—'}</p>
+        <p class="text-xs text-gray-400 font-mono">${b.booking_ref} · ${nights} night${nights!==1?'s':''} · ${b.booking_type==='walk-in'?'🚶 Walk-in':'💻 Online'}</p>
       </div>
+      <span class="badge ${STATUS_CSS[b.status]||'b-pend'}">${STATUS_LABELS[b.status]||b.status}</span>
     </div>
-    <div class="bg-green-50 rounded-xl p-4 mb-4">
-      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Total</span><span class="font-bold">₱${(b.total_amount||0).toLocaleString()}</span></div>
-      <div class="flex justify-between text-sm mb-1"><span class="text-gray-500">Deposit Paid</span><span class="text-forest font-bold">₱${(b.deposit_amount||0).toLocaleString()}</span></div>
-      <div class="flex justify-between text-sm"><span class="text-gray-500">Balance Due</span><span class="font-bold ${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}">₱${(b.remaining_balance||0).toLocaleString()}</span></div>
-      ${b.payment_ref_number?`<div class="flex justify-between text-sm mt-2 pt-2 border-t border-green-100"><span class="text-gray-400">Payment Ref</span><span class="text-gray-600">${b.payment_ref_number}</span></div>`:''}
-      ${b.voucher_code?`<div class="flex justify-between text-sm mt-1"><span class="text-gray-400">Voucher</span><span class="text-green-600">${b.voucher_code} (-₱${b.voucher_discount||0})</span></div>`:''}
-      ${b.payment_proof_url?`<div class="mt-2"><a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest underline"><i class="fas fa-image mr-1"></i>View Payment Proof</a></div>`:''}
+    <div class="space-y-3 mb-5">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Edit Details</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div><label class="fi-label">Guest Name</label><input id="bm_name" class="fi" value="${esc(b.guest_name||'')}"/></div>
+        <div><label class="fi-label">Phone</label><input id="bm_phone" class="fi" value="${esc(b.guest_phone||'')}"/></div>
+        <div><label class="fi-label">Email</label><input id="bm_email" class="fi" value="${esc(b.guest_email||'')}"/></div>
+        <div><label class="fi-label">Pax</label><input id="bm_pax" class="fi" type="number" min="1" max="30" value="${b.pax_count||b.adults||1}"/></div>
+        <div><label class="fi-label">Check-in</label><input id="bm_ci" class="fi" type="date" value="${b.check_in_date||''}"/></div>
+        <div><label class="fi-label">Check-out</label><input id="bm_co" class="fi" type="date" value="${b.check_out_date||''}"/></div>
+        <div class="sm:col-span-2"><label class="fi-label">Room(s)</label><input id="bm_rooms" class="fi" value="${esc(b.room_type||'')}"/></div>
+        <div class="sm:col-span-2"><label class="fi-label">Package Label</label><input id="bm_pkg" class="fi" value="${esc(b.package_label||'')}"/></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div><label class="fi-label">Total Amount (&#8369;)</label><input id="bm_total" class="fi" type="number" min="0" value="${b.total_amount||0}" oninput="checkPayDiffWarning('${b.id}')"/></div>
+        <div><label class="fi-label">Deposit Paid (&#8369;)</label><input id="bm_deposit" class="fi" type="number" min="0" value="${b.deposit_amount||0}"/></div>
+        <div><label class="fi-label">Balance Due (&#8369;)</label><input id="bm_balance" class="fi" type="number" min="0" value="${b.remaining_balance||0}"/></div>
+      </div>
+      <div id="bmPayDiffWarn" class="hidden p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800"></div>
+      <div><label class="fi-label">Special Requests</label><textarea id="bm_special" class="fi" rows="2">${esc(b.special_requests||'')}</textarea></div>
+      <div><label class="fi-label">Admin Notes</label><textarea id="bm_notes" class="fi" rows="2" placeholder="Internal notes only">${esc(b.admin_notes||'')}</textarea></div>
     </div>
-    ${b.special_requests?`<div class="bg-amber-50 rounded-xl p-4 mb-4"><p class="text-xs text-gray-400 mb-1 uppercase">Special Requests</p><p class="text-sm text-gray-700">${esc(b.special_requests)}</p></div>`:''}
-    <div class="flex flex-wrap gap-2">
-      ${b.status==='pending_payment_verification'?`<button onclick="approveBooking('${b.id}','confirmed');closeModal('bookingModal')" class="bg-green-600 text-white text-xs px-4 py-2 rounded-lg hover:bg-green-700">✓ Confirm</button>`:''}
-      ${(b.remaining_balance||0)>0?`<button onclick="closeModal('bookingModal');openPaymentModal('${b.id}',${b.remaining_balance})" class="bg-gold text-white text-xs px-4 py-2 rounded-lg hover:bg-yellow-600">Mark Cash Payment</button>`:''}
-      ${['confirmed','confirmed_balance_due','fully_paid'].includes(b.status)?`<button onclick="markCompleted('${b.id}')" class="bg-purple-600 text-white text-xs px-4 py-2 rounded-lg hover:bg-purple-700">Mark Completed</button>`:''}
-    </div>`;
+    <div class="p-4 bg-forest/5 rounded-xl mb-4 text-sm">
+      <p class="text-xs text-gray-400 uppercase mb-2">Payment Summary</p>
+      <div class="flex justify-between mb-1"><span class="text-gray-500">Total</span><span class="font-bold">&#8369;${(b.total_amount||0).toLocaleString()}</span></div>
+      <div class="flex justify-between mb-1"><span class="text-gray-500">Paid so far</span><span class="font-bold text-forest">&#8369;${((b.total_amount||0)-(b.remaining_balance||0)).toLocaleString()}</span></div>
+      <div class="flex justify-between ${(b.remaining_balance||0)>0?'text-red-600':'text-gray-400'}"><span>Balance</span><span class="font-bold">&#8369;${(b.remaining_balance||0).toLocaleString()}</span></div>
+      ${b.payment_proof_url?`<div class="mt-2 pt-2 border-t border-gray-100"><a href="${b.payment_proof_url}" target="_blank" class="text-xs text-forest hover:underline"><i class="fas fa-image mr-1"></i>View Payment Proof</a></div>`:''}
+    </div>
+    <button onclick="saveBookingEdit('${b.id}')" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center justify-center gap-2 mb-3">
+      <i class="fas fa-save"></i> Save Changes
+    </button>
+    ${CONFIRMED.includes(b.status)?`<button onclick="markCompleted('${b.id}')" class="w-full border border-forest text-forest py-2.5 rounded-xl text-sm hover:bg-forest/5 mb-3">Mark as Completed</button>`:''}
+    ${log.length?`<div class="mt-2"><p class="text-xs text-gray-400 uppercase mb-2">Audit Log</p><div class="space-y-1">${log.slice(-5).reverse().map(e=>`<div class="text-xs text-gray-400">${fmtDateTime(e.at)} · ${esc(e.action)} · by ${e.by}</div>`).join('')}</div></div>`:''}
+  `;
   document.getElementById('bookingModal').classList.remove('hidden');
 }
 
-// ── Payment Modal ─────────────────────────────────────────────────────────────
-function openPaymentModal(id, balance) {
-  document.getElementById('pm_bookingId').value = id;
-  document.getElementById('pm_amount').value = balance;
-  document.getElementById('pm_ref').value = '';
-  document.getElementById('paymentModal').classList.remove('hidden');
+function checkPayDiffWarning(id){
+  const b=allBookings.find(x=>x.id===id);if(!b)return;
+  const newTotal=parseFloat(document.getElementById('bm_total')?.value)||0;
+  const diff=newTotal-(b.total_amount||0);
+  const warn=document.getElementById('bmPayDiffWarn');if(!warn)return;
+  if(diff>0){ warn.classList.remove('hidden'); warn.innerHTML=`<i class="fas fa-exclamation-triangle mr-1"></i>Total increased by <strong>&#8369;${diff.toLocaleString()}</strong>. You will be asked to record the additional payment when saving.`; }
+  else warn.classList.add('hidden');
 }
 
-async function savePayment() {
-  const id      = document.getElementById('pm_bookingId').value;
-  const amount  = parseInt(document.getElementById('pm_amount').value)||0;
-  const method  = document.getElementById('pm_method').value;
-  const ref     = document.getElementById('pm_ref').value;
-  const b       = allBookings.find(x=>x.id===id);
-  if (!b) return;
-
-  const newBalance  = Math.max(0, (b.remaining_balance||0) - amount);
-  const newStatus   = newBalance===0 ? 'fully_paid' : 'confirmed_balance_due';
-  const logEntry    = {action:`Payment marked: ₱${amount} via ${method}${ref?' ref:'+ref:''}`,at:new Date().toISOString(),by:'admin'};
-  const existLog    = (() => { try { return (typeof b.edit_log==='string'?JSON.parse(b.edit_log):b.edit_log)||[]; } catch(e){return[];} })();
-
-  try {
-    const { error } = await db.from('bookings').update({
-      remaining_balance: newBalance,
-      status: newStatus,
-      second_payment_amount: amount,
-      second_payment_method: method,
-      second_payment_ref: ref,
-      second_payment_date: new Date().toISOString(),
-      edit_log: JSON.stringify([...existLog, logEntry]),
-    }).eq('id', id);
-    if (error) throw error;
-    showToast(`Payment of ₱${amount.toLocaleString()} recorded. ${newBalance===0?'Fully paid!':'Balance: ₱'+newBalance.toLocaleString()}`,'success');
-    await notifySuperAdmin('payment_received', `💰 Payment Recorded — ${b.guest_name}`, `₱${amount.toLocaleString()} via ${method}${ref?' (ref: '+ref+')':''}. ${newBalance===0?'Booking is now fully paid.':'Remaining balance: ₱'+newBalance.toLocaleString()+'.'}`, {booking_id:id, booking_ref:b.booking_ref, guest_phone:b.guest_phone});
-    closeModal('paymentModal');
+async function saveBookingEdit(id){
+  const b=allBookings.find(x=>x.id===id);if(!b)return;
+  const newTotal=parseFloat(document.getElementById('bm_total')?.value)||0;
+  const oldTotal=b.total_amount||0;
+  const diff=newTotal-oldTotal;
+  const log=(()=>{try{return typeof b.edit_log==='string'?JSON.parse(b.edit_log):b.edit_log||[];}catch(e){return[];}})();
+  const updates={
+    guest_name:document.getElementById('bm_name')?.value.trim()||b.guest_name,
+    guest_phone:document.getElementById('bm_phone')?.value.trim()||b.guest_phone,
+    guest_email:document.getElementById('bm_email')?.value.trim()||b.guest_email,
+    pax_count:parseInt(document.getElementById('bm_pax')?.value)||b.pax_count,
+    adults:parseInt(document.getElementById('bm_pax')?.value)||b.adults,
+    check_in_date:document.getElementById('bm_ci')?.value||b.check_in_date,
+    check_out_date:document.getElementById('bm_co')?.value||b.check_out_date,
+    room_type:document.getElementById('bm_rooms')?.value.trim()||b.room_type,
+    package_label:document.getElementById('bm_pkg')?.value.trim()||b.package_label,
+    total_amount:newTotal,
+    deposit_amount:parseFloat(document.getElementById('bm_deposit')?.value)||b.deposit_amount,
+    remaining_balance:parseFloat(document.getElementById('bm_balance')?.value)||b.remaining_balance,
+    special_requests:document.getElementById('bm_special')?.value.trim()||null,
+    admin_notes:document.getElementById('bm_notes')?.value.trim()||null,
+    edit_log:JSON.stringify([...log,{action:'edited by admin',at:new Date().toISOString(),by:'admin'}]),
+  };
+  try{
+    const{error}=await db.from('bookings').update(updates).eq('id',id);
+    if(error) throw error;
+    toast('Booking updated!','success');
+    await notifySA('booking_edited','Booking Edited — '+b.booking_ref,'Admin edited booking for '+b.guest_name+'.',{booking_id:id,booking_ref:b.booking_ref});
     closeModal('bookingModal');
     await loadAll();
-  } catch(e) { console.error(e); showToast('Failed.','error'); }
+    if(diff>0){
+      const newBal=Math.max(0,(b.remaining_balance||0)+diff);
+      document.getElementById('payDiffInfo').innerHTML=`Total increased from <strong>&#8369;${oldTotal.toLocaleString()}</strong> to <strong>&#8369;${newTotal.toLocaleString()}</strong>.<br>Additional amount due: <strong class="text-red-600">&#8369;${diff.toLocaleString()}</strong>. Record collection below.`;
+      document.getElementById('pd_amount').value=diff;
+      document.getElementById('pd_booking_id').value=id;
+      document.getElementById('pd_old_total').value=oldTotal;
+      document.getElementById('pd_new_total').value=newTotal;
+      document.getElementById('payDiffModal').classList.remove('hidden');
+    }
+  }catch(e){ console.error(e); toast('Failed: '+(e.message||'unknown'),'error'); }
 }
 
-async function markCompleted(id) {
-  if (!confirm('Mark this booking as completed?')) return;
-  await db.from('bookings').update({status:'completed_stayed'}).eq('id', id);
-  showToast('Marked as completed.','success');
+async function confirmPayDiff(){
+  const id=document.getElementById('pd_booking_id').value;
+  const amount=parseFloat(document.getElementById('pd_amount').value)||0;
+  const method=document.getElementById('pd_method').value;
+  const ref=document.getElementById('pd_ref').value.trim();
+  if(!amount||amount<=0){toast('Enter a valid amount.','error');return;}
+  const b=allBookings.find(x=>x.id===id);if(!b)return;
+  const log=(()=>{try{return typeof b.edit_log==='string'?JSON.parse(b.edit_log):b.edit_log||[];}catch(e){return[];}})();
+  const newBal=Math.max(0,(b.remaining_balance||0)-amount);
+  try{
+    const{error}=await db.from('bookings').update({
+      remaining_balance:newBal,
+      status:newBal===0?'fully_paid':'confirmed_balance_due',
+      edit_log:JSON.stringify([...log,{action:`Additional payment &#8369;${amount} via ${method}${ref?' ref:'+ref:''}`,at:new Date().toISOString(),by:'admin'}]),
+    }).eq('id',id);
+    if(error) throw error;
+    toast(`&#8369;${amount.toLocaleString()} recorded. ${newBal===0?'Fully paid!':'Balance: &#8369;'+newBal.toLocaleString()}`,'success');
+    await notifySA('payment_received','Additional Payment — '+b.booking_ref,`&#8369;${amount.toLocaleString()} via ${method}${ref?' (ref: '+ref+')':''}. ${newBal===0?'Now fully paid.':'Balance: &#8369;'+newBal.toLocaleString()+'.'}`,{booking_id:id,booking_ref:b.booking_ref});
+    closeModal('payDiffModal');
+    await loadAll();
+  }catch(e){toast('Failed.','error');}
+}
+
+async function markCompleted(id){
+  if(!confirm('Mark this booking as completed?'))return;
+  const b=allBookings.find(x=>x.id===id);if(!b)return;
+  const log=(()=>{try{return typeof b.edit_log==='string'?JSON.parse(b.edit_log):b.edit_log||[];}catch(e){return[];}})();
+  await db.from('bookings').update({status:'completed_stayed',edit_log:JSON.stringify([...log,{action:'marked completed',at:new Date().toISOString(),by:'admin'}])}).eq('id',id);
+  toast('Marked as completed.','success');
+  closeModal('bookingModal');
   await loadAll();
 }
 
-async function updateTask(id, status) {
-  await db.from('staff_tasks').update({status, completed_at: status==='completed'?new Date().toISOString():null}).eq('id',id);
-  showToast('Task updated!','success');
-  await loadAll();
+// ── CALENDAR ──
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCal('cal');}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCal('cal');}
+function dashCalPrev(){dashCalMonth--;if(dashCalMonth<0){dashCalMonth=11;dashCalYear--;}renderCal('dash');}
+function dashCalNext(){dashCalMonth++;if(dashCalMonth>11){dashCalMonth=0;dashCalYear++;}renderCal('dash');}
+
+function renderCal(mode){
+  const y=mode==='dash'?dashCalYear:calYear, m=mode==='dash'?dashCalMonth:calMonth;
+  const gridId=mode==='dash'?'dashCalGrid':'calGrid', labelId=mode==='dash'?'dashCalLabel':'calLabel';
+  const el=document.getElementById(labelId);
+  if(el) el.textContent=new Date(y,m,1).toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+  const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+  const todayStr=todayLocal(), evts={};
+  const addEv=(ds,ev)=>{if(!evts[ds])evts[ds]=[];evts[ds].push(ev);};
+  allBookings.filter(b=>CONFIRMED.includes(b.status)).forEach(b=>{
+    addEv(b.check_in_date,{label:`↓${b.guest_name.split(' ')[0]}`,cls:'bg-green-100 text-green-800'});
+    addEv(b.check_out_date,{label:`↑${b.guest_name.split(' ')[0]}`,cls:'bg-blue-100 text-blue-800'});
+  });
+  allTasks.filter(t=>t.due_date&&t.status!=='completed').forEach(t=>addEv(t.due_date,{label:'📌'+(t.task_name||'').slice(0,10),cls:'bg-purple-100 text-purple-800'}));
+  allMaintenance.filter(t=>t.status!=='completed'&&t.reported_date).forEach(t=>addEv(t.reported_date,{label:'🔧'+(t.room_name||''),cls:'bg-red-100 text-red-700'}));
+  let html='';
+  for(let i=0;i<first;i++) html+=mode==='dash'?'<div></div>':`<div class="cal-cell bg-gray-50 opacity-30"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isT=ds===todayStr, dayEvts=evts[ds]||[];
+    if(mode==='dash'){
+      const dot=dayEvts.length?`<span class="w-1.5 h-1.5 rounded-full mt-0.5 ${dayEvts.some(e=>e.cls.includes('green'))?'bg-green-500':dayEvts.some(e=>e.cls.includes('blue'))?'bg-blue-500':'bg-purple-400'} inline-block"></span>`:'';
+      html+=`<div class="h-9 rounded-lg ${isT?'bg-forest text-white':'bg-white hover:bg-gray-50'} flex flex-col items-center justify-center text-xs border ${isT?'border-forest':'border-gray-100'}">${d}${dot}</div>`;
+    }else{
+      html+=`<div class="cal-cell ${isT?'today':''} hover:bg-gray-50">
+        <p class="text-xs font-bold mb-0.5 ${isT?'text-forest':'text-gray-500'}">${d}</p>
+        ${dayEvts.slice(0,3).map(e=>`<div class="cal-ev ${e.cls}">${e.label}</div>`).join('')}
+        ${dayEvts.length>3?`<div class="cal-ev bg-gray-100 text-gray-500">+${dayEvts.length-3}</div>`:''}
+      </div>`;
+    }
+  }
+  const g=document.getElementById(gridId);if(g) g.innerHTML=html;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+// ── WALK-IN ──
+function calcWI(){
+  const ci=document.getElementById('wi_ci').value, co=document.getElementById('wi_co').value;
+  const pax=parseInt(document.getElementById('wi_pax').value)||0;
+  const pi=document.getElementById('wiPriceInfo');
+  if(!ci||!co||!pax||!grpPricing.length){pi?.classList.add('hidden');return;}
+  const nights=Math.max(0,Math.round((new Date(co)-new Date(ci))/86400000));
+  const dow=new Date(ci+'T00:00:00').getDay();
+  const dt=[5,6].includes(dow)?'weekend':'weekday';
+  const tiers=grpPricing.filter(p=>p.day_type===dt).sort((a,b)=>a.pax_min-b.pax_min);
+  const natural=tiers.find(t=>pax>=t.pax_min&&pax<=t.pax_max)||tiers[tiers.length-1];
+  let pricePerNight=natural?.price||0;
+  if(natural?.pax_min===19){
+    const base=tiers.find(t=>t.pax_min===15&&t.pax_max===18);
+    const bp=pax>=19&&pax<=24?pax:18;
+    pricePerNight=(base?.price||0)+500*(bp-18);
+  }
+  const suggested=pricePerNight*nights;
+  setT('wi_nights',nights+' night'+(nights!==1?'s':''));
+  setT('wi_daytype',dt.charAt(0).toUpperCase()+dt.slice(1)+' rate');
+  setT('wi_suggested','&#8369;'+suggested.toLocaleString()+' (suggested)');
+  pi?.classList.remove('hidden');
+  const tot=document.getElementById('wi_total');
+  if(tot&&!tot.value&&suggested) tot.value=suggested;
+}
+
+async function submitWalkIn(){
+  const name=document.getElementById('wi_name').value.trim();
+  const phone=document.getElementById('wi_phone').value.trim();
+  const ci=document.getElementById('wi_ci').value, co=document.getElementById('wi_co').value;
+  const rooms=document.getElementById('wi_rooms').value.trim();
+  const pax=parseInt(document.getElementById('wi_pax').value)||1;
+  const total=parseFloat(document.getElementById('wi_total').value)||0;
+  const paid=parseFloat(document.getElementById('wi_paid').value)||0;
+  if(!name||!phone||!ci||!co||!rooms||!total){toast('Fill all required fields.','error');return;}
+  const balance=Math.max(0,total-paid);
+  const status=balance===0?'fully_paid':'confirmed_balance_due';
+  const ref=`BM-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+  const roomArr=rooms.split(',').map(r=>r.trim()).filter(Boolean);
+  const dow=new Date(ci+'T00:00:00').getDay();
+  const dt=[5,6].includes(dow)?'weekend':'weekday';
+  const btn=document.getElementById('wiBtn');
+  btn.disabled=true; setT('wiText','Saving…'); document.getElementById('wiSpin').classList.remove('hidden');
+  try{
+    const{error}=await db.from('bookings').insert({
+      booking_ref:ref,guest_name:name,guest_phone:phone,
+      guest_email:document.getElementById('wi_email').value||null,
+      room_type:rooms,rooms_selected:JSON.stringify(roomArr),
+      package_label:document.getElementById('wi_pkg').value.trim()||null,
+      check_in_date:ci,check_out_date:co,adults:pax,pax_count:pax,
+      total_amount:total,deposit_amount:paid,remaining_balance:balance,
+      payment_method:document.getElementById('wi_method').value,
+      payment_ref_number:document.getElementById('wi_payref').value.trim()||null,
+      payment_type:balance===0?'full':'downpayment',
+      status,day_type:dt,booking_type:'walk-in',
+      special_requests:document.getElementById('wi_notes').value||null,
+      confirmed_at:new Date().toISOString(),
+      edit_log:JSON.stringify([{action:'created as walk-in',at:new Date().toISOString(),by:'admin'}]),
+    });
+    if(error) throw error;
+    toast('Walk-in created! Ref: '+ref,'success');
+    await notifySA('booking_walkin','New Walk-in — '+ref,name+' · '+rooms+' · &#8369;'+total.toLocaleString(),{booking_ref:ref});
+    ['wi_name','wi_phone','wi_email','wi_rooms','wi_pkg','wi_ci','wi_co','wi_total','wi_paid','wi_payref','wi_notes'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+    document.getElementById('wi_pax').value='2';
+    document.getElementById('wiPriceInfo')?.classList.add('hidden');
+    await loadAll();
+  }catch(e){console.error(e);toast('Failed: '+(e.message||'unknown'),'error');}
+  finally{btn.disabled=false;setT('wiText','Create Walk-in Booking');document.getElementById('wiSpin').classList.add('hidden');}
+}
+
+// ── GUEST LOG ──
+function openGuestLogForRef(ref){
+  showView('guestlog');
+  document.getElementById('gl_ref').value=ref;
+  fetchForLog();
+}
+
+async function fetchForLog(){
+  const ref=document.getElementById('gl_ref').value.trim().toUpperCase();
+  if(!ref){toast('Enter a booking reference.','error');return;}
+  try{
+    const[{data:logData},{data:bk,error}]=await Promise.all([
+      db.from('guest_logs').select('*').eq('booking_ref',ref).maybeSingle(),
+      db.from('bookings').select('*').ilike('booking_ref',ref).maybeSingle(),
+    ]);
+    if(error||!bk){toast('Booking not found.','error');return;}
+    glBookingData=bk;
+    const card=document.getElementById('glBookingCard');card.classList.remove('hidden');
+    setT('glGuestName',bk.guest_name);
+    document.getElementById('glStatus').textContent=STATUS_LABELS[bk.status]||bk.status;
+    document.getElementById('glStatus').className='badge '+(STATUS_CSS[bk.status]||'b-pend')+' text-xs';
+    setT('glBookingDetails',bk.room_type+' · '+fmtDate(bk.check_in_date)+' → '+fmtDate(bk.check_out_date));
+    const pax=bk.pax_count||bk.adults||0;
+    setT('glBookedPax',pax+' pax');setT('glRooms',bk.room_type||'—');
+    setT('glCI',fmtDate(bk.check_in_date));setT('glCO',fmtDate(bk.check_out_date));
+    const bal=bk.remaining_balance||0;
+    const balEl=document.getElementById('glBalance');
+    balEl.textContent=bal>0?'&#8369;'+bal.toLocaleString():'Fully Paid ✓';
+    balEl.className=bal>0?'font-semibold text-red-600':'font-semibold text-green-600';
+    document.getElementById('gl_deposit').value=SECURITY_DEPOSIT;
+    if(logData){
+      document.getElementById('gl_editing_id').value=logData.id;
+      document.getElementById('gl_adults').value=logData.adults_count||0;
+      document.getElementById('gl_ch_above').value=logData.children_above_3||0;
+      document.getElementById('gl_ch_below').value=logData.children_below_3||0;
+      document.getElementById('gl_pets').value=logData.pets_count||0;
+      document.getElementById('gl_deposit').value=logData.security_deposit||SECURITY_DEPOSIT;
+      document.getElementById('gl_notes').value=logData.special_notes||'';
+      document.getElementById('gl_agree').checked=logData.house_rules_agreed||false;
+      setT('glBtnText','Update Check-in Log');
+      const names=(()=>{try{const n=typeof logData.guest_names==='string'?JSON.parse(logData.guest_names):logData.guest_names;return Array.isArray(n)?n:[];}catch(e){return[];}})();
+      buildGuestNameFields(names);
+      toast('Existing log loaded — you can edit and update.','info');
+    }else{
+      document.getElementById('gl_editing_id').value='';
+      document.getElementById('gl_adults').value=Math.max(1,pax);
+      document.getElementById('gl_ch_above').value=0;
+      document.getElementById('gl_ch_below').value=0;
+      document.getElementById('gl_pets').value=0;
+      setT('glBtnText','Save Check-in Log');
+      buildGuestNameFields();
+      toast('Booking found! Fill in guest names.','success');
+    }
+  }catch(e){console.error(e);toast('Error fetching booking.','error');}
+}
+
+function buildGuestNameFields(prefill=[]){
+  const a=parseInt(document.getElementById('gl_adults').value)||0;
+  const ch=parseInt(document.getElementById('gl_ch_above').value)||0;
+  const total=a+ch;
+  setT('glPaxTally',total);setT('glNameCount',total);
+  const container=document.getElementById('glNameFields');
+  if(total===0){container.innerHTML='<p class="text-xs text-gray-400 text-center py-2">Enter guest counts above to generate name fields.</p>';return;}
+  container.innerHTML=Array.from({length:total},(_,i)=>`
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-gray-400 w-6 text-right flex-shrink-0">${i+1}.</span>
+      <input type="text" id="glName_${i}" class="fi text-sm py-2" placeholder="${i<a?'Adult':'Child (3+)'} name" value="${esc(prefill[i]||'')}"/>
+    </div>`).join('');
+}
+
+async function submitGuestLog(){
+  const ref=document.getElementById('gl_ref').value.trim().toUpperCase();
+  if(!ref){toast('Fetch a booking first.','error');return;}
+  const adults=parseInt(document.getElementById('gl_adults').value)||0;
+  const ch_above=parseInt(document.getElementById('gl_ch_above').value)||0;
+  const total=adults+ch_above;
+  if(total===0){toast('Enter at least 1 adult.','error');return;}
+  if(!document.getElementById('gl_agree').checked){toast('Guest must agree to house rules.','error');return;}
+  const names=[];
+  let missing=false;
+  for(let i=0;i<total;i++){const v=(document.getElementById('glName_'+i)?.value||'').trim();if(!v)missing=true;names.push(v||'Guest '+(i+1));}
+  if(missing&&!confirm('Some name fields are empty. Continue anyway?'))return;
+  const editId=document.getElementById('gl_editing_id').value;
+  const payload={
+    booking_ref:ref,guest_names:JSON.stringify(names),
+    adults_count:adults,children_above_3:ch_above,
+    children_below_3:parseInt(document.getElementById('gl_ch_below').value)||0,
+    pets_count:parseInt(document.getElementById('gl_pets').value)||0,
+    house_rules_agreed:true,
+    security_deposit:parseInt(document.getElementById('gl_deposit').value)||SECURITY_DEPOSIT,
+    special_notes:document.getElementById('gl_notes').value.trim()||null,
+    logged_by:'admin',
+  };
+  const btn=document.getElementById('glBtn');btn.disabled=true;
+  document.getElementById('glSpin').classList.remove('hidden');
+  try{
+    let error;
+    if(editId){({error}=await db.from('guest_logs').update(payload).eq('id',editId));}
+    else{payload.checked_in_at=new Date().toISOString();({error}=await db.from('guest_logs').insert(payload));}
+    if(error) throw error;
+    toast(editId?'Guest log updated!':'Guest check-in logged!','success');
+    await notifySA('guest_checked_in','Guest Checked In — '+ref,names.length+' guests logged. Deposit: &#8369;'+payload.security_deposit+'.',{booking_ref:ref});
+    ['gl_ref','gl_notes'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+    document.getElementById('gl_agree').checked=false;
+    document.getElementById('gl_editing_id').value='';
+    document.getElementById('glBookingCard').classList.add('hidden');
+    document.getElementById('gl_adults').value=0;document.getElementById('gl_ch_above').value=0;
+    document.getElementById('glNameFields').innerHTML='<p class="text-xs text-gray-400 text-center py-2">Enter guest counts above to generate name fields.</p>';
+    setT('glPaxTally',0);setT('glNameCount',0);
+    glBookingData=null;setT('glBtnText','Save Check-in Log');
+    await renderRecentLogs();
+  }catch(e){console.error(e);toast('Failed: '+(e.message||'unknown'),'error');}
+  finally{btn.disabled=false;document.getElementById('glSpin').classList.add('hidden');}
+}
+
+async function renderRecentLogs(){
+  const{data}=await db.from('guest_logs').select('*').order('checked_in_at',{ascending:false}).limit(5);
+  setT('logCount',(data||[]).length+' recent');
+  document.getElementById('recentLogs').innerHTML=(data||[]).length
+    ?(data||[]).map(l=>{
+        const names=(()=>{try{const n=typeof l.guest_names==='string'?JSON.parse(l.guest_names):l.guest_names;return Array.isArray(n)?n:[];}catch(e){return[];}})();
+        return `<div class="p-3 bg-gray-50 rounded-xl">
+          <div class="flex justify-between items-start mb-1">
+            <p class="font-semibold text-sm text-gray-800">${l.booking_ref}</p>
+            <button onclick="openGuestLogForRef('${l.booking_ref}')" class="text-xs text-forest hover:underline">Edit</button>
+          </div>
+          <p class="text-xs text-gray-500">${l.adults_count} adults · ${l.children_above_3} kids · ${l.pets_count} pets · Deposit: &#8369;${(l.security_deposit||0).toLocaleString()}</p>
+          <p class="text-xs text-gray-400 mt-0.5">${names.slice(0,3).join(', ')}${names.length>3?' +'+( names.length-3)+' more':''}</p>
+          <p class="text-xs text-gray-400">${fmtDateTime(l.checked_in_at)}</p>
+        </div>`;
+      }).join('')
+    :'<p class="text-gray-300 text-xs">No logs yet.</p>';
+}
+
+function showGuestLogList(){
+  document.getElementById('guestLogListModal').classList.remove('hidden');
+  filterLogList();
+}
+async function filterLogList(){
+  const{data}=await db.from('guest_logs').select('*').order('checked_in_at',{ascending:false}).limit(100);
+  const q=(document.getElementById('logSearch')?.value||'').toLowerCase();
+  const list=(data||[]).filter(l=>!q||l.booking_ref.toLowerCase().includes(q));
+  document.getElementById('guestLogListBody').innerHTML=list.length
+    ?list.map(l=>{
+        const names=(()=>{try{const n=typeof l.guest_names==='string'?JSON.parse(l.guest_names):l.guest_names;return Array.isArray(n)?n:[];}catch(e){return[];}})();
+        return `<div class="p-4 border border-gray-100 rounded-xl">
+          <div class="flex justify-between items-start mb-1">
+            <p class="font-semibold text-sm text-gray-800">${l.booking_ref}</p>
+            <button onclick="closeModal('guestLogListModal');openGuestLogForRef('${l.booking_ref}')" class="text-xs text-forest hover:underline flex-shrink-0">Edit</button>
+          </div>
+          <p class="text-xs text-gray-500 mb-1">${l.adults_count} adults · ${l.children_above_3} kids (3+) · ${l.children_below_3} infants · ${l.pets_count} pets</p>
+          <p class="text-xs text-gray-600 mb-1">Guests: ${names.join(', ')||'—'}</p>
+          <p class="text-xs text-gray-400">Deposit: &#8369;${(l.security_deposit||0).toLocaleString()} · ${fmtDateTime(l.checked_in_at)}${l.special_notes?` · <span class="text-amber-600">${esc(l.special_notes)}</span>`:''}</p>
+        </div>`;
+      }).join('')
+    :'<p class="text-gray-300 text-center py-6">No logs found.</p>';
+}
+
+// ── PERSONNEL ──
+function renderPersonnel(){
+  const g=document.getElementById('personnelGrid');if(!g)return;
+  g.innerHTML=allStaff.length?allStaff.map(s=>`<div class="sc p-5">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-11 h-11 rounded-full bg-forest/10 flex items-center justify-center font-bold text-forest text-lg flex-shrink-0">${s.name.charAt(0)}</div>
+      <div class="flex-1 min-w-0"><p class="font-semibold text-gray-800 text-sm">${esc(s.name)}</p><p class="text-xs text-gray-400">${s.role}</p></div>
+      <span class="badge ${s.status==='active'?'b-conf':s.status==='on_leave'?'b-pend':'b-canc'} text-xs">${s.status}</span>
+    </div>
+    ${s.phone?`<p class="text-xs text-gray-500 mb-1"><i class="fas fa-phone text-gold mr-1"></i>${s.phone}</p>`:''}
+    ${s.email?`<p class="text-xs text-gray-500 mb-1"><i class="fas fa-envelope text-gray-300 mr-1"></i>${esc(s.email)}</p>`:''}
+    ${s.daily_rate?`<p class="text-xs text-gray-500 mb-3">&#8369;${Number(s.daily_rate).toLocaleString()}/day</p>`:'<div class="mb-3"></div>'}
+    <div class="flex gap-2">
+      <button onclick="editStaff('${s.id}')" class="flex-1 text-xs border border-gray-200 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600">Edit</button>
+      <select onchange="updateStaffStatus('${s.id}',this.value)" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 bg-white flex-1">
+        <option value="active" ${s.status==='active'?'selected':''}>Active</option>
+        <option value="on_leave" ${s.status==='on_leave'?'selected':''}>On Leave</option>
+        <option value="inactive" ${s.status==='inactive'?'selected':''}>Inactive</option>
+      </select>
+    </div>
+  </div>`).join('')
+  :'<p class="text-gray-400 text-sm col-span-3">No staff yet. Use Add Staff above.</p>';
+}
+function openStaffModal(id=null){
+  ['sf_id','sf_name','sf_role','sf_phone','sf_email','sf_rate'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+  document.getElementById('sf_status').value='active';
+  setT('sfTitle','Add Staff');
+  if(id){
+    const s=allStaff.find(x=>x.id===id);if(!s)return;
+    document.getElementById('sf_id').value=s.id;
+    document.getElementById('sf_name').value=s.name||'';
+    document.getElementById('sf_role').value=s.role||'';
+    document.getElementById('sf_phone').value=s.phone||'';
+    document.getElementById('sf_email').value=s.email||'';
+    document.getElementById('sf_rate').value=s.daily_rate||'';
+    document.getElementById('sf_status').value=s.status||'active';
+    setT('sfTitle','Edit Staff');
+  }
+  document.getElementById('staffModal').classList.remove('hidden');
+}
+function editStaff(id){openStaffModal(id);}
+async function saveStaff(){
+  const id=document.getElementById('sf_id').value;
+  const name=document.getElementById('sf_name').value.trim();
+  const role=document.getElementById('sf_role').value.trim();
+  if(!name||!role){toast('Name and role are required.','error');return;}
+  const payload={name,role,phone:document.getElementById('sf_phone').value.trim()||null,
+    email:document.getElementById('sf_email').value.trim()||null,
+    daily_rate:parseFloat(document.getElementById('sf_rate').value)||null,
+    status:document.getElementById('sf_status').value};
+  try{
+    let error;
+    if(id){({error}=await db.from('staff').update(payload).eq('id',id));}
+    else{({error}=await db.from('staff').insert(payload));}
+    if(error) throw error;
+    toast(id?'Staff updated!':'Staff added!','success');
+    closeModal('staffModal');
+    const{data}=await db.from('staff').select('*').order('name');
+    allStaff=data||[]; renderPersonnel();
+  }catch(e){toast('Failed: '+e.message,'error');}
+}
+async function updateStaffStatus(id,status){
+  try{
+    await db.from('staff').update({status}).eq('id',id);
+    const{data}=await db.from('staff').select('*').order('name');
+    allStaff=data||[]; renderPersonnel(); toast('Status updated.','success');
+  }catch(e){toast('Failed.','error');}
+}
+
+// ── INVENTORY ──
+function renderInventory(){
+  const low=allInventory.filter(i=>(i.quantity||0)<=(i.min_stock||0));
+  const alert=document.getElementById('lowStockAlert');
+  if(low.length>0){alert.classList.remove('hidden');alert.innerHTML=`<i class="fas fa-exclamation-triangle mr-2"></i><strong>${low.length} item${low.length>1?'s':''} below minimum:</strong> ${low.map(i=>i.item_name).join(', ')}`;}
+  else alert.classList.add('hidden');
+  const tbl=document.getElementById('inventoryTable');
+  tbl.innerHTML=allInventory.length?allInventory.map(i=>{
+    const isLow=(i.quantity||0)<=(i.min_stock||0);
+    return `<tr class="${isLow?'bg-amber-50':'hover:bg-gray-50'}">
+      <td><p class="font-medium text-sm ${isLow?'text-amber-700':''}">${esc(i.item_name)}${isLow?' <span class="text-xs text-red-500">⚠</span>':''}</p></td>
+      <td class="text-xs text-gray-500">${i.category||'—'}</td>
+      <td><p class="font-bold text-sm ${isLow?'text-red-600':'text-gray-800'}">${i.quantity||0} ${i.unit||''}</p><p class="text-xs text-gray-400">min ${i.min_stock||0}</p></td>
+      <td><span class="badge ${isLow?'b-decl':'b-conf'} text-xs">${isLow?'Low':'OK'}</span></td>
+      <td>
+        <div class="flex gap-1.5">
+          <button onclick="openInvAdj('${i.id}','${esc(i.item_name)}',${i.quantity||0},'use')" class="text-xs bg-red-50 text-red-600 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-100 flex items-center gap-1"><i class="fas fa-minus text-xs"></i> Use</button>
+          <button onclick="openInvAdj('${i.id}','${esc(i.item_name)}',${i.quantity||0},'add')" class="text-xs bg-green-50 text-green-700 border border-green-200 px-2.5 py-1.5 rounded-lg hover:bg-green-100 flex items-center gap-1"><i class="fas fa-plus text-xs"></i> Add</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="5" class="text-center py-8 text-gray-300">No inventory items.</td></tr>';
+  const logEl=document.getElementById('inventoryLog');
+  logEl.innerHTML=allInventoryLog.length?allInventoryLog.map(l=>{
+    const isUse=l.change_amount<0;
+    return `<div class="flex justify-between items-start p-2.5 bg-gray-50 rounded-xl">
+      <div><p class="text-sm text-gray-700">${esc(l.item_name||'')} <span class="${isUse?'text-red-600':'text-green-600'} font-semibold">${isUse?'':'+'}${l.change_amount}</span></p>
+      <p class="text-xs text-gray-400">${l.reason||''} · ${l.logged_by==='superadmin'?'Super Admin':'Admin'} · ${fmtDateTime(l.created_at)}</p></div>
+      <span class="text-xs font-medium text-gray-500 flex-shrink-0 ml-2">→ ${l.new_quantity}</span>
+    </div>`;
+  }).join(''):'<p class="text-gray-300 text-xs">No changes yet.</p>';
+}
+function openInvAdj(id,name,currentQty,mode){
+  document.getElementById('invAdjId').value=id;
+  document.getElementById('invAdjCurrentQty').value=currentQty;
+  document.getElementById('invAdjItemName').value=name;
+  document.getElementById('invAdjQty').value='';
+  document.getElementById('invAdjReason').value='';
+  document.getElementById('invAdjTitle').textContent='Adjust Stock — '+name;
+  document.getElementById('invAdjInfo').innerHTML=`<span class="font-medium">${esc(name)}</span> — Current: <strong>${currentQty}</strong>`;
+  document.getElementById('invAdjPreview').classList.add('hidden');
+  setInvMode(mode);
+  document.getElementById('invAdjModal').classList.remove('hidden');
+}
+function setInvMode(mode){
+  document.getElementById('invAdjMode').value=mode;
+  const ub=document.getElementById('invBtnUse'),ab=document.getElementById('invBtnAdd');
+  ub.className=`p-4 border-2 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${mode==='use'?'border-red-400 bg-red-50 text-red-700':'border-gray-200 text-gray-700 hover:border-red-300 hover:bg-red-50'}`;
+  ab.className=`p-4 border-2 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${mode==='add'?'border-green-400 bg-green-50 text-green-700':'border-gray-200 text-gray-700 hover:border-green-300 hover:bg-green-50'}`;
+  document.getElementById('invAdjQtyLabel').textContent=mode==='use'?'Quantity to use / consume':'Quantity to add / restock';
+  previewInvAdj();
+}
+function previewInvAdj(){
+  const qty=parseInt(document.getElementById('invAdjQty').value)||0;
+  const cur=parseFloat(document.getElementById('invAdjCurrentQty').value)||0;
+  const mode=document.getElementById('invAdjMode').value;
+  const preview=document.getElementById('invAdjPreview');
+  if(qty>0){
+    const newQty=mode==='use'?Math.max(0,cur-qty):cur+qty;
+    preview.classList.remove('hidden');
+    preview.className=`p-3 rounded-xl text-sm font-medium text-center ${mode==='use'?'bg-red-50 text-red-700':'bg-green-50 text-green-700'}`;
+    preview.textContent=`${cur} ${mode==='use'?'−':'+'} ${qty} = ${newQty}`;
+  }else preview.classList.add('hidden');
+}
+document.addEventListener('input',e=>{if(e.target.id==='invAdjQty')previewInvAdj();});
+async function confirmInvAdj(){
+  const id=document.getElementById('invAdjId').value;
+  const qty=parseInt(document.getElementById('invAdjQty').value);
+  const cur=parseFloat(document.getElementById('invAdjCurrentQty').value)||0;
+  const mode=document.getElementById('invAdjMode').value;
+  const name=document.getElementById('invAdjItemName').value;
+  const reason=document.getElementById('invAdjReason').value.trim();
+  if(!qty||qty<=0){toast('Enter a quantity greater than 0.','error');return;}
+  const change=mode==='use'?-Math.abs(qty):Math.abs(qty);
+  const newQty=Math.max(0,cur+change);
+  const item=allInventory.find(i=>i.id===id);
+  try{
+    await db.from('inventory').update({quantity:newQty,updated_at:new Date().toISOString()}).eq('id',id);
+    await db.from('inventory_log').insert({item_id:id,item_name:name,change_amount:change,new_quantity:newQty,reason:reason||(mode==='use'?'Used by Admin':'Restocked by Admin'),logged_by:'admin'});
+    if(item&&newQty<=(item.min_stock||0)&&cur>(item.min_stock||0)){
+      await notifySA('low_stock','Low Stock — '+name,name+' is now at '+newQty+' (minimum: '+(item.min_stock||0)+').',{item_id:id});
+    }
+    toast(`Updated! ${name}: ${newQty} remaining.`,'success');
+    closeModal('invAdjModal');
+    const[{data:inv},{data:ld}]=await Promise.all([
+      db.from('inventory').select('*').order('item_name'),
+      db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(30),
+    ]);
+    allInventory=inv||[];allInventoryLog=ld||[];
+    updateBadges();renderInventory();
+  }catch(e){console.error(e);toast('Failed.','error');}
+}
+
+// ── ANNOUNCEMENTS ──
+function renderAnnouncements(){
+  const el=document.getElementById('annList');
+  if(!allAnnouncements.length){el.innerHTML='<p class="text-center text-gray-300 py-8">No announcements yet.</p>';return;}
+  el.innerHTML=allAnnouncements.map(a=>`<div class="sc p-4 flex items-start gap-3 ${a.pinned?'border-l-4 border-gold':''}">
+    <div class="flex-1">
+      <p class="text-sm text-gray-800">${a.pinned?'📌 ':''}${esc(a.message)}</p>
+      <p class="text-xs text-gray-400 mt-1">${a.posted_by==='superadmin'?'👑 Super Admin':'🧑‍💼 You (Admin)'} · ${fmtDateTime(a.created_at)} ${a.acknowledged?'· <span class="text-forest text-xs">✓ Done</span>':''}</p>
+    </div>
+    ${!a.acknowledged?`<button onclick="ackAnnouncement('${a.id}')" class="text-xs text-forest hover:underline flex-shrink-0">Mark Done</button>`
+    :`<button onclick="ackAnnouncement('${a.id}',false)" class="text-xs text-gray-400 hover:underline flex-shrink-0">Undo</button>`}
+  </div>`).join('');
+}
+async function postAnnouncement(){
+  const msg=document.getElementById('annMsg').value.trim();
+  if(!msg){toast('Write a message.','error');return;}
+  try{
+    await db.from('announcements').insert({message:msg,posted_by:'admin',pinned:false,acknowledged:false});
+    document.getElementById('annMsg').value='';toast('Posted!','success');
+    const{data}=await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
+    allAnnouncements=data||[];updateBadges();renderAnnouncements();
+  }catch(e){toast('Failed.','error');}
+}
+async function ackAnnouncement(id,ack=true){
+  await db.from('announcements').update({acknowledged:ack}).eq('id',id);
+  const{data}=await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
+  allAnnouncements=data||[];updateBadges();renderAnnouncements();
+  if(document.getElementById('view-dashboard').classList.contains('active'))renderDashboard();
+}
+async function completeTask(id){
+  await db.from('staff_tasks').update({status:'completed',completed_at:new Date().toISOString()}).eq('id',id);
+  const{data}=await db.from('staff_tasks').select('*').order('created_at',{ascending:false});
+  allTasks=data||[];toast('Task completed!','success');renderDashboard();
+}
+
+// ── NOTIFY SA ──
+async function notifySA(type,title,message,extra={}){
+  try{await db.from('notifications').insert({type,title,message,payload:extra,target:'superadmin',created_by:'admin'});}
+  catch(e){console.warn('Could not notify SA:',e);}
+}
+
+// ── REALTIME ──
+function subscribeRealtime(){
+  db.channel('admin-notifs').on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'target=eq.admin'},p=>{
+    allNotifications=[p.new,...allNotifications];updateBadges();
+    if(document.getElementById('view-notifications').classList.contains('active'))renderNotifications();
+    toast(p.new.title,'info');
+  }).subscribe();
+  db.channel('admin-inv').on('postgres_changes',{event:'*',schema:'public',table:'inventory'},async()=>{
+    const{data}=await db.from('inventory').select('*').order('item_name');
+    allInventory=data||[];updateBadges();
+    if(document.getElementById('view-inventory').classList.contains('active'))renderInventory();
+  }).subscribe();
+  db.channel('admin-bk').on('postgres_changes',{event:'*',schema:'public',table:'bookings'},async()=>{
+    const{data}=await db.from('bookings').select('*').order('created_at',{ascending:false});
+    allBookings=data||[];
+    if(document.getElementById('view-dashboard').classList.contains('active'))renderDashboard();
+    if(document.getElementById('view-bookings').classList.contains('active'))renderBookings();
+  }).subscribe();
+  db.channel('admin-ann').on('postgres_changes',{event:'*',schema:'public',table:'announcements'},async()=>{
+    const{data}=await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
+    allAnnouncements=data||[];updateBadges();
+    if(document.getElementById('view-announcements').classList.contains('active'))renderAnnouncements();
+    if(document.getElementById('view-dashboard').classList.contains('active'))renderDashboard();
+  }).subscribe();
+  db.channel('admin-tasks').on('postgres_changes',{event:'*',schema:'public',table:'staff_tasks'},async()=>{
+    const{data}=await db.from('staff_tasks').select('*').order('created_at',{ascending:false});
+    allTasks=data||[];
+    if(document.getElementById('view-dashboard').classList.contains('active'))renderDashboard();
+  }).subscribe();
+}
+
+// ── HELPERS ──
+function todayLocal(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function closeModal(id){document.getElementById(id)?.classList.add('hidden');}
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden');}));
-function esc(str) { if(!str) return ''; return String(str).replace(/[&<>]/g,m=>m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'); }
-function fmtDate(d) { if(!d) return '—'; return new Date(d+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}); }
-function fmtDateTime(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
-async function sendEmail(to,subject,html) { if(!to) return false; try { await emailjs.send(EMAILJS_SID,EMAILJS_TMPL,{to_email:to,subject,message_html:html,to_name:to.split('@')[0]}); return true; } catch(e){ console.error(e); return false; } }
-function showToast(msg,type='success') { const t=document.getElementById('toast'); t.classList.remove('success','error','info','hidden'); t.classList.add(type); document.getElementById('toastMsg').textContent=msg; document.getElementById('toastIcon').className=type==='success'?'fas fa-check-circle':type==='error'?'fas fa-exclamation-circle':'fas fa-info-circle'; setTimeout(()=>t.classList.add('hidden'),5000); }
-
-// Set walk-in min dates
-const todayWI = new Date().toISOString().split('T')[0];
-document.getElementById('wi_ci').min = todayWI;
-document.getElementById('wi_co').min = todayWI;
-
-// Auto-refresh every 60s
-setInterval(()=>{ if(sessionStorage.getItem('bm_admin')==='1') loadAll(); }, 60000);
+function esc(s){if(!s)return '';return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+function setT(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+function fmtDate(d){if(!d)return '—';return new Date(d+'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'});}
+function fmtDateTime(d){if(!d)return '—';return new Date(d).toLocaleDateString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');t.classList.remove('success','error','info','hidden');t.classList.add(type);
+  document.getElementById('toastIcon').className=type==='success'?'fas fa-check-circle':type==='error'?'fas fa-exclamation-circle':'fas fa-info-circle';
+  document.getElementById('toastMsg').textContent=msg;
+  setTimeout(()=>t.classList.add('hidden'),5000);
+}
+const wd=todayLocal();
+['wi_ci','wi_co'].forEach(f=>{const el=document.getElementById(f);if(el)el.min=wd;});
 </script>
 </body>
 </html>
