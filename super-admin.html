@@ -782,8 +782,14 @@
               <h3 class="font-semibold text-gray-700 text-sm">Seasonal / Special Rules</h3>
               <button onclick="openRuleModal()" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Add Rule</button>
             </div>
-            <table class="tbl w-full"><thead><tr><th>Rule Name</th><th>Type</th><th>Period</th><th>Mult.</th><th>Status</th><th></th></tr></thead>
-            <tbody id="rulesTable"><tr><td colspan="6" class="text-center py-6 text-gray-300">Loading…</td></tr></tbody></table>
+            <div class="overflow-x-auto">
+              <table class="tbl w-full min-w-[520px]">
+                <thead><tr>
+                  <th>Rule Name</th><th>Type</th><th>Period</th><th class="text-right">Mult.</th><th class="text-center">Status</th><th class="text-center">Actions</th>
+                </tr></thead>
+                <tbody id="rulesTable"><tr><td colspan="6" class="text-center py-6 text-gray-300">Loading…</td></tr></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -3506,14 +3512,16 @@ function renderRulesTable(rules){
     <td class="font-medium text-sm">${esc(r.rule_name)}</td>
     <td><span class="badge b-pend text-xs">${r.rule_type}</span></td>
     <td class="text-xs text-gray-500 whitespace-nowrap">${r.start_date||'—'} → ${r.end_date||'—'}</td>
-    <td class="font-bold text-sm ${parseFloat(r.multiplier)>=1?'text-green-600':'text-red-500'}">${parseFloat(r.multiplier||1).toFixed(2)}×</td>
-    <td><span class="badge ${r.is_active?'b-conf':'b-canc'} text-xs">${r.is_active?'Active':'Off'}</span></td>
-    <td><div class="flex gap-2">
-      <button onclick="toggleRule('${r.id}',${!r.is_active})" class="text-xs text-blue-500 hover:underline">${r.is_active?'Disable':'Enable'}</button>
-      <button onclick="deleteRule('${r.id}')" class="text-xs text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
-    </div></td>
+    <td class="text-right font-bold text-sm ${parseFloat(r.multiplier)>=1?'text-green-600':'text-red-500'}">${parseFloat(r.multiplier||1).toFixed(2)}×</td>
+    <td class="text-center"><span class="badge ${r.is_active?'b-conf':'b-canc'} text-xs">${r.is_active?'Active':'Off'}</span></td>
+    <td class="text-center whitespace-nowrap">
+      <div class="flex items-center justify-center gap-2">
+        <button onclick="toggleRule('${r.id}',${!r.is_active})" class="text-xs px-2.5 py-1 rounded-lg ${r.is_active?'text-amber-600 bg-amber-50 hover:bg-amber-100':'text-forest bg-forest/10 hover:bg-forest/20'} font-medium">${r.is_active?'Disable':'Enable'}</button>
+        <button onclick="deleteRule('${r.id}')" class="text-xs text-red-400 hover:text-red-600 w-6 h-6 rounded-lg hover:bg-red-50 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
+      </div>
+    </td>
   </tr>`).join('')
-  :'<tr><td colspan="6" class="text-center py-6 text-gray-300">No seasonal rules set.</td></tr>';
+  :'<tr><td colspan="6" class="text-center py-6 text-gray-300">No seasonal rules set. Click + Add Rule to create one.</td></tr>';
 }
 
 async function savePricing(){
