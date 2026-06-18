@@ -326,7 +326,7 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
           <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Expenses</p><p class="text-2xl font-bold text-red-600" id="kpiExpensesTotal">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiExpensesSub">–</p></div>
           <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Net Profit</p><p class="text-2xl font-bold" id="kpiNetProfit">₱–</p><p class="text-xs text-gray-400 mt-1" id="kpiNetMargin">–</p></div>
-          <div class="stat-card flex items-center gap-3"><div><p class="text-xs text-gray-400 uppercase mb-1">Occupancy Rate</p><p class="text-2xl font-bold text-gray-800" id="kpiOccRate">–%</p><p class="text-xs text-gray-400" id="kpiOccSub">this period</p></div><canvas id="occMini" width="52" height="52" class="ml-auto"></canvas></div>
+          <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Occupancy Rate</p><p class="text-3xl font-bold text-gray-800" id="kpiOccRate">–%</p><p class="text-xs text-gray-400 mt-1" id="kpiOccSub">this period</p></div>
           <div class="stat-card"><p class="text-xs text-gray-400 uppercase mb-1">Pending Confirmation</p><p class="text-2xl font-bold text-yellow-600" id="kpiPendingConfirm">–</p><p class="text-xs text-gray-400 mt-1" id="kpiPendingSub">–</p></div>
         </div>
 
@@ -698,38 +698,93 @@
 
       <!-- ═══ PRICING ENGINE ═══ -->
       <div id="view-pricing" class="view">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="font-heading text-3xl text-gray-800 font-light">Pricing Engine</h2>
-          <button onclick="savePricing()" class="bg-forest text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-save"></i> Save All Changes</button>
-        </div>
-        <div class="sc p-6 mb-5">
-          <h3 class="font-semibold text-gray-700 mb-4 text-sm">Base Room Prices <span class="text-xs text-gray-400 font-normal">(changes reflect instantly on booking form)</span></h3>
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-4" id="roomPricingGrid"><p class="text-gray-400 text-sm col-span-5">Loading…</p></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
-          <div class="sc p-5"><h3 class="font-semibold text-gray-700 mb-3 text-sm">Global Settings</h3>
-            <div class="space-y-3">
-              <div><label class="fi-label">Extra Person Fee (₱)</label><input type="number" id="p_extraFee" class="fi"/></div>
-              <div><label class="fi-label">Deposit Percentage (%)</label><input type="number" id="p_deposit" class="fi"/></div>
-            </div>
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="font-heading text-3xl text-gray-800 font-light">Pricing Engine</h2>
+            <p class="text-xs text-gray-400 mt-0.5">All changes here reflect live on the booking form and walk-in calculations.</p>
           </div>
-          <div class="sc p-5"><h3 class="font-semibold text-gray-700 mb-3 text-sm">Weekend Multipliers</h3><div id="weekendMults" class="space-y-2 text-sm text-gray-500">Loading…</div></div>
-          <div class="sc p-5"><h3 class="font-semibold text-gray-700 mb-3 text-sm">Discount Rules</h3>
-            <div class="space-y-3">
-              <div><label class="fi-label">Early Bird (30+ days): % off</label><input type="number" id="p_earlyBird" class="fi" placeholder="10"/></div>
-              <div><label class="fi-label">Last Minute (3 days): % off</label><input type="number" id="p_lastMin" class="fi" placeholder="15"/></div>
-              <div><label class="fi-label">3+ nights: % off</label><input type="number" id="p_nights3" class="fi" placeholder="5"/></div>
-              <div><label class="fi-label">7+ nights: % off</label><input type="number" id="p_nights7" class="fi" placeholder="10"/></div>
-            </div>
-          </div>
+          <button onclick="savePricing()" class="bg-forest text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center gap-2 shadow-sm"><i class="fas fa-save"></i> Save All Changes</button>
         </div>
-        <div class="sc overflow-hidden">
+
+        <!-- GROUP PRICING TABLE (weekday + weekend side-by-side) -->
+        <div class="sc mb-5">
           <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="font-semibold text-gray-700 text-sm">Seasonal Pricing Rules</h3>
-            <button onclick="openRuleModal()" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Add Rule</button>
+            <div>
+              <h3 class="font-semibold text-gray-700 text-sm">Group Pricing Tiers</h3>
+              <p class="text-xs text-gray-400 mt-0.5">Weekday = Sun–Thu · Weekend = Fri–Sat · 19-24 pax price: base 15-18 + ₱500 × (pax−18)</p>
+            </div>
+            <div class="flex gap-2 text-xs">
+              <span class="flex items-center gap-1 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">☀ Weekday</span>
+              <span class="flex items-center gap-1 bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">🌙 Weekend</span>
+            </div>
           </div>
-          <table class="tbl w-full"><thead><tr><th>Rule Name</th><th>Type</th><th>Period</th><th>Multiplier</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="rulesTable"><tr><td colspan="6" class="text-center py-6 text-gray-300">Loading…</td></tr></tbody></table>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="groupPricingTable">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Pax Range</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Rooms</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide text-gray-500">☀ Weekday (₱)</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-amber-600 uppercase tracking-wide">🌙 Weekend (₱)</th>
+                  <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Free Pool Hrs</th>
+                  <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Free AC</th>
+                  <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Free Mattresses</th>
+                </tr>
+              </thead>
+              <tbody id="groupPricingBody"><tr><td colspan="8" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ADD-ON PRICING -->
+        <div class="sc mb-5">
+          <div class="p-4 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-700 text-sm">Add-on Pricing</h3>
+            <p class="text-xs text-gray-400 mt-0.5">Prices update live on the booking form, walk-in form, and on-site add-on modal.</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50">
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Add-on</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Unit</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Price (₱)</th>
+                  <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Active</th>
+                </tr>
+              </thead>
+              <tbody id="addonPricingBody"><tr><td colspan="5" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- GLOBAL SETTINGS + SEASONAL RULES -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          <div class="sc p-5">
+            <h3 class="font-semibold text-gray-700 mb-4 text-sm">Global Settings</h3>
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="fi-label">Extra Person Fee (₱) <span class="text-gray-400 font-normal text-xs">per pax beyond 24</span></label>
+                  <input type="number" id="p_extraFee" class="fi" min="0"/>
+                </div>
+                <div>
+                  <label class="fi-label">Deposit Required (%)</label>
+                  <input type="number" id="p_deposit" class="fi" min="0" max="100"/>
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 bg-gray-50 rounded-lg p-2.5">Extra pax (beyond 24) = Extra Person Fee + Extra Mattress Fee. Currently configured in add-ons above.</p>
+            </div>
+          </div>
+          <div class="sc overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 class="font-semibold text-gray-700 text-sm">Seasonal / Special Rules</h3>
+              <button onclick="openRuleModal()" class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-lg hover:bg-forest/20 flex items-center gap-1"><i class="fas fa-plus"></i> Add Rule</button>
+            </div>
+            <table class="tbl w-full"><thead><tr><th>Rule Name</th><th>Type</th><th>Period</th><th>Mult.</th><th>Status</th><th></th></tr></thead>
+            <tbody id="rulesTable"><tr><td colspan="6" class="text-center py-6 text-gray-300">Loading…</td></tr></tbody></table>
+          </div>
         </div>
       </div>
 
@@ -2026,11 +2081,7 @@ function recomputeDashboard(){
   setT('kpiPendingSub',`${pendingAll.length} total awaiting review`);
   updateBadges();
 
-  // ── Mini occupancy donut ──
-  if(charts.occMini) charts.occMini.destroy();
-  const oc=document.getElementById('occMini');
-  if(oc && occ!==null) charts.occMini=new Chart(oc,{type:'doughnut',data:{datasets:[{data:[occ,100-occ],backgroundColor:['#2d5a3b','#e5e7eb'],borderWidth:0}]},options:{cutout:'70%',plugins:{tooltip:{enabled:false},legend:{display:false}}}});
-  else if(charts.occMini) charts.occMini=null;
+  // Occupancy: text-only (no donut)
 
   // ── Charts ──
   renderCashFlowChart();
@@ -3372,60 +3423,147 @@ async function deleteCategory(id, name){
 // ═══════════════════════════════════════════════════════
 // PRICING ENGINE
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// PRICING ENGINE — group_pricing + addon_pricing full CRUD
+// ═══════════════════════════════════════════════════════
+let allGroupPricing=[], allAddonPricing=[];
+
 async function loadPricing(){
   try{
-    const[{data:pricing},{data:rules},{data:settings}]=await Promise.all([
-      db.from('room_pricing').select('*').order('base_price'),
+    const[{data:gp},{data:ap},{data:rules},{data:settings}]=await Promise.all([
+      db.from('group_pricing').select('*').order('pax_min'),
+      db.from('addon_pricing').select('*').order('key'),
       db.from('dynamic_pricing_rules').select('*').order('created_at',{ascending:false}),
       db.from('site_settings').select('*').in('setting_key',['extra_person_fee','deposit_percentage'])
     ]);
-    roomPricing=pricing||[]; pricingRules=rules||[];
+    allGroupPricing=gp||[]; allAddonPricing=ap||[]; pricingRules=rules||[];
     const smap=Object.fromEntries((settings||[]).map(s=>[s.setting_key,s.setting_value]));
-    document.getElementById('roomPricingGrid').innerHTML=roomPricing.map(r=>`
-      <div class="text-center p-4 bg-gray-50 rounded-xl">
-        <p class="font-semibold text-gray-700 text-sm mb-2">${r.room_type}</p>
-        <div class="mb-2"><label class="text-xs text-gray-400">Base Price (₱)</label><input type="number" class="fi text-center font-bold text-forest" data-room="${r.id}" data-field="base_price" value="${r.base_price}"/></div>
-        <div class="mb-2"><label class="text-xs text-gray-400">Std Occupancy</label><input type="number" class="fi text-center" data-room="${r.id}" data-field="standard_occupancy" value="${r.standard_occupancy}"/></div>
-        <div><label class="text-xs text-gray-400">Weekend Mult.</label><input type="number" step="0.05" class="fi text-center" data-room="${r.id}" data-field="weekend_multiplier" value="${r.weekend_multiplier}"/></div>
-      </div>`).join('');
+    renderGroupPricingTable();
+    renderAddonPricingTable();
     document.getElementById('p_extraFee').value=smap['extra_person_fee']||500;
     document.getElementById('p_deposit').value=smap['deposit_percentage']||50;
-    document.getElementById('weekendMults').innerHTML=roomPricing.map(r=>`<div class="flex justify-between"><span class="text-gray-600">${r.room_type}</span><span class="font-semibold">${parseFloat(r.weekend_multiplier).toFixed(2)}×</span></div>`).join('');
     renderRulesTable(pricingRules);
-  }catch(e){console.error(e);}
+  }catch(e){console.error(e);toast('Failed to load pricing.','error');}
 }
+
+function renderGroupPricingTable(){
+  const tbody=document.getElementById('groupPricingBody');if(!tbody)return;
+  // Pair weekday + weekend rows by pax_min
+  const paxRanges=[...new Set(allGroupPricing.map(r=>r.pax_min))].sort((a,b)=>a-b);
+  tbody.innerHTML=paxRanges.map(pmin=>{
+    const wd=allGroupPricing.find(r=>r.day_type==='weekday'&&r.pax_min===pmin);
+    const we=allGroupPricing.find(r=>r.day_type==='weekend'&&r.pax_min===pmin);
+    const ref=wd||we;if(!ref)return'';
+    return `<tr class="border-b border-gray-100 hover:bg-gray-50">
+      <td class="px-4 py-3"><span class="font-bold text-gray-800 text-sm">${ref.pax_min}–${ref.pax_max}</span><span class="text-xs text-gray-400 ml-1">pax</span></td>
+      <td class="px-4 py-3 text-xs text-gray-500">${ref.rooms_included} room${ref.rooms_included!==1?'s':''}</td>
+      <td class="px-4 py-3 text-xs text-gray-500 max-w-[200px]">${esc(ref.description||'')}</td>
+      <td class="px-4 py-3 text-right">
+        ${wd?`<input type="number" class="fi text-right font-semibold text-gray-800 w-28 py-1.5 text-sm" data-gp="${wd.id}" value="${wd.price}" min="0" step="500"/>`:
+        '<span class="text-gray-300">—</span>'}
+      </td>
+      <td class="px-4 py-3 text-right">
+        ${we?`<input type="number" class="fi text-right font-semibold text-amber-700 w-28 py-1.5 text-sm" data-gp="${we.id}" value="${we.price}" min="0" step="500"/>`:
+        '<span class="text-gray-300">—</span>'}
+      </td>
+      <td class="px-4 py-3 text-center text-xs text-gray-500">${ref.free_pool_spa_hours>0?ref.free_pool_spa_hours+'hr':'—'}</td>
+      <td class="px-4 py-3 text-center">${ref.free_ac_living?'<span class="text-xs text-green-600 font-medium">✓ Free</span>':'<span class="text-xs text-gray-300">—</span>'}</td>
+      <td class="px-4 py-3 text-center text-xs text-gray-500">${ref.free_extra_mattresses>0?ref.free_extra_mattresses:' —'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAddonPricingTable(){
+  const tbody=document.getElementById('addonPricingBody');if(!tbody)return;
+  const unitLabels={flat:'Flat rate',per_unit:'Per unit',per_hour:'Per hour'};
+  tbody.innerHTML=allAddonPricing.map(a=>`<tr class="border-b border-gray-100 hover:bg-gray-50">
+    <td class="px-4 py-3">
+      <p class="font-semibold text-sm text-gray-800">${esc(a.label)}</p>
+      <p class="text-xs font-mono text-gray-400">${a.key}</p>
+    </td>
+    <td class="px-4 py-3 text-xs text-gray-500">${esc(a.description||'')}</td>
+    <td class="px-4 py-3 text-xs text-gray-500">${unitLabels[a.unit]||a.unit}</td>
+    <td class="px-4 py-3 text-right">
+      <input type="number" class="fi text-right font-semibold text-gray-800 w-28 py-1.5 text-sm" data-addon="${a.id}" value="${a.price}" min="0" step="50"/>
+    </td>
+    <td class="px-4 py-3 text-center">
+      <button onclick="toggleAddon('${a.id}',${!a.is_active})" class="text-xs px-2.5 py-1 rounded-full font-medium ${a.is_active?'bg-green-100 text-green-700 hover:bg-green-200':'bg-gray-100 text-gray-400 hover:bg-gray-200'}">${a.is_active?'Active':'Off'}</button>
+    </td>
+  </tr>`).join('');
+}
+
+async function toggleAddon(id,active){
+  try{
+    await db.from('addon_pricing').update({is_active:active}).eq('id',id);
+    toast(active?'Add-on enabled.':'Add-on disabled.','success');
+    await loadPricing();
+  }catch(e){toast('Failed.','error');}
+}
+
 function renderRulesTable(rules){
-  const tbl=document.getElementById('rulesTable'); if(!tbl) return;
+  const tbl=document.getElementById('rulesTable');if(!tbl)return;
   tbl.innerHTML=rules.length?rules.map(r=>`<tr>
-    <td class="font-medium">${r.rule_name}</td>
+    <td class="font-medium text-sm">${esc(r.rule_name)}</td>
     <td><span class="badge b-pend text-xs">${r.rule_type}</span></td>
-    <td class="text-xs text-gray-500">${r.start_date||'—'} → ${r.end_date||'—'}</td>
-    <td class="font-bold ${parseFloat(r.multiplier)>=1?'profit-pos':'profit-neg'}">${parseFloat(r.multiplier||1).toFixed(2)}×</td>
-    <td><span class="badge ${r.is_active?'b-conf':'b-canc'}">${r.is_active?'Active':'Inactive'}</span></td>
+    <td class="text-xs text-gray-500 whitespace-nowrap">${r.start_date||'—'} → ${r.end_date||'—'}</td>
+    <td class="font-bold text-sm ${parseFloat(r.multiplier)>=1?'text-green-600':'text-red-500'}">${parseFloat(r.multiplier||1).toFixed(2)}×</td>
+    <td><span class="badge ${r.is_active?'b-conf':'b-canc'} text-xs">${r.is_active?'Active':'Off'}</span></td>
     <td><div class="flex gap-2">
       <button onclick="toggleRule('${r.id}',${!r.is_active})" class="text-xs text-blue-500 hover:underline">${r.is_active?'Disable':'Enable'}</button>
       <button onclick="deleteRule('${r.id}')" class="text-xs text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
     </div></td>
   </tr>`).join('')
-  :'<tr><td colspan="6" class="text-center py-6 text-gray-300">No pricing rules.</td></tr>';
+  :'<tr><td colspan="6" class="text-center py-6 text-gray-300">No seasonal rules set.</td></tr>';
 }
+
 async function savePricing(){
+  const btn=document.querySelector('[onclick="savePricing()"]');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…';}
   try{
-    const inputs=document.querySelectorAll('[data-room]'); const updates={};
-    inputs.forEach(inp=>{const id=inp.dataset.room,f=inp.dataset.field;if(!updates[id])updates[id]={};updates[id][f]=parseFloat(inp.value);});
-    for(const[id,data]of Object.entries(updates)){const{error}=await db.from('room_pricing').update({...data,last_updated:new Date().toISOString()}).eq('id',id);if(error)throw error;}
-    const ef=document.getElementById('p_extraFee').value; const dp=document.getElementById('p_deposit').value;
+    const errs=[];
+    // Save group_pricing rows
+    const gpInputs=document.querySelectorAll('[data-gp]');
+    for(const inp of gpInputs){
+      const{error}=await db.from('group_pricing').update({price:parseFloat(inp.value)||0}).eq('id',inp.dataset.gp);
+      if(error) errs.push(error.message);
+    }
+    // Save addon_pricing rows
+    const addonInputs=document.querySelectorAll('[data-addon]');
+    for(const inp of addonInputs){
+      const{error}=await db.from('addon_pricing').update({price:parseFloat(inp.value)||0}).eq('id',inp.dataset.addon);
+      if(error) errs.push(error.message);
+    }
+    // Save global settings
+    const ef=document.getElementById('p_extraFee').value;
+    const dp=document.getElementById('p_deposit').value;
     await Promise.all([
       db.from('site_settings').upsert({setting_key:'extra_person_fee',setting_value:ef,updated_at:new Date().toISOString()},{onConflict:'setting_key'}),
       db.from('site_settings').upsert({setting_key:'deposit_percentage',setting_value:dp,updated_at:new Date().toISOString()},{onConflict:'setting_key'}),
     ]);
-    toast('Pricing saved! Changes live on booking form.','success');
-  }catch(e){console.error(e);toast('Failed.','error');}
+    if(errs.length) throw new Error(errs.join('; '));
+    toast('All pricing saved! Booking form reflects changes immediately.','success');
+    await loadPricing();
+  }catch(e){console.error(e);toast('Save failed: '+(e.message||'unknown'),'error');}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> Save All Changes';}}
 }
-function openRuleModal(){['rl_id','rl_name','rl_mult','rl_start','rl_end','rl_notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('rl_active').checked=true;document.getElementById('ruleModal').classList.remove('hidden');}
-async function saveRule(){const name=document.getElementById('rl_name').value.trim();const mult=parseFloat(document.getElementById('rl_mult').value);if(!name||isNaN(mult)){toast('Name and multiplier required.','error');return;}try{const{error}=await db.from('dynamic_pricing_rules').insert({rule_name:name,rule_type:document.getElementById('rl_type').value,multiplier:mult,start_date:document.getElementById('rl_start').value||null,end_date:document.getElementById('rl_end').value||null,is_active:document.getElementById('rl_active').checked,notes:document.getElementById('rl_notes').value});if(error)throw error;toast('Rule saved!','success');closeModal('ruleModal');await loadPricing();}catch(e){toast('Failed.','error');}}
+
+function openRuleModal(){
+  ['rl_id','rl_name','rl_mult','rl_start','rl_end','rl_notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('rl_active').checked=true;
+  document.getElementById('ruleModal').classList.remove('hidden');
+}
+async function saveRule(){
+  const name=document.getElementById('rl_name').value.trim();
+  const mult=parseFloat(document.getElementById('rl_mult').value);
+  if(!name||isNaN(mult)){toast('Name and multiplier required.','error');return;}
+  try{
+    const{error}=await db.from('dynamic_pricing_rules').insert({rule_name:name,rule_type:document.getElementById('rl_type').value,multiplier:mult,start_date:document.getElementById('rl_start').value||null,end_date:document.getElementById('rl_end').value||null,is_active:document.getElementById('rl_active').checked,notes:document.getElementById('rl_notes').value});
+    if(error)throw error;
+    toast('Rule saved!','success');closeModal('ruleModal');await loadPricing();
+  }catch(e){toast('Failed.','error');}
+}
 async function toggleRule(id,active){await db.from('dynamic_pricing_rules').update({is_active:active}).eq('id',id);toast(active?'Enabled.':'Disabled.','success');await loadPricing();}
-async function deleteRule(id){if(!confirm('Delete?'))return;await db.from('dynamic_pricing_rules').delete().eq('id',id);toast('Deleted.','success');await loadPricing();}
+async function deleteRule(id){if(!confirm('Delete this rule?'))return;await db.from('dynamic_pricing_rules').delete().eq('id',id);toast('Deleted.','success');await loadPricing();}
 
 // ═══════════════════════════════════════════════════════
 // STAFF
@@ -4846,84 +4984,238 @@ function printBSSummary(){
   const totCollected=bsFiltered.reduce((s,b)=>s+((b.total_amount||0)-(b.remaining_balance||0)),0);
   const totBal=bsFiltered.reduce((s,b)=>s+(b.remaining_balance||0),0);
   const totAddons=bsFiltered.reduce((s,b)=>s+addonTotal(b),0);
+  const totNights=bsFiltered.reduce((s,b)=>s+(Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0),0);
 
-  const monthNames=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const filterLabel=[q?`"${q}"`:null,month?monthNames[parseInt(month)]+' '+year:year?year:'All time',status?STATUS_LABELS[status]:''].filter(Boolean).join(' · ');
+  const MONTH_NAMES=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  const periodLabel=month?`${MONTH_NAMES[parseInt(month)]} ${year}`:year?`Year ${year}`:'All Time';
+  const statusLabel=status?(STATUS_LABELS[status]||status):'All Statuses';
+  const genDate=new Date().toLocaleString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
 
-  const rows=bsFiltered.map(b=>{
+  const rows=bsFiltered.map((b,idx)=>{
     const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0;
     const pmt=getPayments(b);
     const ao=addonTotal(b);
     const bal=b.remaining_balance||0;
-    return `<tr>
-      <td style="font-family:monospace;font-size:10px;color:#2d5a3b">${b.booking_ref}</td>
-      <td><strong>${esc(b.guest_name)}</strong><br><span style="color:#999;font-size:10px">${b.guest_phone||''}</span></td>
-      <td style="font-size:10px">${esc(b.room_type||'')}</td>
-      <td style="text-align:center;font-size:11px">${b.check_in_date||''}</td>
-      <td style="text-align:center;font-size:11px">${b.check_out_date||''}</td>
-      <td style="text-align:center">${nights}</td>
-      <td style="text-align:center">${b.pax_count||b.adults||'—'}</td>
-      <td style="text-align:right;font-weight:700">₱${(b.total_amount||0).toLocaleString()}</td>
-      <td style="text-align:right;color:#2d5a3b">₱${pmt.dp1>0?pmt.dp1.toLocaleString():'—'}</td>
-      <td style="text-align:right;color:#2d5a3b">₱${pmt.dp2>0?pmt.dp2.toLocaleString():'—'}</td>
-      <td style="text-align:right;color:#2d5a3b">₱${pmt.fullPmt>0?pmt.fullPmt.toLocaleString():'—'}</td>
-      <td style="text-align:right;${bal>0?'color:#dc2626;font-weight:700':'color:#9ca3af'}">${bal>0?'₱'+bal.toLocaleString():'Paid ✓'}</td>
-      <td style="text-align:right;color:#d97706">${ao>0?'₱'+ao.toLocaleString():'—'}</td>
+    const collected=(b.total_amount||0)-bal;
+    const isFullyPaid=bal===0;
+    const addonsObj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
+    const addonStr=Object.entries(addonsObj).filter(([k])=>k!=='_extra_guests').map(([k,v])=>k.replace(/_/g,' ')+' ₱'+Number(v).toLocaleString()).join(', ')||'—';
+    return `<tr class="${idx%2===0?'row-even':'row-odd'} ${bal>0?'balance-due':''}">
+      <td class="num">${idx+1}</td>
+      <td class="ref">${b.booking_ref}</td>
+      <td>
+        <div class="guest-name">${esc(b.guest_name)}</div>
+        <div class="guest-sub">${b.guest_phone||b.guest_email||''}</div>
+      </td>
+      <td class="room-cell">${esc(b.room_type||'—')}</td>
+      <td class="center">${fmtPrintDate(b.check_in_date)}</td>
+      <td class="center">${fmtPrintDate(b.check_out_date)}</td>
+      <td class="center num-cell">${nights}</td>
+      <td class="center num-cell">${b.pax_count||b.adults||'—'}</td>
+      <td class="money total-col">₱${(b.total_amount||0).toLocaleString()}</td>
+      <td class="money pay-col">${pmt.dp1>0?`₱${pmt.dp1.toLocaleString()}<div class="pay-meta">${pmt.dp1Date?fmtPrintDate(pmt.dp1Date):''} ${pmt.dp1Method}</div>`:'<span class="dash">—</span>'}</td>
+      <td class="money pay-col">${pmt.dp2>0?`₱${pmt.dp2.toLocaleString()}<div class="pay-meta">${pmt.dp2Date?fmtPrintDate(pmt.dp2Date):''} ${pmt.dp2Method}</div>`:'<span class="dash">—</span>'}</td>
+      <td class="money pay-col">${pmt.fullPmt>0?`₱${pmt.fullPmt.toLocaleString()}<div class="pay-meta">${pmt.fullDate?fmtPrintDate(pmt.fullDate):''} ${pmt.fullMethod}</div>`:'<span class="dash">—</span>'}</td>
+      <td class="money collected-col">₱${collected.toLocaleString()}</td>
+      <td class="money ${bal>0?'balance-col':'paid-col'}">${bal>0?`₱${bal.toLocaleString()}`:'PAID ✓'}</td>
+      <td class="money addon-col">${ao>0?`₱${ao.toLocaleString()}<div class="pay-meta">${esc(addonStr)}</div>`:'<span class="dash">—</span>'}</td>
+      <td class="status-col"><span class="status-badge status-${b.status||'pending'}">${STATUS_LABELS[b.status]||b.status}</span></td>
     </tr>`;
   }).join('');
 
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
-  <title>Booking Summary — ${filterLabel}</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Arial',sans-serif;font-size:12px;color:#1a1a1a;padding:24px;}
-    h1{font-size:20px;font-weight:300;color:#2d5a3b;margin-bottom:4px;}
-    .meta{font-size:11px;color:#888;margin-bottom:20px;}
-    table{width:100%;border-collapse:collapse;font-size:11px;}
-    th{background:#2d5a3b;color:white;padding:8px 6px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
-    th.r{text-align:right;}
-    td{padding:7px 6px;border-bottom:1px solid #f0efeb;vertical-align:top;}
-    tr:hover td{background:#f9f9f7;}
-    tfoot td{background:#f0fdf4;font-weight:700;border-top:2px solid #2d5a3b;padding:9px 6px;}
-    .pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
-    .pill{background:#f0fdf4;color:#2d5a3b;border:1px solid #d1fae5;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:600;}
-    .pill.red{background:#fff1f2;color:#dc2626;border-color:#fecdd3;}
-    .pill.amber{background:#fffbeb;color:#d97706;border-color:#fde68a;}
-    @media print{
-      body{padding:12px;}
-      .no-print{display:none!important;}
-    }
-  </style></head><body>
-  <h1>Balay Maysa Resort — Booking Summary</h1>
-  <p class="meta">Filter: ${esc(filterLabel)} · Generated: ${new Date().toLocaleString('en-PH')} · ${bsFiltered.length} booking${bsFiltered.length!==1?'s':''}</p>
-  <div class="pills">
-    <span class="pill">Total ₱${totTotal.toLocaleString()}</span>
-    <span class="pill">Collected ₱${totCollected.toLocaleString()}</span>
-    ${totBal>0?`<span class="pill red">Balance Due ₱${totBal.toLocaleString()}</span>`:''}
-    ${totAddons>0?`<span class="pill amber">Add-ons ₱${totAddons.toLocaleString()}</span>`:''}
-  </div>
-  <table>
-    <thead><tr>
-      <th>Ref #</th><th>Guest</th><th>Room(s)</th><th>Check-in</th><th>Check-out</th>
-      <th class="r">Nights</th><th class="r">Pax</th><th class="r">Total</th>
-      <th class="r">DP #1</th><th class="r">DP #2</th><th class="r">Full Pmt</th>
-      <th class="r">Balance</th><th class="r">Add-ons</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-    <tfoot><tr>
-      <td colspan="7">Totals — ${bsFiltered.length} booking${bsFiltered.length!==1?'s':''}</td>
-      <td style="text-align:right">₱${totTotal.toLocaleString()}</td>
-      <td colspan="3"></td>
-      <td style="text-align:right;color:${totBal>0?'#dc2626':'#2d5a3b'}">₱${totBal.toLocaleString()}</td>
-      <td style="text-align:right;color:#d97706">₱${totAddons.toLocaleString()}</td>
-    </tr></tfoot>
-  </table>
-  </body></html>`;
+  function fmtPrintDate(d){if(!d)return'—';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});}
 
-  const w=window.open('','_blank','width=1100,height=700');
+  const html=`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Booking Summary Report — ${esc(periodLabel)}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  @page{size:A3 landscape;margin:15mm 12mm;}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;color:#1a1a1a;background:white;}
+
+  /* ── HEADER ── */
+  .header{display:flex;justify-content:space-between;align-items:flex-start;padding:0 0 14px;border-bottom:3px solid #2d5a3b;margin-bottom:16px;}
+  .brand-block .brand{font-size:22px;font-weight:300;color:#2d5a3b;letter-spacing:-0.3px;}
+  .brand-block .brand-sub{font-size:10px;color:#888;margin-top:2px;letter-spacing:.06em;text-transform:uppercase;}
+  .report-title{text-align:right;}
+  .report-title h2{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:2px;}
+  .report-title .meta{font-size:9px;color:#888;line-height:1.6;}
+
+  /* ── SUMMARY CARDS ── */
+  .summary-bar{display:flex;gap:10px;margin-bottom:16px;}
+  .summary-card{flex:1;background:#f7f9f7;border:1px solid #e2e8e4;border-radius:8px;padding:10px 14px;}
+  .summary-card.highlight{background:#f0fdf4;border-color:#bbf7d0;}
+  .summary-card.warn{background:#fff7ed;border-color:#fed7aa;}
+  .summary-card.danger{background:#fff1f2;border-color:#fecdd3;}
+  .summary-card .card-label{font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:3px;}
+  .summary-card .card-val{font-size:16px;font-weight:700;color:#1a1a1a;}
+  .summary-card.highlight .card-val{color:#166534;}
+  .summary-card.warn .card-val{color:#c2410c;}
+  .summary-card.danger .card-val{color:#b91c1c;}
+  .summary-card .card-sub{font-size:8px;color:#999;margin-top:1px;}
+
+  /* ── TABLE ── */
+  table{width:100%;border-collapse:collapse;font-size:9px;}
+  thead tr{background:#2d5a3b;}
+  thead th{color:white;padding:7px 6px;text-align:left;font-size:8.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;border:none;}
+  thead th.right,thead th.center{text-align:right;}
+  thead th.center{text-align:center;}
+
+  .row-even td{background:#ffffff;}
+  .row-odd td{background:#f9fafb;}
+  .balance-due td{background:#fff8f4!important;}
+
+  td{padding:6px 6px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
+  td.num{color:#bbb;font-size:8px;text-align:center;width:22px;}
+  td.ref{font-family:monospace;font-size:8.5px;color:#2d5a3b;font-weight:600;white-space:nowrap;}
+  td.center{text-align:center;}
+  td.money{text-align:right;font-weight:600;white-space:nowrap;}
+  td.num-cell{font-weight:700;color:#374151;}
+  td.room-cell{font-size:8.5px;color:#4b5563;max-width:80px;}
+  .guest-name{font-weight:600;color:#111827;}
+  .guest-sub{font-size:8px;color:#9ca3af;margin-top:1px;}
+  .pay-meta{font-size:7.5px;color:#9ca3af;font-weight:400;margin-top:1px;}
+  .dash{color:#d1d5db;}
+
+  /* Money column color coding */
+  td.total-col{color:#111827;}
+  td.pay-col{color:#166534;}
+  td.collected-col{color:#166534;background:#f0fdf4!important;}
+  td.balance-col{color:#b91c1c;font-weight:700;}
+  td.paid-col{color:#166534;}
+  td.addon-col{color:#92400e;}
+
+  /* Status badges */
+  .status-badge{display:inline-block;padding:2px 6px;border-radius:999px;font-size:7.5px;font-weight:600;white-space:nowrap;}
+  .status-confirmed,.status-confirmed_balance_due{background:#d1fae5;color:#065f46;}
+  .status-fully_paid{background:#d1fae5;color:#065f46;}
+  .status-completed_stayed{background:#ede9fe;color:#5b21b6;}
+  .status-pending_payment_verification{background:#fef3c7;color:#92400e;}
+  .status-cancelled,.status-declined{background:#fee2e2;color:#991b1b;}
+  .status-col{text-align:center;width:72px;}
+
+  /* Totals footer */
+  tfoot td{padding:8px 6px;font-weight:700;font-size:9.5px;border-top:2px solid #2d5a3b;background:#f0fdf4!important;}
+  tfoot td.total-col{color:#111827;font-size:11px;}
+  tfoot td.balance-col{color:#b91c1c;}
+  tfoot td.paid-col{color:#166534;}
+  tfoot td.collected-col{color:#166534;}
+
+  /* ── FOOTER ── */
+  .page-footer{margin-top:16px;padding-top:10px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;}
+  .page-footer p{font-size:8px;color:#9ca3af;}
+  .page-footer .disclaimer{font-size:7.5px;color:#bbb;font-style:italic;}
+
+  @media print{
+    .no-print{display:none!important;}
+    body{font-size:9.5px;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- PRINT BUTTON (hidden when printing) -->
+  <div class="no-print" style="position:fixed;top:16px;right:16px;z-index:999;display:flex;gap:8px;">
+    <button onclick="window.print()" style="background:#2d5a3b;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">🖨 Print / Save PDF</button>
+    <button onclick="window.close()" style="background:#f3f4f6;color:#374151;border:none;padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;">✕ Close</button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand-block">
+      <div class="brand">🌿 Balay Maysa Resort</div>
+      <div class="brand-sub">Private Resort · Booking Summary Report</div>
+    </div>
+    <div class="report-title">
+      <h2>Booking Summary Report</h2>
+      <div class="meta">
+        <strong>Period:</strong> ${esc(periodLabel)} &nbsp;|&nbsp; <strong>Status:</strong> ${esc(statusLabel)}<br/>
+        ${q?`<strong>Search:</strong> ${esc(q)} &nbsp;|&nbsp; `:''}
+        <strong>Generated:</strong> ${genDate}
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-bar">
+    <div class="summary-card">
+      <div class="card-label">Total Bookings</div>
+      <div class="card-val">${bsFiltered.length}</div>
+      <div class="card-sub">${totNights} total nights</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Total Amount</div>
+      <div class="card-val">₱${totTotal.toLocaleString()}</div>
+      <div class="card-sub">Gross booking value</div>
+    </div>
+    <div class="summary-card highlight">
+      <div class="card-label">Total Collected</div>
+      <div class="card-val">₱${totCollected.toLocaleString()}</div>
+      <div class="card-sub">${totTotal>0?Math.round(totCollected/totTotal*100):0}% collection rate</div>
+    </div>
+    ${totBal>0?`<div class="summary-card danger">
+      <div class="card-label">Outstanding Balance</div>
+      <div class="card-val">₱${totBal.toLocaleString()}</div>
+      <div class="card-sub">${bsFiltered.filter(b=>b.remaining_balance>0).length} bookings with balance</div>
+    </div>`:'<div class="summary-card highlight"><div class="card-label">Balance Due</div><div class="card-val" style="color:#166534">₱0 — All Paid ✓</div><div class="card-sub">No outstanding balances</div></div>'}
+    ${totAddons>0?`<div class="summary-card warn">
+      <div class="card-label">Add-on Revenue</div>
+      <div class="card-val">₱${totAddons.toLocaleString()}</div>
+      <div class="card-sub">On-site purchases</div>
+    </div>`:''}
+  </div>
+
+  <!-- TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th style="width:22px">#</th>
+        <th>Ref #</th>
+        <th>Guest</th>
+        <th>Room(s)</th>
+        <th class="center">Check-in</th>
+        <th class="center">Check-out</th>
+        <th class="center" style="width:36px">Nts</th>
+        <th class="center" style="width:34px">Pax</th>
+        <th class="right" style="width:72px">Total</th>
+        <th class="right" style="width:80px">DP #1</th>
+        <th class="right" style="width:80px">DP #2</th>
+        <th class="right" style="width:80px">Full Pmt</th>
+        <th class="right" style="width:72px;background:#166534">Collected</th>
+        <th class="right" style="width:70px">Balance</th>
+        <th class="right" style="width:80px">Add-ons</th>
+        <th class="center" style="width:72px">Status</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+    <tfoot>
+      <tr>
+        <td colspan="8" style="color:#6b7280;font-size:9px;">TOTALS — ${bsFiltered.length} booking${bsFiltered.length!==1?'s':''} · ${totNights} nights</td>
+        <td class="total-col" style="text-align:right">₱${totTotal.toLocaleString()}</td>
+        <td colspan="3"></td>
+        <td class="collected-col" style="text-align:right">₱${totCollected.toLocaleString()}</td>
+        <td class="${totBal>0?'balance-col':'paid-col'}" style="text-align:right">${totBal>0?'₱'+totBal.toLocaleString():'FULLY PAID ✓'}</td>
+        <td class="addon-col" style="text-align:right">${totAddons>0?'₱'+totAddons.toLocaleString():'—'}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- PAGE FOOTER -->
+  <div class="page-footer">
+    <p>Balay Maysa Resort &nbsp;·&nbsp; Booking Management System &nbsp;·&nbsp; Confidential</p>
+    <p class="disclaimer">This document is computer-generated. Figures are accurate as of the generation date.</p>
+    <p>Page 1 of 1 &nbsp;·&nbsp; ${esc(periodLabel)}</p>
+  </div>
+
+</body>
+</html>`;
+
+  const w=window.open('','_blank','width=1200,height=800');
   w.document.write(html);
   w.document.close();
-  setTimeout(()=>w.print(),400);
 }
 
 // ── Fix acctSearch name search bug ────────────────────────────
