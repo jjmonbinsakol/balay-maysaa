@@ -215,6 +215,7 @@
       <button class="nav-item" onclick="showView('finances')" id="nav-finances"><i class="fas fa-peso-sign"></i> Revenue & P&L</button>
       <button class="nav-item" onclick="showView('expenses')" id="nav-expenses"><i class="fas fa-receipt"></i> Expenses</button>
       <button class="nav-item" onclick="showView('accounting')" id="nav-accounting"><i class="fas fa-book-open"></i> Guest Ledger</button>
+      <button class="nav-item" onclick="showView('bookingsummary')" id="nav-bookingsummary"><i class="fas fa-file-invoice-dollar"></i> Booking Summary</button>
       <button class="nav-item" onclick="showView('pricing')" id="nav-pricing"><i class="fas fa-tags"></i> Pricing Engine</button>
 
       <p class="nav-group-label">Operations</p>
@@ -547,6 +548,106 @@
             <div class="flex items-center justify-center h-64 text-gray-300">
               <div class="text-center"><i class="fas fa-arrow-left text-3xl mb-3 block"></i><p class="text-sm">Select a booking from the list to view details</p></div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ BOOKING SUMMARY (Accounting) ═══ -->
+      <div id="view-bookingsummary" class="view">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="font-heading text-3xl text-gray-800 font-light">Booking Summary</h2>
+            <p class="text-gray-400 text-xs mt-0.5">Full accounting view per booking — payments, add-ons, balance, and export.</p>
+          </div>
+          <div class="flex gap-2 flex-wrap">
+            <button onclick="exportBSSummary('csv')" class="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-file-csv text-green-600"></i> Export CSV</button>
+            <button onclick="exportBSSummary('excel')" class="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-file-excel text-green-600"></i> Export Excel</button>
+            <button onclick="printBSSummary()" class="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-50"><i class="fas fa-print text-blue-600"></i> Print</button>
+          </div>
+        </div>
+
+        <!-- Filter / Search bar -->
+        <div class="sc p-4 mb-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+            <!-- Search: name OR ref -->
+            <div class="lg:col-span-2">
+              <label class="fi-label text-xs">Search — Ref # or Guest Name</label>
+              <div class="relative">
+                <input type="text" id="bsSearch" class="fi pr-8" placeholder="BM-20260617-XXXX or Juan dela Cruz" oninput="filterBS()"/>
+                <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs pointer-events-none"></i>
+              </div>
+            </div>
+            <!-- Month -->
+            <div>
+              <label class="fi-label text-xs">Month</label>
+              <select id="bsMonth" class="fi" onchange="filterBS()">
+                <option value="">All Months</option>
+                <option value="01">January</option><option value="02">February</option><option value="03">March</option>
+                <option value="04">April</option><option value="05">May</option><option value="06">June</option>
+                <option value="07">July</option><option value="08">August</option><option value="09">September</option>
+                <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+              </select>
+            </div>
+            <!-- Year — combobox: select OR type -->
+            <div>
+              <label class="fi-label text-xs">Year <span class="font-normal text-gray-400">(select or type)</span></label>
+              <input type="text" id="bsYear" class="fi" placeholder="e.g. 2026" maxlength="4" inputmode="numeric"
+                list="bsYearList" oninput="filterBS()"/>
+              <datalist id="bsYearList"></datalist>
+            </div>
+            <!-- Status filter -->
+            <div>
+              <label class="fi-label text-xs">Status</label>
+              <select id="bsStatus" class="fi" onchange="filterBS()">
+                <option value="">All Statuses</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="confirmed_balance_due">Balance Due</option>
+                <option value="fully_paid">Fully Paid</option>
+                <option value="completed_stayed">Completed</option>
+                <option value="pending_payment_verification">Pending</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+          <!-- Summary pills (live update with filters) -->
+          <div class="flex flex-wrap gap-3 mt-4 pt-3 border-t border-gray-100" id="bsSummaryPills">
+            <span class="text-xs text-gray-400">Loading summary…</span>
+          </div>
+        </div>
+
+        <!-- Live preview card (below search/filter, above table) -->
+        <div id="bsLiveCard" class="hidden sc p-5 mb-5 border-l-4 border-forest">
+          <!-- Populated by JS when single booking selected -->
+        </div>
+
+        <!-- Table -->
+        <div class="sc overflow-hidden mb-5">
+          <div class="overflow-x-auto">
+            <table class="tbl w-full min-w-[900px]" id="bsTable">
+              <thead>
+                <tr>
+                  <th class="text-left">Ref #</th>
+                  <th class="text-left">Guest</th>
+                  <th class="text-left">Status</th>
+                  <th class="text-left">Room(s)</th>
+                  <th class="text-center">Check-in</th>
+                  <th class="text-center">Check-out</th>
+                  <th class="text-center">Nights</th>
+                  <th class="text-center">Pax</th>
+                  <th class="text-right">Total</th>
+                  <th class="text-right">DP #1</th>
+                  <th class="text-right">DP #2</th>
+                  <th class="text-right">Full Pmt</th>
+                  <th class="text-right">Balance</th>
+                  <th class="text-right">Add-ons</th>
+                  <th class="text-left">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="bsTableBody">
+                <tr><td colspan="15" class="text-center py-8 text-gray-300">Use the filters above to load bookings.</td></tr>
+              </tbody>
+              <tfoot id="bsTableFoot" class="bg-forest/5 font-bold text-sm"></tfoot>
+            </table>
           </div>
         </div>
       </div>
@@ -1728,6 +1829,7 @@ function showView(name){
     dashboard:refreshDashboard, calendar:renderCalendar,
     bookings:loadAllBookings, inquiries:loadInquiries,
     vouchers:loadVouchers, finances:loadPL, expenses:()=>{populateYearSelects();loadExpenses();},
+    bookingsummary:loadBS,
     accounting:loadAccounting,
     pricing:loadPricing, staff:loadStaff, tasks:loadTasks,
     inventory:loadInventory, maintenance:loadMaintenance,
@@ -2392,12 +2494,22 @@ async function applyBookingStatus(id){
 // manual updates — always shows 3 years back through 2 years ahead.
 function populateYearSelects(){
   const cur=new Date().getFullYear();
+  // Build range: from earliest booking year (or cur-3) through cur+2
+  const earliest=(()=>{
+    const years=(allBookings||[]).map(b=>parseInt((b.check_in_date||'').slice(0,4))).filter(y=>y>2000);
+    return years.length?Math.min(...years):cur-3;
+  })();
   const years=[];
-  for(let y=cur-3;y<=cur+2;y++) years.push(y);
+  for(let y=earliest;y<=cur+5;y++) years.push(y);
   const opts=years.map(y=>`<option value="${y}"${y===cur?' selected':''}>${y}</option>`).join('');
   ['plYear','acctYear'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.innerHTML=opts;
   });
+  // Populate bsYear datalist for the combobox
+  const dl=document.getElementById('bsYearList');
+  if(dl) dl.innerHTML=years.map(y=>`<option value="${y}">`).join('');
+  const bsYr=document.getElementById('bsYear');
+  if(bsYr&&!bsYr.value) bsYr.value=cur;
 }
 
 function toggleSidebar(){
@@ -2878,13 +2990,7 @@ async function loadAccounting(){
   renderAcctList(acctBookings);
 }
 
-function filterAccounting(){
-  const q=(document.getElementById('acctSearch').value||'').toLowerCase().trim();
-  const filtered = q
-    ? acctBookings.filter(b=>(b.guest_name||'').toLowerCase().includes(q)||(b.booking_ref||'').toLowerCase().includes(q))
-    : acctBookings;
-  renderAcctList(filtered);
-}
+// filterAccounting is defined below in the Booking Summary section with name+ref+phone fix
 
 function renderAcctList(list){
   setT('acctCount', list.length);
@@ -4383,8 +4489,456 @@ const expMF=document.getElementById('expMonthFilter'); if(expMF)expMF.value=new 
 setInterval(()=>{if(sessionStorage.getItem('bm_sa')&&sessionExpiry&&Date.now()<sessionExpiry){loadAllBookings(true);loadInquiries(true);}},60000);
 
 // ══════════════════════════════════════════════════════
-// REALTIME — every table, every panel, zero reload needed
+// BOOKING SUMMARY — professional accounting tab
 // ══════════════════════════════════════════════════════
+
+let bsFiltered = []; // currently filtered bookings
+
+// Called when tab is opened
+function loadBS(){
+  populateYearSelects();
+  const yr=document.getElementById('bsYear');
+  if(yr&&!yr.value) yr.value=new Date().getFullYear();
+  filterBS();
+}
+
+// Core filter function — runs on every input/change
+function filterBS(){
+  const q=(document.getElementById('bsSearch')?.value||'').trim().toLowerCase();
+  const month=document.getElementById('bsMonth')?.value||'';
+  const yearRaw=(document.getElementById('bsYear')?.value||'').trim();
+  const year=yearRaw.length===4?yearRaw:'';
+  const status=document.getElementById('bsStatus')?.value||'';
+
+  let src=[...allBookings];
+
+  // ── Search: supports both ref (starts BM-) and guest name ──
+  // The old bug: toLowerCase on the ref would miss uppercase refs.
+  // Fix: compare ref case-insensitively AND search name case-insensitively.
+  if(q){
+    src=src.filter(b=>
+      (b.booking_ref||'').toLowerCase().includes(q) ||
+      (b.guest_name||'').toLowerCase().includes(q) ||
+      (b.guest_phone||'').includes(q) ||
+      (b.guest_email||'').toLowerCase().includes(q)
+    );
+  }
+  // Month filter — applied to check_in_date
+  if(month){
+    src=src.filter(b=>(b.check_in_date||'').slice(5,7)===month);
+  }
+  // Year filter
+  if(year){
+    src=src.filter(b=>(b.check_in_date||'').startsWith(year));
+  }
+  // Status
+  if(status) src=src.filter(b=>b.status===status);
+
+  bsFiltered=src;
+
+  renderBSSummaryPills(src);
+  renderBSTable(src);
+
+  // If exactly one result (unique ref search), show detail card
+  if(src.length===1){
+    renderBSDetailCard(src[0]);
+    document.getElementById('bsLiveCard').classList.remove('hidden');
+  } else {
+    document.getElementById('bsLiveCard').classList.add('hidden');
+  }
+}
+
+function addonTotal(b){
+  const obj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
+  return Object.values(obj).reduce((s,v)=>s+(typeof v==='number'?v:0),0);
+}
+
+function getPayments(b){
+  // Returns {dp1, dp1Date, dp1Method, dp2, dp2Date, dp2Method, fullPmt, fullDate, fullMethod}
+  const ph=(()=>{try{return typeof b.payment_history==='string'?JSON.parse(b.payment_history):b.payment_history||[];}catch(e){return[];}})();
+  if(ph.length>=2){
+    const sorted=[...ph].sort((a,c)=>new Date(a.date)-new Date(c.date));
+    const dp1=sorted[0]||{};
+    const dp2=sorted[1]||{};
+    const full=sorted.length>2?sorted[sorted.length-1]:null;
+    return{
+      dp1:dp1.amount||0, dp1Date:dp1.date||'', dp1Method:dp1.method||b.payment_method||'',
+      dp2:dp2.amount||0, dp2Date:dp2.date||'', dp2Method:dp2.method||'',
+      fullPmt:full?.amount||0, fullDate:full?.date||'', fullMethod:full?.method||'',
+    };
+  }
+  // Fallback from booking columns
+  const paid=b.deposit_amount||0;
+  const bal=b.remaining_balance||0;
+  const total=b.total_amount||0;
+  const isFullyPaid=bal===0;
+  return{
+    dp1:paid, dp1Date:b.created_at?b.created_at.slice(0,10):'', dp1Method:b.payment_method||'',
+    dp2:0, dp2Date:'', dp2Method:'',
+    fullPmt:isFullyPaid&&(total-paid)>0?(total-paid):0, fullDate:'', fullMethod:'',
+  };
+}
+
+function renderBSSummaryPills(src){
+  const totalAmt=src.reduce((s,b)=>s+(b.total_amount||0),0);
+  const collected=src.reduce((s,b)=>s+((b.total_amount||0)-(b.remaining_balance||0)),0);
+  const balance=src.reduce((s,b)=>s+(b.remaining_balance||0),0);
+  const addons=src.reduce((s,b)=>s+addonTotal(b),0);
+  const el=document.getElementById('bsSummaryPills');
+  if(!el) return;
+  el.innerHTML=[
+    `<span class="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full font-medium">${src.length} booking${src.length!==1?'s':''}</span>`,
+    `<span class="text-xs bg-forest/10 text-forest px-3 py-1.5 rounded-full font-medium">Total ₱${totalAmt.toLocaleString()}</span>`,
+    `<span class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-medium">Collected ₱${collected.toLocaleString()}</span>`,
+    balance>0?`<span class="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-full font-medium">Balance ₱${balance.toLocaleString()}</span>`:'',
+    addons>0?`<span class="text-xs bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full font-medium">Add-ons ₱${addons.toLocaleString()}</span>`:'',
+  ].filter(Boolean).join('');
+}
+
+function renderBSTable(src){
+  const tbody=document.getElementById('bsTableBody');
+  const tfoot=document.getElementById('bsTableFoot');
+  if(!tbody) return;
+
+  if(!src.length){
+    tbody.innerHTML=`<tr><td colspan="15" class="text-center py-10 text-gray-300">No bookings match the selected filters.</td></tr>`;
+    if(tfoot) tfoot.innerHTML='';
+    return;
+  }
+
+  let totTotal=0,totDp1=0,totDp2=0,totFull=0,totBal=0,totAddons=0;
+
+  tbody.innerHTML=src.map(b=>{
+    const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0;
+    const pmt=getPayments(b);
+    const addons=addonTotal(b);
+    totTotal+=b.total_amount||0; totDp1+=pmt.dp1; totDp2+=pmt.dp2;
+    totFull+=pmt.fullPmt; totBal+=b.remaining_balance||0; totAddons+=addons;
+
+    const balCls=(b.remaining_balance||0)>0?'text-red-600 font-semibold':'text-gray-300';
+    return `<tr class="cursor-pointer hover:bg-forest/5 transition-colors" onclick="renderBSDetailCard(allBookings.find(x=>x.id==='${b.id}'));document.getElementById('bsLiveCard').classList.remove('hidden');document.getElementById('bsLiveCard').scrollIntoView({behavior:'smooth',block:'nearest'})">
+      <td class="font-mono text-xs font-semibold text-forest whitespace-nowrap">${b.booking_ref}</td>
+      <td>
+        <p class="font-medium text-sm whitespace-nowrap">${esc(b.guest_name)}</p>
+        <p class="text-xs text-gray-400">${b.guest_phone||''}</p>
+      </td>
+      <td><span class="badge ${STATUS_CSS[b.status]||'b-pend'} text-xs whitespace-nowrap">${STATUS_LABELS[b.status]||b.status}</span></td>
+      <td class="text-xs text-gray-600 max-w-[100px] truncate">${b.room_type||'—'}</td>
+      <td class="text-xs text-center whitespace-nowrap">${fmtDate(b.check_in_date)}</td>
+      <td class="text-xs text-center whitespace-nowrap">${fmtDate(b.check_out_date)}</td>
+      <td class="text-xs text-center font-medium">${nights}</td>
+      <td class="text-xs text-center">${b.pax_count||b.adults||'—'}</td>
+      <td class="text-right font-semibold text-sm whitespace-nowrap">₱${(b.total_amount||0).toLocaleString()}</td>
+      <td class="text-right text-xs whitespace-nowrap">
+        ${pmt.dp1>0?`<p class="font-medium text-forest">₱${pmt.dp1.toLocaleString()}</p><p class="text-gray-400">${pmt.dp1Date?fmtDate(pmt.dp1Date):''} ${pmt.dp1Method}</p>`:'<span class="text-gray-300">—</span>'}
+      </td>
+      <td class="text-right text-xs whitespace-nowrap">
+        ${pmt.dp2>0?`<p class="font-medium text-forest">₱${pmt.dp2.toLocaleString()}</p><p class="text-gray-400">${pmt.dp2Date?fmtDate(pmt.dp2Date):''} ${pmt.dp2Method}</p>`:'<span class="text-gray-300">—</span>'}
+      </td>
+      <td class="text-right text-xs whitespace-nowrap">
+        ${pmt.fullPmt>0?`<p class="font-medium text-forest">₱${pmt.fullPmt.toLocaleString()}</p><p class="text-gray-400">${pmt.fullDate?fmtDate(pmt.fullDate):''} ${pmt.fullMethod}</p>`:'<span class="text-gray-300">—</span>'}
+      </td>
+      <td class="text-right text-sm whitespace-nowrap ${balCls}">
+        ${(b.remaining_balance||0)>0?`₱${b.remaining_balance.toLocaleString()}`:'<i class="fas fa-check text-green-400"></i>'}
+      </td>
+      <td class="text-right text-xs whitespace-nowrap">
+        ${addons>0?`<span class="text-amber-600 font-medium">₱${addons.toLocaleString()}</span>`:'<span class="text-gray-300">—</span>'}
+      </td>
+      <td class="text-xs text-gray-400 max-w-[140px] truncate" title="${esc(b.admin_notes||b.special_requests||'')}">${esc((b.admin_notes||b.special_requests||'').slice(0,40))||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  // Footer totals row
+  if(tfoot) tfoot.innerHTML=`<tr class="border-t-2 border-forest/20">
+    <td colspan="8" class="px-4 py-3 text-xs text-gray-500 uppercase tracking-wide">Totals (${src.length} bookings)</td>
+    <td class="text-right px-4 py-3 text-forest">₱${totTotal.toLocaleString()}</td>
+    <td class="text-right px-4 py-3 text-forest">₱${totDp1.toLocaleString()}</td>
+    <td class="text-right px-4 py-3 text-forest">₱${totDp2.toLocaleString()}</td>
+    <td class="text-right px-4 py-3 text-forest">₱${totFull.toLocaleString()}</td>
+    <td class="text-right px-4 py-3 ${totBal>0?'text-red-600':'text-green-600'}">₱${totBal.toLocaleString()}</td>
+    <td class="text-right px-4 py-3 text-amber-600">₱${totAddons.toLocaleString()}</td>
+    <td class="px-4 py-3"></td>
+  </tr>`;
+}
+
+// ── Single-booking detail card (shown when clicking a row or when 1 result) ──
+function renderBSDetailCard(b){
+  if(!b) return;
+  const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0;
+  const pmt=getPayments(b);
+  const addonsObj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
+  const addonKeys=['griller','stove','pet_fee','pool_spa','ac_living'];
+  const addonLabels={griller:'Griller + charcoal',stove:'Stove (Gas)',pet_fee:'Pet Fee',pool_spa:'Pool Spa (extra hrs)',ac_living:'AC in Living Area'};
+  const addonRows=addonKeys.filter(k=>addonsObj[k]).map(k=>
+    `<div class="flex justify-between text-sm py-1.5 border-b border-gray-50 last:border-0">
+      <span class="text-gray-600">${addonLabels[k]||k}</span>
+      <span class="font-semibold">₱${Number(addonsObj[k]).toLocaleString()}</span>
+    </div>`
+  );
+  if(addonsObj._extra_guests){
+    const eg=parseInt(addonsObj._extra_guests)||0;
+    addonRows.push(`<div class="flex justify-between text-sm py-1.5 border-b border-gray-50"><span class="text-gray-600">Extra Guests ×${eg}</span><span class="font-semibold">₱${(eg*1000).toLocaleString()}</span></div>`);
+  }
+  const addonTotal=Object.values(addonsObj).reduce((s,v)=>s+(typeof v==='number'?v:0),0);
+
+  // Structured payment rows matching the handwritten note exactly
+  const pmtRows=[
+    pmt.dp1>0?`<div class="flex justify-between items-start py-2 border-b border-gray-50">
+      <div><p class="font-semibold text-sm">Downpayment #1</p><p class="text-xs text-gray-400">${pmt.dp1Date?fmtDate(pmt.dp1Date):'—'} · ${pmt.dp1Method||'—'}</p></div>
+      <span class="font-bold text-forest text-base">₱${pmt.dp1.toLocaleString()}</span></div>`:null,
+    pmt.dp2>0?`<div class="flex justify-between items-start py-2 border-b border-gray-50">
+      <div><p class="font-semibold text-sm">Downpayment #2</p><p class="text-xs text-gray-400">${pmt.dp2Date?fmtDate(pmt.dp2Date):'—'} · ${pmt.dp2Method||'—'}</p></div>
+      <span class="font-bold text-forest text-base">₱${pmt.dp2.toLocaleString()}</span></div>`:null,
+    pmt.fullPmt>0?`<div class="flex justify-between items-start py-2 border-b border-gray-50">
+      <div><p class="font-semibold text-sm">Full Payment</p><p class="text-xs text-gray-400">${pmt.fullDate?fmtDate(pmt.fullDate):'—'} · ${pmt.fullMethod||'—'}</p></div>
+      <span class="font-bold text-forest text-base">₱${pmt.fullPmt.toLocaleString()}</span></div>`:null,
+  ].filter(Boolean);
+
+  const bal=b.remaining_balance||0;
+  const card=document.getElementById('bsLiveCard');
+  if(!card) return;
+  card.innerHTML=`
+    <!-- Booking Header -->
+    <div class="flex justify-between items-start mb-5 flex-wrap gap-3">
+      <div>
+        <p class="text-xs font-mono text-gray-400 mb-0.5">${b.booking_ref}</p>
+        <h3 class="font-heading text-2xl text-gray-800 font-light">${esc(b.guest_name)}</h3>
+        <p class="text-sm text-gray-500">${b.guest_email||''} ${b.guest_phone?'· '+b.guest_phone:''}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="badge ${STATUS_CSS[b.status]||'b-pend'}">${STATUS_LABELS[b.status]||b.status}</span>
+        <button onclick="openBookingModal('${b.id}')" class="text-xs border border-forest text-forest px-3 py-1.5 rounded-lg hover:bg-forest/5">Full Edit →</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- Left: booking details -->
+      <div class="space-y-4">
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-xs text-gray-400 uppercase font-semibold mb-3">Booking Details</p>
+          <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
+            <div><p class="text-xs text-gray-400">Check-in</p><p class="font-medium">${fmtDate(b.check_in_date)}</p></div>
+            <div><p class="text-xs text-gray-400">Check-out</p><p class="font-medium">${fmtDate(b.check_out_date)}</p></div>
+            <div><p class="text-xs text-gray-400">Nights</p><p class="font-bold text-forest">${nights}</p></div>
+            <div><p class="text-xs text-gray-400">Guests (Pax)</p><p class="font-medium">${b.pax_count||b.adults||'—'}</p></div>
+            <div class="col-span-2"><p class="text-xs text-gray-400">Room(s)</p><p class="font-medium">${b.room_type||'—'}</p></div>
+            ${b.package_label?`<div class="col-span-2"><p class="text-xs text-gray-400">Package</p><p class="font-medium text-xs">${esc(b.package_label)}</p></div>`:''}
+          </div>
+        </div>
+        <!-- Add-ons section -->
+        ${addonRows.length?`<div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+          <p class="text-xs text-amber-700 uppercase font-semibold mb-2">Add-ons</p>
+          ${addonRows.join('')}
+          <div class="flex justify-between text-sm pt-1.5 font-bold text-amber-700"><span>Add-ons Total</span><span>₱${addonTotal.toLocaleString()}</span></div>
+        </div>`:''}
+        <!-- Special requests + admin notes -->
+        ${b.special_requests?`<div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700"><p class="font-semibold mb-1">Special Requests <span class="font-normal text-gray-400">(from booking)</span></p>${esc(b.special_requests)}</div>`:''}
+        ${b.admin_notes?`<div class="bg-gray-50 border border-gray-100 rounded-xl p-3 text-xs text-gray-600"><p class="font-semibold mb-1">Additional Notes <span class="font-normal text-gray-400">(admin input)</span></p>${esc(b.admin_notes)}</div>`:''}
+      </div>
+
+      <!-- Right: payment breakdown -->
+      <div class="space-y-4">
+        <div class="bg-forest/5 rounded-xl p-4">
+          <p class="text-xs text-gray-400 uppercase font-semibold mb-3">Payment Breakdown</p>
+          ${pmtRows.length?pmtRows.join(''):`<p class="text-xs text-gray-400 italic">No payment history recorded.</p>`}
+          ${addonTotal>0?`<div class="flex justify-between items-start py-2 border-b border-gray-50">
+            <div><p class="font-semibold text-sm">Add-ons</p><p class="text-xs text-gray-400">On-site purchases</p></div>
+            <span class="font-bold text-amber-600 text-base">₱${addonTotal.toLocaleString()}</span></div>`:''}
+        </div>
+        <!-- Financial summary totals box -->
+        <div class="rounded-xl border border-gray-200 overflow-hidden">
+          <div class="flex justify-between px-4 py-2.5 bg-gray-50 text-sm border-b border-gray-100">
+            <span class="text-gray-500">Total Amount</span>
+            <span class="font-bold text-gray-800">₱${(b.total_amount||0).toLocaleString()}</span>
+          </div>
+          <div class="flex justify-between px-4 py-2.5 text-sm border-b border-gray-100">
+            <span class="text-gray-500">Total Collected</span>
+            <span class="font-semibold text-forest">₱${((b.total_amount||0)-(bal)).toLocaleString()}</span>
+          </div>
+          <div class="flex justify-between px-4 py-3 ${bal>0?'bg-red-50':'bg-green-50'} text-sm font-bold">
+            <span class="${bal>0?'text-red-700':'text-green-700'}">
+              ${bal>0?'Balance Due (Show to Guest)':'Fully Paid ✓'}
+            </span>
+            <span class="${bal>0?'text-red-600':'text-green-600'} text-lg">
+              ${bal>0?'₱'+bal.toLocaleString():'₱0'}
+            </span>
+          </div>
+        </div>
+        ${b.payment_proof_url?`<a href="${b.payment_proof_url}" target="_blank" class="flex items-center gap-2 text-xs text-forest hover:underline"><i class="fas fa-image"></i> View Payment Proof</a>`:''}
+      </div>
+    </div>`;
+}
+
+// ── EXPORT functions ──────────────────────────────────────────
+function exportBSSummary(type){
+  if(!bsFiltered.length){toast('No bookings to export — apply a filter first.','error');return;}
+  const headers=['Ref #','Guest Name','Phone','Email','Status','Room(s)','Check-in','Check-out','Nights','Pax','Package','Total (₱)','DP #1 Amount','DP #1 Date','DP #1 Method','DP #2 Amount','DP #2 Date','DP #2 Method','Full Pmt Amount','Full Pmt Date','Full Pmt Method','Balance (₱)','Add-ons (₱)','Special Requests','Admin Notes'];
+  const rows=bsFiltered.map(b=>{
+    const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0;
+    const pmt=getPayments(b);
+    const addons=addonTotal(b);
+    return[
+      b.booking_ref||'',b.guest_name||'',b.guest_phone||'',b.guest_email||'',
+      STATUS_LABELS[b.status]||b.status,b.room_type||'',
+      b.check_in_date||'',b.check_out_date||'',nights,b.pax_count||b.adults||'',
+      b.package_label||'',b.total_amount||0,
+      pmt.dp1||0,pmt.dp1Date||'',pmt.dp1Method||'',
+      pmt.dp2||0,pmt.dp2Date||'',pmt.dp2Method||'',
+      pmt.fullPmt||0,pmt.fullDate||'',pmt.fullMethod||'',
+      b.remaining_balance||0,addons,
+      b.special_requests||'',b.admin_notes||''
+    ];
+  });
+
+  const month=document.getElementById('bsMonth')?.value||'all';
+  const year=document.getElementById('bsYear')?.value||new Date().getFullYear();
+  const fn=`booking-summary-${year}-${month}`;
+
+  if(type==='csv'){
+    dlCSV([headers,...rows],fn+'.csv');
+    toast('CSV exported!','success');
+    return;
+  }
+
+  // Excel: use SheetJS via CDN
+  if(type==='excel'){
+    exportBSExcel([headers,...rows],fn+'.xlsx');
+    return;
+  }
+}
+
+async function exportBSExcel(data, filename){
+  // Load SheetJS dynamically if not already loaded
+  if(!window.XLSX){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload=res; s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+  try{
+    const wb=window.XLSX.utils.book_new();
+    const ws=window.XLSX.utils.aoa_to_sheet(data);
+    // Style header row width
+    ws['!cols']=data[0].map((_,i)=>({wch:Math.max(12,...data.map(r=>String(r[i]||'').length))+2}));
+    // Freeze top row
+    ws['!freeze']={xSplit:0,ySplit:1};
+    window.XLSX.utils.book_append_sheet(wb,ws,'Booking Summary');
+    window.XLSX.writeFile(wb,filename);
+    toast('Excel exported!','success');
+  }catch(e){
+    console.error(e); toast('Excel export failed. Try CSV instead.','error');
+  }
+}
+
+function printBSSummary(){
+  if(!bsFiltered.length){toast('No bookings to print.','error');return;}
+  const month=document.getElementById('bsMonth')?.value||'';
+  const year=document.getElementById('bsYear')?.value||new Date().getFullYear();
+  const status=document.getElementById('bsStatus')?.value||'';
+  const q=document.getElementById('bsSearch')?.value||'';
+
+  const totTotal=bsFiltered.reduce((s,b)=>s+(b.total_amount||0),0);
+  const totCollected=bsFiltered.reduce((s,b)=>s+((b.total_amount||0)-(b.remaining_balance||0)),0);
+  const totBal=bsFiltered.reduce((s,b)=>s+(b.remaining_balance||0),0);
+  const totAddons=bsFiltered.reduce((s,b)=>s+addonTotal(b),0);
+
+  const monthNames=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const filterLabel=[q?`"${q}"`:null,month?monthNames[parseInt(month)]+' '+year:year?year:'All time',status?STATUS_LABELS[status]:''].filter(Boolean).join(' · ');
+
+  const rows=bsFiltered.map(b=>{
+    const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0;
+    const pmt=getPayments(b);
+    const ao=addonTotal(b);
+    const bal=b.remaining_balance||0;
+    return `<tr>
+      <td style="font-family:monospace;font-size:10px;color:#2d5a3b">${b.booking_ref}</td>
+      <td><strong>${esc(b.guest_name)}</strong><br><span style="color:#999;font-size:10px">${b.guest_phone||''}</span></td>
+      <td style="font-size:10px">${esc(b.room_type||'')}</td>
+      <td style="text-align:center;font-size:11px">${b.check_in_date||''}</td>
+      <td style="text-align:center;font-size:11px">${b.check_out_date||''}</td>
+      <td style="text-align:center">${nights}</td>
+      <td style="text-align:center">${b.pax_count||b.adults||'—'}</td>
+      <td style="text-align:right;font-weight:700">₱${(b.total_amount||0).toLocaleString()}</td>
+      <td style="text-align:right;color:#2d5a3b">₱${pmt.dp1>0?pmt.dp1.toLocaleString():'—'}</td>
+      <td style="text-align:right;color:#2d5a3b">₱${pmt.dp2>0?pmt.dp2.toLocaleString():'—'}</td>
+      <td style="text-align:right;color:#2d5a3b">₱${pmt.fullPmt>0?pmt.fullPmt.toLocaleString():'—'}</td>
+      <td style="text-align:right;${bal>0?'color:#dc2626;font-weight:700':'color:#9ca3af'}">${bal>0?'₱'+bal.toLocaleString():'Paid ✓'}</td>
+      <td style="text-align:right;color:#d97706">${ao>0?'₱'+ao.toLocaleString():'—'}</td>
+    </tr>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <title>Booking Summary — ${filterLabel}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Arial',sans-serif;font-size:12px;color:#1a1a1a;padding:24px;}
+    h1{font-size:20px;font-weight:300;color:#2d5a3b;margin-bottom:4px;}
+    .meta{font-size:11px;color:#888;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;font-size:11px;}
+    th{background:#2d5a3b;color:white;padding:8px 6px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+    th.r{text-align:right;}
+    td{padding:7px 6px;border-bottom:1px solid #f0efeb;vertical-align:top;}
+    tr:hover td{background:#f9f9f7;}
+    tfoot td{background:#f0fdf4;font-weight:700;border-top:2px solid #2d5a3b;padding:9px 6px;}
+    .pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+    .pill{background:#f0fdf4;color:#2d5a3b;border:1px solid #d1fae5;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:600;}
+    .pill.red{background:#fff1f2;color:#dc2626;border-color:#fecdd3;}
+    .pill.amber{background:#fffbeb;color:#d97706;border-color:#fde68a;}
+    @media print{
+      body{padding:12px;}
+      .no-print{display:none!important;}
+    }
+  </style></head><body>
+  <h1>Balay Maysa Resort — Booking Summary</h1>
+  <p class="meta">Filter: ${esc(filterLabel)} · Generated: ${new Date().toLocaleString('en-PH')} · ${bsFiltered.length} booking${bsFiltered.length!==1?'s':''}</p>
+  <div class="pills">
+    <span class="pill">Total ₱${totTotal.toLocaleString()}</span>
+    <span class="pill">Collected ₱${totCollected.toLocaleString()}</span>
+    ${totBal>0?`<span class="pill red">Balance Due ₱${totBal.toLocaleString()}</span>`:''}
+    ${totAddons>0?`<span class="pill amber">Add-ons ₱${totAddons.toLocaleString()}</span>`:''}
+  </div>
+  <table>
+    <thead><tr>
+      <th>Ref #</th><th>Guest</th><th>Room(s)</th><th>Check-in</th><th>Check-out</th>
+      <th class="r">Nights</th><th class="r">Pax</th><th class="r">Total</th>
+      <th class="r">DP #1</th><th class="r">DP #2</th><th class="r">Full Pmt</th>
+      <th class="r">Balance</th><th class="r">Add-ons</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr>
+      <td colspan="7">Totals — ${bsFiltered.length} booking${bsFiltered.length!==1?'s':''}</td>
+      <td style="text-align:right">₱${totTotal.toLocaleString()}</td>
+      <td colspan="3"></td>
+      <td style="text-align:right;color:${totBal>0?'#dc2626':'#2d5a3b'}">₱${totBal.toLocaleString()}</td>
+      <td style="text-align:right;color:#d97706">₱${totAddons.toLocaleString()}</td>
+    </tr></tfoot>
+  </table>
+  </body></html>`;
+
+  const w=window.open('','_blank','width=1100,height=700');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),400);
+}
+
+// ── Fix acctSearch name search bug ────────────────────────────
+// The old filterAccounting only searched acctBookings (already month-filtered).
+// Rebuilt to also search by name case-insensitively and phone.
+function filterAccounting(){
+  const q=(document.getElementById('acctSearch')?.value||'').trim().toLowerCase();
+  const filtered=q
+    ? acctBookings.filter(b=>
+        (b.guest_name||'').toLowerCase().includes(q)||
+        (b.booking_ref||'').toLowerCase().includes(q)||
+        (b.guest_phone||'').includes(q)||
+        (b.guest_email||'').toLowerCase().includes(q)
+      )
+    : acctBookings;
+  renderAcctList(filtered);
+}
+
 (function setupRealtime(){
   // Helper: refresh only if view is active, else update in-memory only
   const activeView=()=>document.querySelector('.view.active')?.id?.replace('view-','');
