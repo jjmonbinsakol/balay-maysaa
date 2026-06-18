@@ -647,15 +647,77 @@
 
       <!-- ═══ TASKS ═══ -->
       <div id="view-tasks" class="view">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="font-heading text-3xl text-gray-800 font-light">Task Management</h2>
-          <button onclick="openTaskModal()" class="bg-forest text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-plus"></i> Assign Task</button>
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="font-heading text-3xl text-gray-800 font-light">Task Management</h2>
+            <p class="text-gray-400 text-xs mt-0.5">Live sync — changes appear on Admin's panel instantly.</p>
+          </div>
+          <div class="flex gap-2 flex-wrap">
+            <span id="tasksLiveIndicator" class="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 border border-green-200 px-2.5 py-1.5 rounded-lg"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse inline-block"></span>Live</span>
+            <button onclick="openTaskModal()" class="bg-forest text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-plus"></i> Assign Task</button>
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-          <div class="bg-gray-50 rounded-2xl p-4"><div class="flex items-center gap-2 mb-3"><span class="w-2 h-2 bg-gray-400 rounded-full"></span><p class="font-semibold text-gray-600 text-sm">Pending</p><span class="ml-auto bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full" id="cnt-pending">0</span></div><div id="tasks-pending" class="space-y-2"></div></div>
-          <div class="bg-blue-50 rounded-2xl p-4"><div class="flex items-center gap-2 mb-3"><span class="w-2 h-2 bg-blue-500 rounded-full"></span><p class="font-semibold text-blue-700 text-sm">In Progress</p><span class="ml-auto bg-blue-200 text-blue-700 text-xs px-2 py-0.5 rounded-full" id="cnt-in_progress">0</span></div><div id="tasks-in_progress" class="space-y-2"></div></div>
-          <div class="bg-green-50 rounded-2xl p-4"><div class="flex items-center gap-2 mb-3"><span class="w-2 h-2 bg-green-500 rounded-full"></span><p class="font-semibold text-green-700 text-sm">Completed</p><span class="ml-auto bg-green-200 text-green-700 text-xs px-2 py-0.5 rounded-full" id="cnt-completed">0</span></div><div id="tasks-completed" class="space-y-2"></div></div>
-          <div class="bg-red-50 rounded-2xl p-4"><div class="flex items-center gap-2 mb-3"><span class="w-2 h-2 bg-red-400 rounded-full"></span><p class="font-semibold text-red-700 text-sm">Cancelled</p><span class="ml-auto bg-red-200 text-red-700 text-xs px-2 py-0.5 rounded-full" id="cnt-cancelled">0</span></div><div id="tasks-cancelled" class="space-y-2"></div></div>
+        <!-- Filter bar -->
+        <div class="flex gap-2 mb-5 flex-wrap items-center">
+          <select id="tkFilterPriority" class="fi w-36 text-sm py-2" onchange="renderTasks()">
+            <option value="">All Priorities</option>
+            <option value="urgent">🔴 Urgent</option>
+            <option value="high">🟠 High</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <select id="tkFilterAssignee" class="fi w-44 text-sm py-2" onchange="renderTasks()">
+            <option value="">All Assignees</option>
+          </select>
+          <select id="tkFilterCategory" class="fi w-40 text-sm py-2" onchange="renderTasks()">
+            <option value="">All Categories</option>
+            <option value="cleaning">🧹 Cleaning</option>
+            <option value="maintenance">🔧 Maintenance</option>
+            <option value="guest-service">🛎 Guest Service</option>
+            <option value="admin">📋 Admin</option>
+            <option value="general">📌 General</option>
+          </select>
+          <button onclick="document.getElementById('tkFilterPriority').value='';document.getElementById('tkFilterAssignee').value='';document.getElementById('tkFilterCategory').value='';renderTasks();" class="text-xs text-gray-400 hover:text-gray-600 px-2">Clear filters</button>
+          <span class="ml-auto text-xs text-gray-400" id="taskSummaryLabel">–</span>
+        </div>
+        <!-- Kanban board -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <!-- Pending -->
+          <div class="rounded-2xl bg-gray-50 border border-gray-200">
+            <div class="flex items-center gap-2 p-4 border-b border-gray-200">
+              <span class="w-2.5 h-2.5 bg-gray-400 rounded-full"></span>
+              <p class="font-semibold text-gray-600 text-sm">Pending</p>
+              <span class="ml-auto bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full font-medium" id="cnt-pending">0</span>
+            </div>
+            <div id="tasks-pending" class="p-3 space-y-2.5 min-h-[120px]"></div>
+          </div>
+          <!-- In Progress -->
+          <div class="rounded-2xl bg-blue-50 border border-blue-200">
+            <div class="flex items-center gap-2 p-4 border-b border-blue-200">
+              <span class="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse"></span>
+              <p class="font-semibold text-blue-700 text-sm">In Progress</p>
+              <span class="ml-auto bg-blue-200 text-blue-700 text-xs px-2 py-0.5 rounded-full font-medium" id="cnt-in_progress">0</span>
+            </div>
+            <div id="tasks-in_progress" class="p-3 space-y-2.5 min-h-[120px]"></div>
+          </div>
+          <!-- Completed -->
+          <div class="rounded-2xl bg-green-50 border border-green-200">
+            <div class="flex items-center gap-2 p-4 border-b border-green-200">
+              <span class="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+              <p class="font-semibold text-green-700 text-sm">Completed</p>
+              <span class="ml-auto bg-green-200 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium" id="cnt-completed">0</span>
+            </div>
+            <div id="tasks-completed" class="p-3 space-y-2.5 min-h-[120px]"></div>
+          </div>
+          <!-- Cancelled -->
+          <div class="rounded-2xl bg-red-50 border border-red-200">
+            <div class="flex items-center gap-2 p-4 border-b border-red-200">
+              <span class="w-2.5 h-2.5 bg-red-400 rounded-full"></span>
+              <p class="font-semibold text-red-600 text-sm">Cancelled</p>
+              <span class="ml-auto bg-red-200 text-red-700 text-xs px-2 py-0.5 rounded-full font-medium" id="cnt-cancelled">0</span>
+            </div>
+            <div id="tasks-cancelled" class="p-3 space-y-2.5 min-h-[120px]"></div>
+          </div>
         </div>
       </div>
 
@@ -1262,21 +1324,49 @@
 <!-- ═══ TASK MODAL ═══ -->
 <div id="taskModal" class="modal hidden">
   <div class="mbox">
-    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
-      <h3 class="font-heading text-xl text-forest font-light">Assign Task</h3>
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
+      <h3 class="font-heading text-xl text-forest font-light" id="taskModalTitle">Assign Task</h3>
       <button onclick="closeModal('taskModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
     </div>
     <div class="p-5 space-y-3">
-      <div><label class="fi-label">Task Name *</label><input type="text" id="tk_name" class="fi" placeholder="e.g. Clean Silayan Room"/></div>
-      <div><label class="fi-label">Description</label><textarea id="tk_desc" class="fi" rows="2"></textarea></div>
+      <input type="hidden" id="tk_id"/>
+      <div><label class="fi-label">Task Name *</label><input type="text" id="tk_name" class="fi" placeholder="e.g. Deep-clean Silayan Room"/></div>
+      <div><label class="fi-label">Description</label><textarea id="tk_desc" class="fi" rows="2" placeholder="Additional details, materials needed, etc."></textarea></div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="fi-label">Category</label>
+          <select id="tk_category" class="fi">
+            <option value="general">📌 General</option>
+            <option value="cleaning">🧹 Cleaning</option>
+            <option value="maintenance">🔧 Maintenance</option>
+            <option value="guest-service">🛎 Guest Service</option>
+            <option value="admin">📋 Admin</option>
+          </select>
+        </div>
+        <div><label class="fi-label">Priority</label>
+          <select id="tk_priority" class="fi">
+            <option value="low">🟢 Low</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="high">🟠 High</option>
+            <option value="urgent">🔴 Urgent</option>
+          </select>
+        </div>
+      </div>
       <div class="grid grid-cols-2 gap-4">
         <div><label class="fi-label">Assign To</label><select id="tk_staff" class="fi"><option value="">Unassigned</option></select></div>
         <div><label class="fi-label">Due Date</label><input type="date" id="tk_due" class="fi"/></div>
       </div>
-      <div><label class="fi-label">Priority</label><select id="tk_priority" class="fi"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+      <div id="tk_status_row" class="hidden"><label class="fi-label">Status</label>
+        <select id="tk_status" class="fi">
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
       <div class="flex gap-3 mt-2">
         <button onclick="closeModal('taskModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-        <button onclick="saveTask()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Assign Task</button>
+        <button id="tk_delete_btn" class="hidden px-4 py-2 border border-red-200 text-red-500 rounded-lg text-sm hover:bg-red-50" onclick="deleteTask()"><i class="fas fa-trash text-xs"></i></button>
+        <button onclick="saveTask()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark" id="tk_save_btn">Assign Task</button>
       </div>
     </div>
   </div>
@@ -3269,31 +3359,185 @@ function genPayslip(sid){const s=allStaff.find(x=>x.id===sid);if(!s)return;const
 // ═══════════════════════════════════════════════════════
 // TASKS
 // ═══════════════════════════════════════════════════════
-async function loadTasks(){
-  try{const{data}=await db.from('staff_tasks').select('*,staff(name)').order('created_at',{ascending:false});allTasks=data||[];
-    const statuses=['pending','in_progress','completed','cancelled'];
-    statuses.forEach(st=>{
-      const el=document.getElementById('tasks-'+st); const cnt=document.getElementById('cnt-'+st);
-      if(!el)return; const items=allTasks.filter(t=>t.status===st); cnt.textContent=items.length;
-      el.innerHTML=items.length?items.map(t=>`
-        <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 pri-${t.priority}">
-          <p class="font-medium text-xs text-gray-800 mb-1">${esc(t.task_name)}</p>
-          ${t.staff?`<p class="text-xs text-gray-400"><i class="fas fa-user mr-1"></i>${esc(t.staff.name)}</p>`:''}
-          ${t.due_date?`<p class="text-xs text-gray-400"><i class="fas fa-calendar mr-1"></i>${t.due_date}</p>`:''}
-          <div class="flex items-center gap-2 mt-2">
-            <span class="badge ${t.priority==='urgent'?'b-decl':t.priority==='high'?'b-pend':t.priority==='medium'?'b-pend':'b-conf'} text-xs">${t.priority}</span>
-            ${st==='pending'?`<button onclick="updTask('${t.id}','in_progress')" class="text-xs text-blue-500 ml-auto">Start →</button>`:''}
-            ${st==='in_progress'?`<button onclick="updTask('${t.id}','completed')" class="text-xs text-green-500 ml-auto">Done ✓</button>`:''}
-          </div>
-        </div>`).join(''):'<p class="text-xs text-center text-gray-300 py-4">Empty</p>';
-    });
-    const tb=document.getElementById('tasksBadge'); if(tb){const p=allTasks.filter(t=>t.status==='pending').length;tb.textContent=p;tb.classList.toggle('hidden',p===0);}
-  }catch(e){console.error(e);}
-}
-function openTaskModal(){['tk_name','tk_desc','tk_due'].forEach(id=>document.getElementById(id).value='');document.getElementById('tk_priority').value='medium';document.getElementById('taskModal').classList.remove('hidden');}
-async function saveTask(){const name=document.getElementById('tk_name').value.trim();if(!name){toast('Task name required.','error');return;}try{const{error}=await db.from('staff_tasks').insert({task_name:name,description:document.getElementById('tk_desc').value,assigned_to:document.getElementById('tk_staff').value||null,due_date:document.getElementById('tk_due').value||null,priority:document.getElementById('tk_priority').value,assigned_by:'superadmin'});if(error)throw error;toast('Task assigned!','success');closeModal('taskModal');await loadTasks();}catch(e){toast('Failed.','error');}}
-async function updTask(id,status){const upd={status};if(status==='completed')upd.completed_at=new Date().toISOString();await db.from('staff_tasks').update(upd).eq('id',id);toast('Updated!','success');await loadTasks();}
+// ══════════════════════════════════════════════════════
+// TASKS — professional kanban with full CRUD + realtime
+// ══════════════════════════════════════════════════════
+const TASK_PRIORITY_CSS={urgent:'bg-red-100 text-red-700 border border-red-200',high:'bg-orange-100 text-orange-700 border border-orange-200',medium:'bg-yellow-50 text-yellow-700 border border-yellow-200',low:'bg-gray-100 text-gray-500 border border-gray-200'};
+const TASK_PRIORITY_DOT={urgent:'bg-red-500',high:'bg-orange-400',medium:'bg-yellow-400',low:'bg-gray-400'};
+const TASK_CAT_ICON={cleaning:'🧹',maintenance:'🔧','guest-service':'🛎',admin:'📋',general:'📌'};
 
+async function loadTasks(silent=false){
+  try{
+    const{data,error}=await db.from('staff_tasks').select('*,staff(name,role)').order('created_at',{ascending:false});
+    if(error) throw error;
+    allTasks=data||[];
+    renderTasks();
+    // Update assignee filter with current staff
+    const sel=document.getElementById('tkFilterAssignee');
+    if(sel){
+      const cur=sel.value;
+      const staffOpts=(allStaff||[]).map(s=>`<option value="${s.id}" ${cur===s.id?'selected':''}>${esc(s.name)}</option>`).join('');
+      sel.innerHTML=`<option value="">All Assignees</option>${staffOpts}`;
+    }
+    // Populate tk_staff select
+    const ts=document.getElementById('tk_staff');
+    if(ts){const cv=ts.value;ts.innerHTML=`<option value="">Unassigned</option>${(allStaff||[]).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}`;ts.value=cv;}
+    updateBadges();
+  }catch(e){console.error('loadTasks:',e);}
+}
+
+function renderTasks(){
+  const fp=document.getElementById('tkFilterPriority')?.value||'';
+  const fa=document.getElementById('tkFilterAssignee')?.value||'';
+  const fc=document.getElementById('tkFilterCategory')?.value||'';
+  let tasks=[...allTasks];
+  if(fp) tasks=tasks.filter(t=>t.priority===fp);
+  if(fa) tasks=tasks.filter(t=>t.assigned_to===fa);
+  if(fc) tasks=tasks.filter(t=>(t.category||'general')===fc);
+
+  const statuses=['pending','in_progress','completed','cancelled'];
+  const total=tasks.length, active=tasks.filter(t=>['pending','in_progress'].includes(t.status)).length;
+  const sumEl=document.getElementById('taskSummaryLabel');
+  if(sumEl) sumEl.textContent=`${active} active · ${total} total`;
+
+  statuses.forEach(st=>{
+    const col=document.getElementById('tasks-'+st);
+    const cnt=document.getElementById('cnt-'+st);
+    const items=tasks.filter(t=>t.status===st);
+    if(cnt) cnt.textContent=items.length;
+    if(!col) return;
+    col.innerHTML=items.length
+      ? items.map(t=>buildTaskCard(t)).join('')
+      : `<div class="text-xs text-center text-gray-300 py-6">No ${st.replace('_',' ')} tasks</div>`;
+  });
+}
+
+function buildTaskCard(t){
+  const isOverdue=t.due_date&&t.due_date<new Date().toISOString().split('T')[0]&&t.status!=='completed'&&t.status!=='cancelled';
+  const daysLeft=t.due_date?Math.round((new Date(t.due_date+'T00:00:00')-new Date())/(1000*60*60*24)):null;
+  const dueLabel=t.due_date?(isOverdue?`<span class="text-red-500 font-medium">⚠ Overdue ${Math.abs(daysLeft)}d</span>`:daysLeft===0?'<span class="text-orange-500 font-medium">Due today</span>':daysLeft===1?'<span class="text-amber-500">Due tomorrow</span>':`<span class="text-gray-400">Due ${fmtDate(t.due_date)}</span>`):'';
+  const actionBtns=
+    t.status==='pending'?`<button onclick="updTask('${t.id}','in_progress')" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-2.5 py-1 rounded-lg font-medium transition-colors">▶ Start</button><button onclick="updTask('${t.id}','cancelled')" class="text-xs text-gray-300 hover:text-red-400 px-1.5 py-1 rounded-lg ml-auto">Cancel</button>`:
+    t.status==='in_progress'?`<button onclick="updTask('${t.id}','completed')" class="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-2.5 py-1 rounded-lg font-medium transition-colors">✓ Done</button><button onclick="updTask('${t.id}','pending')" class="text-xs text-gray-300 hover:text-gray-500 px-1.5 py-1 rounded-lg ml-auto">↩ Back</button>`:
+    t.status==='completed'?`<button onclick="updTask('${t.id}','in_progress')" class="text-xs text-gray-300 hover:text-blue-500 px-1.5 py-1 rounded-lg">↩ Reopen</button>`:`<button onclick="updTask('${t.id}','pending')" class="text-xs text-gray-300 hover:text-gray-500 px-1.5 py-1 rounded-lg">↩ Restore</button>`;
+  return `<div class="bg-white rounded-xl p-3.5 shadow-sm border border-gray-100 hover:border-forest/30 transition-colors group" id="task-card-${t.id}">
+    <!-- Top row: priority dot + category icon + edit -->
+    <div class="flex items-start gap-2 mb-2">
+      <span class="w-2 h-2 rounded-full ${TASK_PRIORITY_DOT[t.priority]||'bg-gray-300'} mt-1.5 flex-shrink-0"></span>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-xs text-gray-800 leading-snug">${esc(t.task_name)}</p>
+        ${t.description?`<p class="text-xs text-gray-400 mt-0.5 line-clamp-2">${esc(t.description)}</p>`:''}
+      </div>
+      <button onclick="openTaskModal('${t.id}')" class="opacity-0 group-hover:opacity-100 w-6 h-6 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 flex-shrink-0 transition-opacity" title="Edit"><i class="fas fa-pen text-[10px]"></i></button>
+    </div>
+    <!-- Meta row -->
+    <div class="flex flex-wrap gap-1.5 mb-2.5">
+      <span class="text-[10px] px-1.5 py-0.5 rounded-md ${TASK_PRIORITY_CSS[t.priority]||''} font-medium">${t.priority}</span>
+      <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-500">${TASK_CAT_ICON[t.category||'general']} ${(t.category||'general').replace('-',' ')}</span>
+      ${t.staff?`<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-forest/5 text-forest">👤 ${esc(t.staff.name)}</span>`:''}
+    </div>
+    ${t.notes?`<p class="text-[10px] text-blue-600 bg-blue-50 rounded-lg px-2 py-1 mb-2 line-clamp-2"><i class="fas fa-comment mr-1"></i>${esc(t.notes)}</p>`:''}
+    <!-- Due date -->
+    ${t.due_date?`<div class="text-[10px] mb-2.5">${dueLabel}</div>`:''}
+    <!-- Action buttons -->
+    <div class="flex items-center gap-1.5 border-t border-gray-50 pt-2">${actionBtns}</div>
+    ${t.completed_at?`<p class="text-[10px] text-gray-300 mt-1.5">Completed ${fmtDateTime(t.completed_at)}</p>`:''}
+  </div>`;
+}
+
+function openTaskModal(id=null){
+  const isEdit=!!id;
+  ['tk_id','tk_name','tk_desc','tk_due'].forEach(f=>{const el=document.getElementById(f);if(el)el.value='';});
+  document.getElementById('tk_priority').value='medium';
+  document.getElementById('tk_category').value='general';
+  document.getElementById('tk_staff').value='';
+  document.getElementById('tk_status_row').classList.add('hidden');
+  document.getElementById('tk_delete_btn').classList.add('hidden');
+  document.getElementById('tk_save_btn').textContent='Assign Task';
+  setT('taskModalTitle','Assign Task');
+  if(id){
+    const t=allTasks.find(x=>x.id===id);if(!t)return;
+    document.getElementById('tk_id').value=t.id;
+    document.getElementById('tk_name').value=t.task_name||'';
+    document.getElementById('tk_desc').value=t.description||'';
+    document.getElementById('tk_due').value=t.due_date||'';
+    document.getElementById('tk_priority').value=t.priority||'medium';
+    document.getElementById('tk_category').value=t.category||'general';
+    document.getElementById('tk_staff').value=t.assigned_to||'';
+    document.getElementById('tk_status').value=t.status||'pending';
+    document.getElementById('tk_status_row').classList.remove('hidden');
+    document.getElementById('tk_delete_btn').classList.remove('hidden');
+    document.getElementById('tk_save_btn').textContent='Save Changes';
+    setT('taskModalTitle','Edit Task');
+  }
+  document.getElementById('taskModal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('tk_name').focus(),80);
+}
+
+async function saveTask(){
+  const id=document.getElementById('tk_id').value;
+  const name=document.getElementById('tk_name').value.trim();
+  if(!name){toast('Task name is required.','error');return;}
+  const payload={
+    task_name:name,
+    description:document.getElementById('tk_desc').value.trim()||null,
+    category:document.getElementById('tk_category').value||'general',
+    priority:document.getElementById('tk_priority').value,
+    assigned_to:document.getElementById('tk_staff').value||null,
+    due_date:document.getElementById('tk_due').value||null,
+    assigned_by:'superadmin',
+  };
+  if(id){
+    payload.status=document.getElementById('tk_status').value;
+    if(payload.status==='completed'&&allTasks.find(t=>t.id===id)?.status!=='completed')
+      payload.completed_at=new Date().toISOString();
+    if(payload.status==='in_progress'&&allTasks.find(t=>t.id===id)?.status==='pending')
+      payload.started_at=new Date().toISOString();
+  }
+  try{
+    let error;
+    if(id){({error}=await db.from('staff_tasks').update(payload).eq('id',id));}
+    else{({error}=await db.from('staff_tasks').insert(payload));}
+    if(error) throw error;
+    toast(id?'Task updated!':'Task assigned!','success');
+    closeModal('taskModal');
+    // Realtime will handle the re-render — but do a local refresh as fallback
+    await loadTasks(true);
+  }catch(e){console.error(e);toast('Failed: '+(e.message||'unknown'),'error');}
+}
+
+async function updTask(id,status){
+  const upd={status};
+  if(status==='completed') upd.completed_at=new Date().toISOString();
+  if(status==='in_progress'){
+    const t=allTasks.find(x=>x.id===id);
+    if(t&&t.status==='pending') upd.started_at=new Date().toISOString();
+  }
+  // Optimistic UI: update local state immediately, don't wait for DB round-trip
+  allTasks=allTasks.map(t=>t.id===id?{...t,...upd}:t);
+  renderTasks();
+  try{
+    const{error}=await db.from('staff_tasks').update(upd).eq('id',id);
+    if(error) throw error;
+    toast(status==='completed'?'Task completed ✓':status==='in_progress'?'Task started!':'Updated!','success');
+  }catch(e){
+    console.error(e); toast('Update failed.','error');
+    await loadTasks(true); // rollback
+  }
+}
+
+async function deleteTask(){
+  const id=document.getElementById('tk_id').value;
+  if(!id) return;
+  const t=allTasks.find(x=>x.id===id);
+  if(!confirm(`Delete task "${t?.task_name||''}"? This cannot be undone.`)) return;
+  try{
+    await db.from('staff_tasks').delete().eq('id',id);
+    toast('Task deleted.','success');
+    closeModal('taskModal');
+    await loadTasks(true);
+  }catch(e){toast('Failed.','error');}
+}
 // ═══════════════════════════════════════════════════════
 // INVENTORY
 // ═══════════════════════════════════════════════════════
@@ -4138,25 +4382,120 @@ const expMF=document.getElementById('expMonthFilter'); if(expMF)expMF.value=new 
 // Auto-refresh every 60s
 setInterval(()=>{if(sessionStorage.getItem('bm_sa')&&sessionExpiry&&Date.now()<sessionExpiry){loadAllBookings(true);loadInquiries(true);}},60000);
 
-// ═══════════════════════════════════════════════════════
-// REALTIME — shared inventory + notifications from Admin
-// ═══════════════════════════════════════════════════════
-// Inventory: if Admin (in-house staff) adjusts stock, reflect it here
-// instantly without waiting for the 60s refresh.
-db.channel('sa-inventory-sync')
-  .on('postgres_changes',{event:'*',schema:'public',table:'inventory'},()=>{
-    if(document.getElementById('tab-inventory') && !document.getElementById('tab-inventory').classList.contains('hidden')) loadInventory();
-    else loadInventory(); // keep allInventory fresh even off-tab for low-stock badge
-  })
-  .subscribe();
+// ══════════════════════════════════════════════════════
+// REALTIME — every table, every panel, zero reload needed
+// ══════════════════════════════════════════════════════
+(function setupRealtime(){
+  // Helper: refresh only if view is active, else update in-memory only
+  const activeView=()=>document.querySelector('.view.active')?.id?.replace('view-','');
+  const inView=(name)=>activeView()===name;
 
-// Notifications: Admin → Super Admin (e.g. guest checked in, low stock flagged)
-db.channel('sa-notifications')
-  .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'target=eq.superadmin'},(payload)=>{
-    const n=payload.new;
-    toast(`📣 ${n.title}`,'info');
-  })
-  .subscribe();
+  // 1. BOOKINGS — any change: update allBookings, refresh active view
+  db.channel('sa-rt-bookings').on('postgres_changes',{event:'*',schema:'public',table:'bookings'},async(p)=>{
+    const{data}=await db.from('bookings').select('*').order('created_at',{ascending:false});
+    allBookings=data||[];
+    updateBadges();
+    if(inView('dashboard')) refreshDashboard();
+    else if(inView('bookings')) renderBookingsTable(allBookings);
+    else if(inView('calendar')) renderCalendar();
+    else if(inView('accounting')) loadGuestLedger();
+    else if(inView('finances')) loadPL();
+    if(p.eventType==='INSERT') toast(`📋 New booking: ${p.new.booking_ref||''}`, 'info');
+  }).subscribe();
+
+  // 2. TASKS — optimistic UI already applied; this syncs other sessions
+  db.channel('sa-rt-tasks').on('postgres_changes',{event:'*',schema:'public',table:'staff_tasks'},async(p)=>{
+    const{data}=await db.from('staff_tasks').select('*,staff(name,role)').order('created_at',{ascending:false});
+    allTasks=data||[];
+    updateBadges();
+    if(inView('tasks')) renderTasks();
+    if(inView('dashboard')) refreshDashboard();
+    // Show toast for changes made by Admin
+    if(p.eventType==='UPDATE'&&p.new.assigned_by!=='superadmin'){
+      const action=p.new.status==='completed'?'completed':'updated';
+      toast(`✅ Admin ${action} task: ${p.new.task_name||''}`, 'success');
+    }
+  }).subscribe();
+
+  // 3. INVENTORY
+  db.channel('sa-rt-inventory').on('postgres_changes',{event:'*',schema:'public',table:'inventory'},async()=>{
+    const[{data:inv},{data:log}]=await Promise.all([
+      db.from('inventory').select('*').order('item_name'),
+      db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(30),
+    ]);
+    allInventory=inv||[]; allInventoryLog=log||[];
+    updateBadges();
+    if(inView('inventory')) renderInventory();
+    if(inView('dashboard')) updateAlerts();
+  }).subscribe();
+
+  // 4. STAFF
+  db.channel('sa-rt-staff').on('postgres_changes',{event:'*',schema:'public',table:'staff'},async()=>{
+    const{data}=await db.from('staff').select('*').order('name');
+    allStaff=data||[];
+    if(inView('staff')) loadStaff();
+    // Re-populate task assignee selects
+    const selects=['tk_staff','tkFilterAssignee'];
+    selects.forEach(sid=>{
+      const sel=document.getElementById(sid); if(!sel) return;
+      const cv=sel.value;
+      sel.innerHTML=(sid==='tk_staff'?'<option value="">Unassigned</option>':'<option value="">All Assignees</option>')+
+        allStaff.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+      sel.value=cv;
+    });
+  }).subscribe();
+
+  // 5. NOTIFICATIONS from Admin
+  db.channel('sa-rt-notifications').on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'target=eq.superadmin'},async(p)=>{
+    const n=p.new;
+    allNotifications=[n,...(allNotifications||[])];
+    updateBadges();
+    // Rich toast based on type
+    const icons={booking_walkin:'🚶',guest_checked_in:'✅',low_stock:'⚠️',booking_edited:'✏️',addon_added:'➕',payment_received:'💰'};
+    toast(`${icons[n.type]||'📣'} ${n.title}`,'info');
+  }).subscribe();
+
+  // 6. ANNOUNCEMENTS
+  db.channel('sa-rt-announcements').on('postgres_changes',{event:'*',schema:'public',table:'announcements'},async()=>{
+    const{data}=await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
+    if(inView('announcements')) loadAnnouncements();
+  }).subscribe();
+
+  // 7. MAINTENANCE
+  db.channel('sa-rt-maintenance').on('postgres_changes',{event:'*',schema:'public',table:'maintenance'},async()=>{
+    const{data}=await db.from('maintenance').select('*').order('created_at',{ascending:false});
+    allMaintenance=data||[];
+    updateBadges();
+    if(inView('maintenance')) loadMaintenance();
+  }).subscribe();
+
+  // 8. GUEST LOGS — Admin checks in guests
+  db.channel('sa-rt-guestlogs').on('postgres_changes',{event:'*',schema:'public',table:'guest_logs'},(p)=>{
+    if(p.eventType==='INSERT') toast(`🏠 Guest log created: ${p.new.booking_ref||''}`, 'info');
+    if(inView('guestrecords')){
+      const q=document.getElementById('saGrSearch')?.value;
+      if(q&&q.length>1) searchSAGuestRecords();
+    }
+  }).subscribe();
+
+  // 9. EXPENSES
+  db.channel('sa-rt-expenses').on('postgres_changes',{event:'*',schema:'public',table:'expenses'},async()=>{
+    const{data}=await db.from('expenses').select('*').order('date',{ascending:false});
+    allExpenses=data||[];
+    if(inView('expenses')) loadExpenses();
+    else if(inView('finances')) loadPL();
+  }).subscribe();
+
+  // 10. INQUIRIES
+  db.channel('sa-rt-inquiries').on('postgres_changes',{event:'INSERT',schema:'public',table:'inquiries'},(p)=>{
+    toast(`📨 New inquiry from ${p.new.guest_name||'guest'}`,'info');
+    updateBadges();
+    if(inView('inquiries')) loadInquiries();
+  }).subscribe();
+
+  console.log('[RT] All 10 realtime channels active');
+})();
+
 
 // ── DASHBOARD CALENDAR (SA) ──────────────────────────────────
 let saCalYear=new Date().getFullYear(), saCalMonth=new Date().getMonth();
@@ -4331,6 +4670,6 @@ showView=function(name){
   _origShowView.apply(this,arguments);
   if(name==='guestrecords'){const q=document.getElementById('saGrSearch')?.value;if(q&&q.length>1)searchSAGuestRecords();}
 };
-
+</script>
 </body>
 </html>
