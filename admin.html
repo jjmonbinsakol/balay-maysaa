@@ -107,6 +107,7 @@
       <button class="nav-item" onclick="showView('walkin')" id="nav-walkin"><i class="fas fa-walking"></i> Walk-in Booking</button>
       <p class="nav-group">Guests</p>
       <button class="nav-item" onclick="showView('guestlog')" id="nav-guestlog"><i class="fas fa-clipboard-list"></i> Guest Log</button>
+      <button class="nav-item" onclick="showView('guestrecords')" id="nav-guestrecords"><i class="fas fa-users-viewfinder"></i> Guest Records</button>
       <p class="nav-group">Operations</p>
       <button class="nav-item" onclick="showView('calendar')" id="nav-calendar"><i class="fas fa-calendar-days"></i> Calendar</button>
       <button class="nav-item" onclick="showView('personnel')" id="nav-personnel"><i class="fas fa-users"></i> Personnel</button>
@@ -339,87 +340,125 @@
       <!-- ═══ GUEST LOG ═══ -->
       <div id="view-guestlog" class="view">
         <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
-          <div><h2 class="font-heading text-3xl text-gray-800 font-light">Guest Check-in Log</h2>
-          <p class="text-gray-400 text-xs mt-0.5">Fetch a booking reference to auto-populate — guest names tally to the booked pax count.</p></div>
-          <button onclick="showGuestLogList()" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-list"></i> View All Logs</button>
+          <div>
+            <h2 class="font-heading text-3xl text-gray-800 font-light">Guest Check-in Log</h2>
+            <p class="text-gray-400 text-xs mt-0.5">Step 1: enter booking ref → Step 2: fill names (one per booked pax) → Save.</p>
+          </div>
+          <button onclick="showView('guestrecords')" class="text-xs bg-white border border-gray-200 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-users-viewfinder"></i> View All Records</button>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
-          <!-- Form -->
-          <div class="lg:col-span-3 sc p-6">
-            <h3 class="font-semibold text-gray-700 mb-4">Log Check-in</h3>
-            <div class="space-y-4">
+
+        <!-- STEP 1: Reference lookup -->
+        <div class="sc p-6 mb-5" id="glStep1">
+          <h3 class="font-semibold text-gray-700 mb-1">Step 1 — Find Booking</h3>
+          <p class="text-xs text-gray-400 mb-4">Enter the booking reference number or search by guest name.</p>
+          <div class="flex gap-2 mb-2 max-w-lg">
+            <input type="text" id="gl_ref" class="fi" placeholder="e.g. BM-20260617-XXXX or guest name" oninput="glSearchHandler()" onkeydown="if(event.key==='Enter')fetchForLog()"/>
+            <button onclick="fetchForLog()" class="px-5 py-2 bg-forest text-white rounded-lg text-sm font-medium hover:bg-forest-dark whitespace-nowrap flex items-center gap-2"><i class="fas fa-search"></i> Find</button>
+          </div>
+          <div id="glSearchDropdown" class="hidden max-w-lg bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"></div>
+        </div>
+
+        <!-- STEP 2: Booking confirmed + name entry (hidden until fetch) -->
+        <div id="glStep2" class="hidden">
+          <!-- Booking summary banner -->
+          <div class="sc p-5 mb-5 border-l-4 border-forest">
+            <div class="flex items-start justify-between gap-3 flex-wrap">
               <div>
-                <label class="fi-label">Search Booking *</label>
-                <div class="flex gap-2">
-                  <input type="text" id="gl_ref" class="fi" placeholder="Ref # (BM-…) or Guest Name" oninput="gl_ref_input_handler()"/>
-                  <button onclick="fetchForLog()" class="px-4 py-2 bg-forest text-white rounded-lg text-sm hover:bg-forest-dark whitespace-nowrap flex items-center gap-1"><i class="fas fa-search"></i> Fetch</button>
-                </div>
-                <!-- Name search dropdown (shown when typing a name) -->
-                <div id="glNameSuggestions" class="hidden mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-10 relative"></div>
+                <p class="font-heading text-xl text-forest font-light" id="glGuestName">–</p>
+                <p class="text-sm text-gray-500 mt-0.5" id="glBookingDetails">–</p>
               </div>
-              <!-- Booking info after fetch -->
-              <div id="glBookingCard" class="hidden bg-forest/5 border border-forest/20 rounded-xl p-4">
-                <div class="flex justify-between items-start mb-2">
-                  <p class="font-semibold text-gray-800 text-base" id="glGuestName">–</p>
-                  <span class="badge b-conf text-xs" id="glStatus">–</span>
-                </div>
-                <p class="text-gray-500 text-sm" id="glBookingDetails">–</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3 text-xs">
-                  <div><span class="text-gray-400">Booked Pax:</span><br/><span class="font-semibold text-forest" id="glBookedPax">–</span></div>
-                  <div><span class="text-gray-400">Room(s):</span><br/><span class="font-medium" id="glRooms">–</span></div>
-                  <div><span class="text-gray-400">Check-in:</span><br/><span class="font-medium" id="glCI">–</span></div>
-                  <div><span class="text-gray-400">Check-out:</span><br/><span class="font-medium" id="glCO">–</span></div>
-                  <div><span class="text-gray-400">Balance Due:</span><br/><span class="font-semibold text-red-600" id="glBalance">–</span></div>
-                  <div><span class="text-gray-400">Security Deposit:</span><br/><span class="font-semibold text-forest">₱1,500</span></div>
-                </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="badge b-conf text-xs" id="glStatus">–</span>
+                <button onclick="resetGuestLog()" class="text-xs text-gray-400 hover:text-gray-600 border border-gray-200 px-3 py-1 rounded-lg">← Change Booking</button>
               </div>
-              <!-- Guest count -->
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div><label class="fi-label">Adults *</label><input type="number" id="gl_adults" class="fi" value="0" min="0" oninput="buildGuestNameFields()"/></div>
-                <div><label class="fi-label">Children 3+</label><input type="number" id="gl_ch_above" class="fi" value="0" min="0" oninput="buildGuestNameFields()"/></div>
-                <div><label class="fi-label">Infants &lt;3</label><input type="number" id="gl_ch_below" class="fi" value="0" min="0"/></div>
-                <div><label class="fi-label">Pets</label><input type="number" id="gl_pets" class="fi" value="0" min="0"/></div>
-              </div>
-              <!-- Pax tally -->
-              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                <span class="text-sm text-gray-500">Total billable guests (adults + children 3+)</span>
-                <span class="font-bold text-forest text-lg" id="glPaxTally">0</span>
-              </div>
-              <!-- Dynamic name inputs -->
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label class="fi-label mb-0">Guest Names *</label>
-                  <span class="text-xs text-gray-400">Fill in all <span id="glNameCount">0</span> name(s)</span>
-                </div>
-                <div id="glNameFields" class="space-y-2"><p class="text-xs text-gray-400 text-center py-2">Enter guest counts above to generate name fields.</p></div>
-              </div>
-              <!-- Security deposit -->
-              <div><label class="fi-label">Security Deposit (₱) — refundable upon checkout</label>
-                <input type="number" id="gl_deposit" class="fi" value="1500" min="0"/>
-              </div>
-              <!-- Notes -->
-              <div><label class="fi-label">Special Notes <span class="text-gray-400 font-normal text-xs">(car plate, items, etc.)</span></label>
-                <textarea id="gl_notes" class="fi" rows="2"></textarea>
-              </div>
-              <!-- Agreement -->
-              <label class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl cursor-pointer">
-                <input type="checkbox" id="gl_agree" class="w-4 h-4 accent-forest mt-0.5 flex-shrink-0"/>
-                <span class="text-xs text-gray-700">Guest has read and agrees to all <strong>House Rules, Terms &amp; Conditions</strong>. Security deposit will be collected and refunded accordingly upon checkout.</span>
-              </label>
-              <input type="hidden" id="gl_editing_id"/>
-              <button onclick="submitGuestLog()" id="glBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center justify-center gap-2">
-                <span id="glBtnText">Save Check-in Log</span><div class="spin hidden" id="glSpin"></div>
-              </button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 text-xs">
+              <div class="bg-gray-50 rounded-lg p-2.5"><p class="text-gray-400 mb-0.5">Booked Pax</p><p class="font-bold text-forest text-base" id="glBookedPax">–</p></div>
+              <div class="bg-gray-50 rounded-lg p-2.5"><p class="text-gray-400 mb-0.5">Room(s)</p><p class="font-medium" id="glRooms">–</p></div>
+              <div class="bg-gray-50 rounded-lg p-2.5"><p class="text-gray-400 mb-0.5">Check-in</p><p class="font-medium" id="glCI">–</p></div>
+              <div class="bg-gray-50 rounded-lg p-2.5"><p class="text-gray-400 mb-0.5">Balance Due</p><p class="font-semibold" id="glBalance">–</p></div>
             </div>
           </div>
-          <!-- Recent logs panel -->
-          <div class="lg:col-span-2 sc p-5">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="font-semibold text-gray-700 text-sm">Recent Logs</h3>
-              <span class="text-xs text-gray-400" id="logCount">–</span>
+
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+            <!-- Log form -->
+            <div class="lg:col-span-3 sc p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-700">Step 2 — Guest Details &amp; Names</h3>
+                <span id="glEditBadge" class="hidden badge b-pend text-xs">Editing existing log</span>
+              </div>
+              <div class="space-y-4">
+                <!-- Counts -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div><label class="fi-label">Adults *</label><input type="number" id="gl_adults" class="fi" value="0" min="0" oninput="buildGuestNameFields()"/></div>
+                  <div><label class="fi-label">Children 3+</label><input type="number" id="gl_ch_above" class="fi" value="0" min="0" oninput="buildGuestNameFields()"/></div>
+                  <div><label class="fi-label">Infants &lt;3</label><input type="number" id="gl_ch_below" class="fi" value="0" min="0"/></div>
+                  <div><label class="fi-label">Pets</label><input type="number" id="gl_pets" class="fi" value="0" min="0"/></div>
+                </div>
+                <!-- Tally -->
+                <div class="flex items-center justify-between p-3 rounded-xl border border-dashed border-gray-300">
+                  <span class="text-sm text-gray-500">Billable guests (adults + children 3+) — name fields below</span>
+                  <span class="font-bold text-forest text-lg" id="glPaxTally">0</span>
+                </div>
+                <!-- Dynamic name fields -->
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <label class="fi-label mb-0">Guest Names *</label>
+                    <span class="text-xs text-gray-400"><span id="glNameCount">0</span> name(s) to fill</span>
+                  </div>
+                  <div id="glNameFields" class="space-y-2">
+                    <p class="text-xs text-gray-400 text-center py-3 bg-gray-50 rounded-lg">Enter counts above to generate name fields.</p>
+                  </div>
+                </div>
+                <!-- Deposit -->
+                <div><label class="fi-label">Security Deposit (₱) <span class="text-gray-400 font-normal text-xs">— auto-set to ₱1,500, refundable on checkout</span></label>
+                  <input type="number" id="gl_deposit" class="fi" value="1500" min="0"/>
+                </div>
+                <!-- Notes -->
+                <div><label class="fi-label">Special Notes <span class="text-gray-400 font-normal text-xs">(car plate, items brought, etc.)</span></label>
+                  <textarea id="gl_notes" class="fi" rows="2"></textarea>
+                </div>
+                <!-- House rules checkbox -->
+                <label class="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl cursor-pointer">
+                  <input type="checkbox" id="gl_agree" class="w-4 h-4 accent-forest mt-0.5 flex-shrink-0"/>
+                  <span class="text-xs text-gray-700">Guest confirms they have read and agreed to all <strong>House Rules &amp; Terms</strong>. Security deposit will be collected and refunded upon checkout.</span>
+                </label>
+                <input type="hidden" id="gl_editing_id"/>
+                <button onclick="submitGuestLog()" id="glBtn" class="w-full bg-forest text-white py-3 rounded-xl text-sm font-semibold hover:bg-forest-dark flex items-center justify-center gap-2">
+                  <span id="glBtnText">Save Check-in Log</span><div class="spin hidden" id="glSpin"></div>
+                </button>
+              </div>
             </div>
-            <div id="recentLogs" class="space-y-3"><p class="text-gray-300 text-xs">No logs yet.</p></div>
+            <!-- Right panel: recent logs for this booking -->
+            <div class="lg:col-span-2 sc p-5">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-gray-700 text-sm">Recent Logs</h3>
+                <span class="text-xs text-gray-400" id="logCount">–</span>
+              </div>
+              <div id="recentLogs" class="space-y-3"><p class="text-gray-300 text-xs">No logs yet.</p></div>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ═══ GUEST STAY RECORDS ═══ -->
+      <div id="view-guestrecords" class="view">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div>
+            <h2 class="font-heading text-3xl text-gray-800 font-light">Guest Stay Records</h2>
+            <p class="text-gray-400 text-xs mt-0.5">Search by reference number (unique) or guest name. Add comments for future reference.</p>
+          </div>
+        </div>
+        <!-- Search bar -->
+        <div class="sc p-4 mb-5">
+          <div class="flex gap-2 max-w-lg">
+            <input type="text" id="grSearch" class="fi" placeholder="Ref # (unique) or guest name…" oninput="searchGuestRecords()"/>
+            <button onclick="searchGuestRecords()" class="px-4 py-2 bg-forest text-white rounded-lg text-sm hover:bg-forest-dark whitespace-nowrap flex items-center gap-2"><i class="fas fa-search"></i> Search</button>
+          </div>
+        </div>
+        <!-- Results -->
+        <div id="grResults" class="space-y-4">
+          <p class="text-gray-300 text-center py-8">Enter a reference number or name to search guest records.</p>
         </div>
       </div>
 
@@ -589,19 +628,7 @@
   </div>
 </div>
 
-<!-- ═══ GUEST LOG LIST MODAL ═══ -->
-<div id="guestLogListModal" class="modal hidden">
-  <div class="mbox mbox-lg">
-    <div class="p-5 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
-      <h3 class="font-heading text-xl text-forest font-light">All Guest Logs</h3>
-      <button onclick="closeModal('guestLogListModal')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
-    </div>
-    <div class="p-4">
-      <input type="text" id="logSearch" class="fi mb-4" placeholder="Search by ref or guest name…" oninput="filterLogList()"/>
-      <div id="guestLogListBody" class="space-y-3"></div>
-    </div>
-  </div>
-</div>
+<!-- GUEST LOG LIST MODAL REMOVED — replaced by Guest Records tab -->
 
 <!-- ═══ ADD-ONS MODAL ═══ -->
 <div id="addonModal" class="modal hidden">
@@ -753,7 +780,9 @@ function showView(name){
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-'+name)?.classList.add('active');
   const map={dashboard:renderDashboard,notifications:renderNotifications,bookings:()=>renderBookings(),
-    calendar:()=>renderCal('cal'),guestlog:renderRecentLogs,personnel:renderPersonnel,
+    calendar:()=>renderCal('cal'),guestlog:renderRecentLogs,
+    guestrecords:()=>{const q=document.getElementById('grSearch')?.value;if(q&&q.length>1)searchGuestRecords();},
+    personnel:renderPersonnel,
     inventory:renderInventory,announcements:renderAnnouncements,walkin:()=>{}};
   if(map[name]) map[name]();
   if(window.innerWidth<769){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
@@ -1356,42 +1385,293 @@ async function filterLogList(){
     :'<p class="text-gray-300 text-center py-6">No logs found.</p>';
 }
 
-// Guest log name/ref suggestion
-function gl_ref_input_handler(){
+// ── GUEST LOG — 2-step flow ──────────────────────────────────
+function resetGuestLog(){
+  document.getElementById('gl_ref').value='';
+  document.getElementById('glStep2').classList.add('hidden');
+  document.getElementById('glStep1').classList.remove('hidden');
+  document.getElementById('glSearchDropdown').classList.add('hidden');
+  document.getElementById('gl_editing_id').value='';
+  document.getElementById('glEditBadge').classList.add('hidden');
+  setT('glBtnText','Save Check-in Log');
+  glBookingData=null;
+}
+
+function glSearchHandler(){
   const val=document.getElementById('gl_ref').value.trim();
-  const sugg=document.getElementById('glNameSuggestions');
-  // If it looks like a ref number, hide suggestions and uppercase
-  if(val.toUpperCase().startsWith('BM-')||val.length<3){
-    document.getElementById('gl_ref').style.textTransform='uppercase';
-    sugg.classList.add('hidden');return;
-  }
-  document.getElementById('gl_ref').style.textTransform='none';
-  // Search bookings by name
+  const dd=document.getElementById('glSearchDropdown');
+  if(!val||val.length<2){dd.classList.add('hidden');return;}
+  const isRef=val.toUpperCase().startsWith('BM-')||(/^BM/i.test(val));
   const q=val.toLowerCase();
-  const matches=allBookings.filter(b=>(b.guest_name||'').toLowerCase().includes(q)).slice(0,6);
-  if(!matches.length){sugg.classList.add('hidden');return;}
-  sugg.classList.remove('hidden');
-  sugg.innerHTML=matches.map(b=>`
-    <button onclick="selectGLBooking('${b.booking_ref}','${esc(b.guest_name)}')"
-      class="w-full text-left px-4 py-3 hover:bg-forest/5 border-b border-gray-50 last:border-0 flex justify-between items-center">
-      <div><p class="text-sm font-medium text-gray-800">${esc(b.guest_name)}</p>
+  let matches=[];
+  if(isRef){
+    // Exact ref match attempt — still show dropdown if partial
+    matches=allBookings.filter(b=>(b.booking_ref||'').toLowerCase().includes(q)).slice(0,5);
+  } else {
+    matches=allBookings.filter(b=>(b.guest_name||'').toLowerCase().includes(q)).slice(0,6);
+  }
+  if(!matches.length){dd.classList.add('hidden');return;}
+  dd.classList.remove('hidden');
+  dd.innerHTML=matches.map(b=>`
+    <button onclick="selectGLBooking('${b.booking_ref}')"
+      class="w-full text-left px-4 py-3 hover:bg-forest/5 border-b border-gray-50 last:border-0 flex justify-between items-center gap-2">
+      <div class="min-w-0">
+        <p class="text-sm font-semibold text-gray-800 truncate">${esc(b.guest_name)}</p>
         <p class="text-xs text-gray-400">${b.booking_ref} · ${fmtDate(b.check_in_date)} → ${fmtDate(b.check_out_date)}</p>
       </div>
-      <span class="badge ${STATUS_CSS[b.status]||'b-pend'} text-xs ml-2">${STATUS_LABELS[b.status]||b.status}</span>
+      <span class="badge ${STATUS_CSS[b.status]||'b-pend'} text-xs flex-shrink-0">${STATUS_LABELS[b.status]||b.status}</span>
     </button>`).join('');
 }
 
-function selectGLBooking(ref,name){
+function selectGLBooking(ref){
   document.getElementById('gl_ref').value=ref;
-  document.getElementById('gl_ref').style.textTransform='uppercase';
-  document.getElementById('glNameSuggestions').classList.add('hidden');
+  document.getElementById('glSearchDropdown').classList.add('hidden');
   fetchForLog();
 }
-// Close suggestions when clicking outside
+
 document.addEventListener('click',e=>{
-  if(!e.target.closest('#gl_ref')&&!e.target.closest('#glNameSuggestions'))
-    document.getElementById('glNameSuggestions')?.classList.add('hidden');
+  if(!e.target.closest('#gl_ref')&&!e.target.closest('#glSearchDropdown'))
+    document.getElementById('glSearchDropdown')?.classList.add('hidden');
 });
+
+function openGuestLogForRef(ref){
+  showView('guestlog');
+  document.getElementById('gl_ref').value=ref;
+  document.getElementById('glSearchDropdown').classList.add('hidden');
+  fetchForLog();
+}
+
+async function fetchForLog(){
+  const rawRef=document.getElementById('gl_ref').value.trim().toUpperCase();
+  if(!rawRef){toast('Enter a booking reference or name first.','error');return;}
+  try{
+    // Try by exact ref first; if not found try name search on already-loaded data
+    let bk=allBookings.find(b=>b.booking_ref===rawRef);
+    if(!bk){
+      // Also try DB fetch in case not loaded
+      const{data,error}=await db.from('bookings').select('*').ilike('booking_ref',rawRef).maybeSingle();
+      if(!error&&data) bk=data;
+    }
+    if(!bk){toast('Booking not found.','error');return;}
+    glBookingData=bk;
+
+    // Populate Step 2 banner
+    setT('glGuestName',bk.guest_name);
+    document.getElementById('glStatus').textContent=STATUS_LABELS[bk.status]||bk.status;
+    document.getElementById('glStatus').className='badge '+(STATUS_CSS[bk.status]||'b-pend')+' text-xs';
+    setT('glBookingDetails',(bk.room_type||'')+ ' · ' +fmtDate(bk.check_in_date)+' → '+fmtDate(bk.check_out_date));
+    const pax=bk.pax_count||bk.adults||0;
+    setT('glBookedPax',pax+' pax');
+    setT('glRooms',bk.room_type||'—');
+    setT('glCI',fmtDate(bk.check_in_date));
+    const bal=bk.remaining_balance||0;
+    const balEl=document.getElementById('glBalance');
+    balEl.textContent=bal>0?'₱'+bal.toLocaleString():'Fully Paid ✓';
+    balEl.className='font-semibold '+(bal>0?'text-red-600':'text-green-600');
+
+    // Check existing log
+    const{data:logData}=await db.from('guest_logs').select('*').eq('booking_ref',rawRef).maybeSingle();
+    if(logData){
+      document.getElementById('gl_editing_id').value=logData.id;
+      document.getElementById('glEditBadge').classList.remove('hidden');
+      document.getElementById('gl_adults').value=logData.adults_count||0;
+      document.getElementById('gl_ch_above').value=logData.children_above_3||0;
+      document.getElementById('gl_ch_below').value=logData.children_below_3||0;
+      document.getElementById('gl_pets').value=logData.pets_count||0;
+      document.getElementById('gl_deposit').value=logData.security_deposit||SECURITY_DEPOSIT;
+      document.getElementById('gl_notes').value=logData.special_notes||'';
+      document.getElementById('gl_agree').checked=logData.house_rules_agreed||false;
+      setT('glBtnText','Update Check-in Log');
+      const names=(()=>{try{const n=typeof logData.guest_names==='string'?JSON.parse(logData.guest_names):logData.guest_names;return Array.isArray(n)?n:[];}catch(e){return[];}})();
+      buildGuestNameFields(names);
+      toast('Existing log loaded — you can edit and update.','info');
+    } else {
+      document.getElementById('gl_editing_id').value='';
+      document.getElementById('glEditBadge').classList.add('hidden');
+      document.getElementById('gl_adults').value=Math.max(1,pax);
+      document.getElementById('gl_ch_above').value=0;
+      document.getElementById('gl_ch_below').value=0;
+      document.getElementById('gl_pets').value=0;
+      document.getElementById('gl_deposit').value=SECURITY_DEPOSIT;
+      document.getElementById('gl_notes').value='';
+      document.getElementById('gl_agree').checked=false;
+      setT('glBtnText','Save Check-in Log');
+      buildGuestNameFields();
+      toast('Booking found! Fill in guest details.','success');
+    }
+    // Show Step 2, hide Step 1
+    document.getElementById('glStep1').classList.add('hidden');
+    document.getElementById('glStep2').classList.remove('hidden');
+    await renderRecentLogs();
+  }catch(e){console.error(e);toast('Error fetching booking.','error');}
+}
+
+function buildGuestNameFields(prefill=[]){
+  const a=parseInt(document.getElementById('gl_adults').value)||0;
+  const ch=parseInt(document.getElementById('gl_ch_above').value)||0;
+  const total=a+ch;
+  setT('glPaxTally',total);setT('glNameCount',total);
+  const container=document.getElementById('glNameFields');
+  if(total===0){
+    container.innerHTML='<p class="text-xs text-gray-400 text-center py-3 bg-gray-50 rounded-lg">Enter guest counts above to generate name fields.</p>';
+    return;
+  }
+  container.innerHTML=Array.from({length:total},(_,i)=>`
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-gray-400 w-6 text-right flex-shrink-0 font-medium">${i+1}</span>
+      <input type="text" id="glName_${i}" class="fi text-sm py-2.5"
+        placeholder="${i<a?'Adult':'Child 3+'} ${i<a?i+1:i-a+1} — full name"
+        value="${esc(prefill[i]||'')}"/>
+    </div>`).join('');
+  // Focus first empty
+  setTimeout(()=>{
+    for(let i=0;i<total;i++){
+      const el=document.getElementById('glName_'+i);
+      if(el&&!el.value){el.focus();break;}
+    }
+  },80);
+}
+
+async function submitGuestLog(){
+  const bk=glBookingData;
+  if(!bk){toast('Fetch a booking first.','error');return;}
+  const ref=bk.booking_ref;
+  const adults=parseInt(document.getElementById('gl_adults').value)||0;
+  const ch_above=parseInt(document.getElementById('gl_ch_above').value)||0;
+  const total=adults+ch_above;
+  if(total===0){toast('Enter at least 1 adult.','error');return;}
+  if(!document.getElementById('gl_agree').checked){toast('Guest must agree to house rules.','error');return;}
+  const names=[];
+  let missing=false;
+  for(let i=0;i<total;i++){
+    const v=(document.getElementById('glName_'+i)?.value||'').trim();
+    if(!v) missing=true;
+    names.push(v||'Guest '+(i+1));
+  }
+  if(missing&&!confirm('Some name fields are empty. Save anyway?'))return;
+  const editId=document.getElementById('gl_editing_id').value;
+  const payload={
+    booking_ref:ref, guest_names:JSON.stringify(names),
+    adults_count:adults, children_above_3:ch_above,
+    children_below_3:parseInt(document.getElementById('gl_ch_below').value)||0,
+    pets_count:parseInt(document.getElementById('gl_pets').value)||0,
+    house_rules_agreed:true,
+    security_deposit:parseInt(document.getElementById('gl_deposit').value)||SECURITY_DEPOSIT,
+    special_notes:document.getElementById('gl_notes').value.trim()||null,
+    logged_by:'admin',
+  };
+  const btn=document.getElementById('glBtn');btn.disabled=true;
+  document.getElementById('glSpin').classList.remove('hidden');
+  try{
+    let error;
+    if(editId){
+      ({error}=await db.from('guest_logs').update(payload).eq('id',editId));
+    } else {
+      payload.checked_in_at=new Date().toISOString();
+      ({error}=await db.from('guest_logs').insert(payload));
+    }
+    if(error) throw error;
+    toast(editId?'Guest log updated!':'Guest check-in logged!','success');
+    await notifySA('guest_checked_in','Guest Checked In — '+ref,names.length+' guests logged. Deposit: ₱'+(payload.security_deposit||1500)+'.',{booking_ref:ref});
+    // Update editing ID in case this was a new insert
+    if(!editId){
+      const{data:nd}=await db.from('guest_logs').select('id').eq('booking_ref',ref).maybeSingle();
+      if(nd) document.getElementById('gl_editing_id').value=nd.id;
+    }
+    document.getElementById('glEditBadge').classList.remove('hidden');
+    setT('glBtnText','Update Check-in Log');
+    await renderRecentLogs();
+  }catch(e){console.error(e);toast('Failed: '+(e.message||'unknown'),'error');}
+  finally{btn.disabled=false;document.getElementById('glSpin').classList.add('hidden');}
+}
+
+async function renderRecentLogs(){
+  const{data}=await db.from('guest_logs').select('*').order('checked_in_at',{ascending:false}).limit(5);
+  setT('logCount',(data||[]).length+' recent');
+  document.getElementById('recentLogs').innerHTML=(data||[]).length
+    ?(data||[]).map(l=>{
+        const names=parseNames(l.guest_names);
+        return `<div class="p-3 bg-gray-50 rounded-xl">
+          <div class="flex justify-between items-start mb-1">
+            <p class="font-semibold text-sm text-gray-800">${l.booking_ref}</p>
+            <button onclick="openGuestLogForRef('${l.booking_ref}')" class="text-xs text-forest hover:underline">Edit</button>
+          </div>
+          <p class="text-xs text-gray-500">${l.adults_count}A · ${l.children_above_3}C · ${l.pets_count}🐾 · Dep: ₱${(l.security_deposit||0).toLocaleString()}</p>
+          <p class="text-xs text-gray-400 mt-0.5 truncate">${names.slice(0,3).join(', ')}${names.length>3?' +'+( names.length-3)+' more':''}</p>
+          <p class="text-xs text-gray-300">${fmtDateTime(l.checked_in_at)}</p>
+        </div>`;
+      }).join('')
+    :'<p class="text-gray-300 text-xs text-center py-4">No logs yet.</p>';
+}
+
+// ── GUEST STAY RECORDS ──────────────────────────────────────────
+async function searchGuestRecords(){
+  const q=(document.getElementById('grSearch')?.value||'').trim();
+  const el=document.getElementById('grResults');
+  if(!q||q.length<2){el.innerHTML='<p class="text-gray-300 text-center py-8">Enter a reference number or name to search.</p>';return;}
+  const isRef=q.toUpperCase().startsWith('BM-')||(/^BM\d*/i.test(q));
+  let logs=[];
+  if(isRef){
+    const{data}=await db.from('guest_logs').select('*').ilike('booking_ref','%'+q.toUpperCase()+'%').order('checked_in_at',{ascending:false});
+    logs=data||[];
+  } else {
+    // Search by name inside jsonb array — fetch all and filter client-side
+    const{data}=await db.from('guest_logs').select('*').order('checked_in_at',{ascending:false}).limit(200);
+    const ql=q.toLowerCase();
+    logs=(data||[]).filter(l=>{
+      const names=parseNames(l.guest_names);
+      return names.some(n=>n.toLowerCase().includes(ql));
+    });
+  }
+  if(!logs.length){el.innerHTML='<p class="text-gray-300 text-center py-8">No records found for "'+esc(q)+'".</p>';return;}
+  el.innerHTML=logs.map(l=>{
+    const names=parseNames(l.guest_names);
+    const bk=allBookings.find(b=>b.booking_ref===l.booking_ref);
+    return `<div class="sc p-5" id="gr-${l.id}">
+      <div class="flex items-start justify-between gap-3 flex-wrap mb-3">
+        <div>
+          <p class="font-semibold text-gray-800">${l.booking_ref}</p>
+          ${bk?`<p class="text-sm text-gray-500">${esc(bk.guest_name)} · ${bk.room_type} · ${fmtDate(bk.check_in_date)} → ${fmtDate(bk.check_out_date)}</p>`:''}
+          <p class="text-xs text-gray-400 mt-0.5">Logged: ${fmtDateTime(l.checked_in_at)} · ${l.adults_count}A · ${l.children_above_3}C(3+) · ${l.children_below_3}C(<3) · ${l.pets_count}🐾 · Deposit: ₱${(l.security_deposit||0).toLocaleString()}</p>
+        </div>
+        <button onclick="openGuestLogForRef('${l.booking_ref}')" class="text-xs border border-forest text-forest px-3 py-1.5 rounded-lg hover:bg-forest/5 whitespace-nowrap">Edit Log</button>
+      </div>
+      <!-- Guest names -->
+      <div class="mb-3">
+        <p class="text-xs text-gray-400 uppercase font-semibold mb-1.5">Guest Names (${names.length})</p>
+        <div class="flex flex-wrap gap-1.5">${names.map((n,i)=>`<span class="text-xs bg-forest/5 text-forest px-2.5 py-1 rounded-full">${i+1}. ${esc(n)}</span>`).join('')||'<span class="text-xs text-gray-300">No names recorded</span>'}</div>
+      </div>
+      ${l.special_notes?`<p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mb-3"><i class="fas fa-note-sticky mr-1"></i>${esc(l.special_notes)}</p>`:''}
+      <!-- Admin comment -->
+      <div class="border-t border-gray-100 pt-3">
+        <p class="text-xs text-gray-400 uppercase font-semibold mb-1.5">Admin Comment <span class="font-normal normal-case text-gray-300">(internal record — visible to Super Admin)</span></p>
+        <div class="flex gap-2">
+          <textarea id="grComment-${l.id}" class="fi text-sm flex-1" rows="2" placeholder="e.g. Great guests, very tidy. Broken TV reported.">${esc(l.admin_comment||'')}</textarea>
+          <button onclick="saveGuestComment('${l.id}','admin')" class="self-end px-3 py-2 bg-forest text-white rounded-lg text-xs font-medium hover:bg-forest-dark whitespace-nowrap">Save</button>
+        </div>
+        ${l.sa_comment?`<div class="mt-2 p-2.5 bg-purple-50 border border-purple-100 rounded-lg text-xs text-purple-700"><i class="fas fa-crown mr-1"></i><strong>Super Admin:</strong> ${esc(l.sa_comment)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function saveGuestComment(logId, role){
+  const comment=(document.getElementById('grComment-'+logId)?.value||'').trim();
+  const field=role==='sa'?'sa_comment':'admin_comment';
+  try{
+    const{error}=await db.from('guest_logs').update({[field]:comment}).eq('id',logId);
+    if(error) throw error;
+    toast('Comment saved!','success');
+  }catch(e){toast('Failed to save.','error');}
+}
+
+function parseNames(raw){
+  try{const n=typeof raw==='string'?JSON.parse(raw):raw;return Array.isArray(n)?n:[];}catch(e){return[];}
+}
+
+// REMOVE old modal-based list — replaced by guest records tab
+function showGuestLogList(){ showView('guestrecords'); document.getElementById('grSearch').focus(); }
+async function filterLogList(){ await searchGuestRecords(); }
 function renderPersonnel(){
   const g=document.getElementById('personnelGrid');if(!g)return;
   g.innerHTML=allStaff.length?allStaff.map(s=>`<div class="sc p-5">
