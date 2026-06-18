@@ -1998,8 +1998,22 @@ async function saveTaskNote(id){
   }catch(e){toast('Failed to save note.','error');}
 }
 
-// ══════════════════════════════════════════════════════
-// REALTIME — comprehensive, all tables, zero reload
+// ── NOTIFY SUPER ADMIN ──────────────────────────────────────────
+async function notifySA(type, title, message, extra={}){
+  try{
+    await db.from('notifications').insert({
+      type, title, message,
+      payload: extra,
+      target: 'superadmin',
+      created_by: 'admin',
+      is_read: false,
+    });
+  }catch(e){
+    // Non-fatal — log silently so UI actions still complete
+    console.warn('[notifySA] Could not notify Super Admin:', e?.message||e);
+  }
+}
+
 // ══════════════════════════════════════════════════════
 function subscribeRealtime(){
   const activeView=()=>document.querySelector('.view.active')?.id?.replace('view-','');
