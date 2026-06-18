@@ -4918,312 +4918,541 @@ function renderBSDetailCard(b){
     </div>`;
 }
 
-// ── EXPORT functions ──────────────────────────────────────────
-function exportBSSummary(type){
-  if(!bsFiltered.length){toast('No bookings to export — apply a filter first.','error');return;}
-  const headers=['Ref #','Guest Name','Phone','Email','Status','Room(s)','Check-in','Check-out','Nights','Pax','Package','Total (₱)','DP #1 Amount','DP #1 Date','DP #1 Method','DP #2 Amount','DP #2 Date','DP #2 Method','Full Pmt Amount','Full Pmt Date','Full Pmt Method','Balance (₱)','Add-ons (₱)','Special Requests','Admin Notes'];
-  const rows=bsFiltered.map(b=>{
-    const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0;
-    const pmt=getPayments(b);
-    const addons=addonTotal(b);
-    return[
-      b.booking_ref||'',b.guest_name||'',b.guest_phone||'',b.guest_email||'',
-      STATUS_LABELS[b.status]||b.status,b.room_type||'',
-      b.check_in_date||'',b.check_out_date||'',nights,b.pax_count||b.adults||'',
-      b.package_label||'',b.total_amount||0,
-      pmt.dp1||0,pmt.dp1Date||'',pmt.dp1Method||'',
-      pmt.dp2||0,pmt.dp2Date||'',pmt.dp2Method||'',
-      pmt.fullPmt||0,pmt.fullDate||'',pmt.fullMethod||'',
-      b.remaining_balance||0,addons,
-      b.special_requests||'',b.admin_notes||''
-    ];
-  });
+// ══════════════════════════════════════════════════════════════════════
+// BOOKING SUMMARY EXPORTS — CSV, Excel (SheetJS), Print (A4/A3 report)
+// ══════════════════════════════════════════════════════════════════════
 
-  const month=document.getElementById('bsMonth')?.value||'all';
-  const year=document.getElementById('bsYear')?.value||new Date().getFullYear();
-  const fn=`booking-summary-${year}-${month}`;
-
-  if(type==='csv'){
-    dlCSV([headers,...rows],fn+'.csv');
-    toast('CSV exported!','success');
-    return;
-  }
-
-  // Excel: use SheetJS via CDN
-  if(type==='excel'){
-    exportBSExcel([headers,...rows],fn+'.xlsx');
-    return;
-  }
-}
-
-async function exportBSExcel(data, filename){
-  // Load SheetJS dynamically if not already loaded
-  if(!window.XLSX){
-    await new Promise((res,rej)=>{
-      const s=document.createElement('script');
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-      s.onload=res; s.onerror=rej;
-      document.head.appendChild(s);
-    });
-  }
-  try{
-    const wb=window.XLSX.utils.book_new();
-    const ws=window.XLSX.utils.aoa_to_sheet(data);
-    // Style header row width
-    ws['!cols']=data[0].map((_,i)=>({wch:Math.max(12,...data.map(r=>String(r[i]||'').length))+2}));
-    // Freeze top row
-    ws['!freeze']={xSplit:0,ySplit:1};
-    window.XLSX.utils.book_append_sheet(wb,ws,'Booking Summary');
-    window.XLSX.writeFile(wb,filename);
-    toast('Excel exported!','success');
-  }catch(e){
-    console.error(e); toast('Excel export failed. Try CSV instead.','error');
-  }
-}
-
-function printBSSummary(){
-  if(!bsFiltered.length){toast('No bookings to print.','error');return;}
+// ── Shared helpers ────────────────────────────────────────────────────
+function bsGetMeta(){
+  const MONTH_FULL=['','January','February','March','April','May','June','July','August','September','October','November','December'];
   const month=document.getElementById('bsMonth')?.value||'';
   const year=document.getElementById('bsYear')?.value||new Date().getFullYear();
   const status=document.getElementById('bsStatus')?.value||'';
   const q=document.getElementById('bsSearch')?.value||'';
-
-  const totTotal=bsFiltered.reduce((s,b)=>s+(b.total_amount||0),0);
-  const totCollected=bsFiltered.reduce((s,b)=>s+((b.total_amount||0)-(b.remaining_balance||0)),0);
-  const totBal=bsFiltered.reduce((s,b)=>s+(b.remaining_balance||0),0);
-  const totAddons=bsFiltered.reduce((s,b)=>s+addonTotal(b),0);
-  const totNights=bsFiltered.reduce((s,b)=>s+(Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0),0);
-
-  const MONTH_NAMES=['','January','February','March','April','May','June','July','August','September','October','November','December'];
-  const periodLabel=month?`${MONTH_NAMES[parseInt(month)]} ${year}`:year?`Year ${year}`:'All Time';
+  const period=month?`${MONTH_FULL[parseInt(month)]} ${year}`:year?`FY ${year}`:'All Time';
   const statusLabel=status?(STATUS_LABELS[status]||status):'All Statuses';
-  const genDate=new Date().toLocaleString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const fileName=`BookingSummary_${year}${month?'_'+month:''}_${status||'All'}`;
+  return{month,year,status,q,period,statusLabel,fileName,MONTH_FULL};
+}
 
-  const rows=bsFiltered.map((b,idx)=>{
+function bsBuildRows(){
+  return bsFiltered.map((b,i)=>{
     const nights=Math.round((new Date(b.check_out_date)-new Date(b.check_in_date))/86400000)||0;
     const pmt=getPayments(b);
     const ao=addonTotal(b);
-    const bal=b.remaining_balance||0;
-    const collected=(b.total_amount||0)-bal;
-    const isFullyPaid=bal===0;
+    const collected=(b.total_amount||0)-(b.remaining_balance||0);
     const addonsObj=(()=>{try{return typeof b.addons==='string'?JSON.parse(b.addons):b.addons||{};}catch(e){return{};}})();
-    const addonStr=Object.entries(addonsObj).filter(([k])=>k!=='_extra_guests').map(([k,v])=>k.replace(/_/g,' ')+' ₱'+Number(v).toLocaleString()).join(', ')||'—';
-    return `<tr class="${idx%2===0?'row-even':'row-odd'} ${bal>0?'balance-due':''}">
-      <td class="num">${idx+1}</td>
-      <td class="ref">${b.booking_ref}</td>
-      <td>
-        <div class="guest-name">${esc(b.guest_name)}</div>
-        <div class="guest-sub">${b.guest_phone||b.guest_email||''}</div>
+    const addonStr=Object.entries(addonsObj).filter(([k])=>k!=='_extra_guests').map(([k,v])=>`${k.replace(/_/g,' ')} ₱${Number(v).toLocaleString()}`).join('; ')||'';
+    return{
+      n:i+1, ref:b.booking_ref, name:b.guest_name, phone:b.guest_phone||'',
+      email:b.guest_email||'', status:STATUS_LABELS[b.status]||b.status,
+      rooms:b.room_type||'', pkg:b.package_label||'',
+      ci:b.check_in_date||'', co:b.check_out_date||'',
+      nights, pax:b.pax_count||b.adults||0,
+      total:b.total_amount||0,
+      dp1:pmt.dp1, dp1Date:pmt.dp1Date, dp1Method:pmt.dp1Method,
+      dp2:pmt.dp2, dp2Date:pmt.dp2Date, dp2Method:pmt.dp2Method,
+      fullPmt:pmt.fullPmt, fullDate:pmt.fullDate, fullMethod:pmt.fullMethod,
+      collected, balance:b.remaining_balance||0,
+      addons:ao, addonStr,
+      notes:(b.admin_notes||b.special_requests||'').slice(0,120),
+      isPaid:(b.remaining_balance||0)===0,
+    };
+  });
+}
+
+function bsTotals(rows){
+  return{
+    count:rows.length,
+    nights:rows.reduce((s,r)=>s+r.nights,0),
+    total:rows.reduce((s,r)=>s+r.total,0),
+    dp1:rows.reduce((s,r)=>s+r.dp1,0),
+    dp2:rows.reduce((s,r)=>s+r.dp2,0),
+    fullPmt:rows.reduce((s,r)=>s+r.fullPmt,0),
+    collected:rows.reduce((s,r)=>s+r.collected,0),
+    balance:rows.reduce((s,r)=>s+r.balance,0),
+    addons:rows.reduce((s,r)=>s+r.addons,0),
+    withBalance:rows.filter(r=>r.balance>0).length,
+    fullyPaid:rows.filter(r=>r.isPaid).length,
+  };
+}
+
+const PHP=v=>`₱${Number(v).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const PHPV=v=>Number(v).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+// ── CSV export ────────────────────────────────────────────────────────
+function exportBSSummary(type){
+  if(!bsFiltered.length){toast('No bookings to export — apply filters first.','error');return;}
+  const meta=bsGetMeta();
+  const rows=bsBuildRows();
+  const totals=bsTotals(rows);
+
+  if(type==='csv') return exportBSCSV(rows,totals,meta);
+  if(type==='excel') return exportBSExcel(rows,totals,meta);
+}
+
+function exportBSCSV(rows,totals,meta){
+  const lines=[];
+  // ── Header block
+  lines.push([`BALAY MAYSA RESORT — BOOKING SUMMARY REPORT`]);
+  lines.push([`Period:`,meta.period,`Status:`,meta.statusLabel,`Generated:`,new Date().toLocaleString('en-PH')]);
+  lines.push([]);
+  // ── KPI block
+  lines.push([`SUMMARY`]);
+  lines.push([`Total Bookings`,totals.count,`Total Nights`,totals.nights]);
+  lines.push([`Gross Amount`,PHPV(totals.total),`Total Collected`,PHPV(totals.collected)]);
+  lines.push([`Outstanding Balance`,PHPV(totals.balance),`Add-on Revenue`,PHPV(totals.addons)]);
+  lines.push([`Fully Paid`,totals.fullyPaid,`With Balance`,totals.withBalance]);
+  lines.push([]);
+  // ── Column headers
+  lines.push([
+    '#','Reference #','Guest Name','Phone','Email','Status',
+    'Room(s)','Package',
+    'Check-in','Check-out','Nights','Pax',
+    'Total Amount (₱)',
+    'DP #1 Amount','DP #1 Date','DP #1 Method',
+    'DP #2 Amount','DP #2 Date','DP #2 Method',
+    'Full Payment Amount','Full Payment Date','Full Payment Method',
+    'Total Collected (₱)','Balance Due (₱)','Add-ons (₱)','Add-on Details',
+    'Notes'
+  ]);
+  // ── Data rows
+  rows.forEach(r=>{
+    lines.push([
+      r.n, r.ref, r.name, r.phone, r.email, r.status,
+      r.rooms, r.pkg,
+      r.ci, r.co, r.nights, r.pax,
+      r.total,
+      r.dp1||'', r.dp1Date||'', r.dp1Method||'',
+      r.dp2||'', r.dp2Date||'', r.dp2Method||'',
+      r.fullPmt||'', r.fullDate||'', r.fullMethod||'',
+      r.collected, r.balance||'', r.addons||'', r.addonStr,
+      r.notes
+    ]);
+  });
+  // ── Totals row
+  lines.push([]);
+  lines.push([
+    'TOTALS','','','','','',
+    '','',
+    '','', totals.nights, '',
+    PHPV(totals.total),
+    PHPV(totals.dp1),'','',
+    PHPV(totals.dp2),'','',
+    PHPV(totals.fullPmt),'','',
+    PHPV(totals.collected), PHPV(totals.balance), PHPV(totals.addons),'',''
+  ]);
+  dlCSV(lines, meta.fileName+'.csv');
+  toast('CSV exported with full report headers!','success');
+}
+
+// ── Excel export (SheetJS with proper styling via cell formats) ────────
+async function exportBSExcel(rows,totals,meta){
+  if(!window.XLSX){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload=res; s.onerror=rej; document.head.appendChild(s);
+    });
+  }
+  try{
+    const wb=window.XLSX.utils.book_new();
+
+    // ── Sheet 1: Summary ─────────────────────────────────────────────
+    const summaryAoA=[
+      ['BALAY MAYSA RESORT — BOOKING SUMMARY REPORT'],
+      [''],
+      ['Period:', meta.period],
+      ['Status Filter:', meta.statusLabel],
+      ['Generated:', new Date().toLocaleString('en-PH')],
+      ['Prepared by:', 'Super Admin'],
+      [''],
+      ['─── KEY METRICS ─────────────────────────────────────'],
+      ['Total Bookings:', totals.count,          'Total Nights:', totals.nights],
+      ['Gross Amount:',   totals.total,           'Total Collected:', totals.collected],
+      ['Balance Due:',    totals.balance,         'Add-on Revenue:', totals.addons],
+      ['Fully Paid:',     totals.fullyPaid+' bookings', 'With Balance:', totals.withBalance+' bookings'],
+      ['Collection Rate:', totals.total>0?Math.round(totals.collected/totals.total*100)+'%':'—', '', ''],
+      [''],
+      ['─── PAYMENT BREAKDOWN ────────────────────────────────'],
+      ['Downpayment #1 Total:', totals.dp1],
+      ['Downpayment #2 Total:', totals.dp2],
+      ['Full Payment Total:', totals.fullPmt],
+      ['Total Collected:', totals.collected],
+      ['Outstanding Balance:', totals.balance],
+      [''],
+      ['Note: All amounts in Philippine Peso (PHP/₱). This report is computer-generated.'],
+    ];
+    const wsSummary=window.XLSX.utils.aoa_to_sheet(summaryAoA);
+    wsSummary['!cols']=[{wch:30},{wch:20},{wch:25},{wch:20}];
+    window.XLSX.utils.book_append_sheet(wb,wsSummary,'Summary');
+
+    // ── Sheet 2: Booking Ledger ──────────────────────────────────────
+    const HEADER=[
+      '#','Reference #','Guest Name','Phone','Email','Status',
+      'Room(s)','Package','Check-in','Check-out','Nights','Pax',
+      'Total Amount',
+      'DP #1 Amount','DP #1 Date','DP #1 Method',
+      'DP #2 Amount','DP #2 Date','DP #2 Method',
+      'Full Pmt Amount','Full Pmt Date','Full Pmt Method',
+      'Total Collected','Balance Due','Add-ons','Add-on Details','Notes'
+    ];
+    const DATA=rows.map(r=>[
+      r.n, r.ref, r.name, r.phone, r.email, r.status,
+      r.rooms, r.pkg, r.ci, r.co, r.nights, r.pax,
+      r.total,
+      r.dp1||0, r.dp1Date||'', r.dp1Method||'',
+      r.dp2||0, r.dp2Date||'', r.dp2Method||'',
+      r.fullPmt||0, r.fullDate||'', r.fullMethod||'',
+      r.collected, r.balance||0, r.addons||0, r.addonStr, r.notes
+    ]);
+    const TOTALS_ROW=[
+      'TOTALS','','','','','','','','','',totals.nights,'',
+      totals.total,
+      totals.dp1,'','',totals.dp2,'','',totals.fullPmt,'','',
+      totals.collected,totals.balance,totals.addons,'',''
+    ];
+    const ledgerAoA=[HEADER,...DATA,[],TOTALS_ROW];
+    const wsLedger=window.XLSX.utils.aoa_to_sheet(ledgerAoA);
+
+    // Column widths
+    wsLedger['!cols']=[
+      {wch:4},{wch:22},{wch:22},{wch:14},{wch:24},{wch:18},
+      {wch:20},{wch:28},{wch:12},{wch:12},{wch:7},{wch:5},
+      {wch:14},
+      {wch:14},{wch:12},{wch:12},
+      {wch:14},{wch:12},{wch:12},
+      {wch:14},{wch:12},{wch:12},
+      {wch:14},{wch:14},{wch:12},{wch:30},{wch:40}
+    ];
+    // Freeze header row
+    wsLedger['!freeze']={xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft',state:'frozen'};
+    window.XLSX.utils.book_append_sheet(wb,wsLedger,'Booking Ledger');
+
+    // ── Sheet 3: Payment Tracker ─────────────────────────────────────
+    const PMT_HEADER=['#','Ref #','Guest','Status','Total','DP #1','DP #1 Date','DP #2','DP #2 Date','Full Pmt','Full Pmt Date','Collected','Balance','Status Note'];
+    const PMT_DATA=rows.map(r=>[
+      r.n, r.ref, r.name, r.status,
+      r.total, r.dp1||0, r.dp1Date||'',
+      r.dp2||0, r.dp2Date||'',
+      r.fullPmt||0, r.fullDate||'',
+      r.collected, r.balance||0,
+      r.isPaid?'FULLY PAID':'Balance Due: ₱'+r.balance.toLocaleString()
+    ]);
+    const PMT_TOTALS=['TOTALS','','',
+      '',totals.total,totals.dp1,'',totals.dp2,'',totals.fullPmt,'',totals.collected,totals.balance,''];
+    const wsPmt=window.XLSX.utils.aoa_to_sheet([PMT_HEADER,...PMT_DATA,[],PMT_TOTALS]);
+    wsPmt['!cols']=[{wch:4},{wch:22},{wch:22},{wch:18},{wch:14},{wch:14},{wch:12},{wch:14},{wch:12},{wch:14},{wch:12},{wch:14},{wch:14},{wch:30}];
+    wsPmt['!freeze']={xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft',state:'frozen'};
+    window.XLSX.utils.book_append_sheet(wb,wsPmt,'Payment Tracker');
+
+    // ── Sheet 4: Balance Due (filtered) ─────────────────────────────
+    const balRows=rows.filter(r=>r.balance>0);
+    if(balRows.length){
+      const BAL_HEADER=['#','Ref #','Guest','Phone','Room(s)','Check-in','Check-out','Total','Collected','Balance Due','Days Since CI','Urgency'];
+      const today=new Date();
+      const BAL_DATA=balRows.map((r,i)=>{
+        const daysSince=Math.round((today-new Date(r.ci+'T00:00:00'))/86400000);
+        const urgency=daysSince>30?'URGENT':daysSince>14?'Follow Up':daysSince>7?'Pending':'New';
+        return[i+1,r.ref,r.name,r.phone,r.rooms,r.ci,r.co,r.total,r.collected,r.balance,daysSince,urgency];
+      });
+      const BAL_TOT=['TOTALS','','','','','','',
+        balRows.reduce((s,r)=>s+r.total,0),
+        balRows.reduce((s,r)=>s+r.collected,0),
+        balRows.reduce((s,r)=>s+r.balance,0),'',''];
+      const wsBal=window.XLSX.utils.aoa_to_sheet([BAL_HEADER,...BAL_DATA,[],BAL_TOT]);
+      wsBal['!cols']=[{wch:4},{wch:22},{wch:22},{wch:14},{wch:20},{wch:12},{wch:12},{wch:14},{wch:14},{wch:14},{wch:14},{wch:10}];
+      wsBal['!freeze']={xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft',state:'frozen'};
+      window.XLSX.utils.book_append_sheet(wb,wsBal,'Balance Due');
+    }
+
+    window.XLSX.writeFile(wb,meta.fileName+'.xlsx');
+    toast(`Excel exported — ${balRows?balRows.length+' w/ balance, ':''}4 sheets!`,'success');
+  }catch(e){
+    console.error(e);
+    toast('Excel failed — try CSV instead.','error');
+  }
+}
+
+// ── PRINT / PDF — professional A4 portrait accounting report ──────────
+function printBSSummary(){
+  if(!bsFiltered.length){toast('No bookings to print.','error');return;}
+  const meta=bsGetMeta();
+  const rows=bsBuildRows();
+  const tot=bsTotals(rows);
+  const genDate=new Date().toLocaleString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  // Per-row HTML
+  const rowsHTML=rows.map((r,i)=>{
+    const hasBal=r.balance>0;
+    const bgClass=i%2===0?'':'row-alt';
+    const balClass=hasBal?'cell-balance':'cell-paid';
+    return `<tr class="${bgClass}${hasBal?' row-has-balance':''}">
+      <td class="col-n">${r.n}</td>
+      <td class="col-ref">${r.ref}</td>
+      <td class="col-guest">
+        <div class="guest-name">${esc(r.name)}</div>
+        ${r.phone?`<div class="guest-sub">${r.phone}</div>`:''}
       </td>
-      <td class="room-cell">${esc(b.room_type||'—')}</td>
-      <td class="center">${fmtPrintDate(b.check_in_date)}</td>
-      <td class="center">${fmtPrintDate(b.check_out_date)}</td>
-      <td class="center num-cell">${nights}</td>
-      <td class="center num-cell">${b.pax_count||b.adults||'—'}</td>
-      <td class="money total-col">₱${(b.total_amount||0).toLocaleString()}</td>
-      <td class="money pay-col">${pmt.dp1>0?`₱${pmt.dp1.toLocaleString()}<div class="pay-meta">${pmt.dp1Date?fmtPrintDate(pmt.dp1Date):''} ${pmt.dp1Method}</div>`:'<span class="dash">—</span>'}</td>
-      <td class="money pay-col">${pmt.dp2>0?`₱${pmt.dp2.toLocaleString()}<div class="pay-meta">${pmt.dp2Date?fmtPrintDate(pmt.dp2Date):''} ${pmt.dp2Method}</div>`:'<span class="dash">—</span>'}</td>
-      <td class="money pay-col">${pmt.fullPmt>0?`₱${pmt.fullPmt.toLocaleString()}<div class="pay-meta">${pmt.fullDate?fmtPrintDate(pmt.fullDate):''} ${pmt.fullMethod}</div>`:'<span class="dash">—</span>'}</td>
-      <td class="money collected-col">₱${collected.toLocaleString()}</td>
-      <td class="money ${bal>0?'balance-col':'paid-col'}">${bal>0?`₱${bal.toLocaleString()}`:'PAID ✓'}</td>
-      <td class="money addon-col">${ao>0?`₱${ao.toLocaleString()}<div class="pay-meta">${esc(addonStr)}</div>`:'<span class="dash">—</span>'}</td>
-      <td class="status-col"><span class="status-badge status-${b.status||'pending'}">${STATUS_LABELS[b.status]||b.status}</span></td>
+      <td class="col-room">${esc(r.rooms)}</td>
+      <td class="col-date">${r.ci?r.ci.slice(5):''}</td>
+      <td class="col-date">${r.co?r.co.slice(5):''}</td>
+      <td class="col-num">${r.nights}</td>
+      <td class="col-num">${r.pax}</td>
+      <td class="col-money total-col">${PHPV(r.total)}</td>
+      <td class="col-money pmt-col">
+        ${r.dp1>0?`<span class="amount">${PHPV(r.dp1)}</span>${r.dp1Date?`<br><span class="meta">${r.dp1Date.slice(5)} ${r.dp1Method}</span>`:''}`:
+        '<span class="dash">—</span>'}
+      </td>
+      <td class="col-money pmt-col">
+        ${r.dp2>0?`<span class="amount">${PHPV(r.dp2)}</span>${r.dp2Date?`<br><span class="meta">${r.dp2Date.slice(5)} ${r.dp2Method}</span>`:''}`:
+        '<span class="dash">—</span>'}
+      </td>
+      <td class="col-money pmt-col">
+        ${r.fullPmt>0?`<span class="amount">${PHPV(r.fullPmt)}</span>${r.fullDate?`<br><span class="meta">${r.fullDate.slice(5)} ${r.fullMethod}</span>`:''}`:
+        '<span class="dash">—</span>'}
+      </td>
+      <td class="col-money coll-col">${PHPV(r.collected)}</td>
+      <td class="col-money ${balClass}">${hasBal?PHPV(r.balance):'PAID ✓'}</td>
+      ${r.addons>0?`<td class="col-money addon-col">${PHPV(r.addons)}</td>`:`<td class="col-money"><span class="dash">—</span></td>`}
     </tr>`;
   }).join('');
 
-  function fmtPrintDate(d){if(!d)return'—';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});}
+  // Totals row
+  const totRow=`<tr class="totals-row">
+    <td colspan="8" class="totals-label">TOTALS — ${tot.count} booking${tot.count!==1?'s':''} · ${tot.nights} nights</td>
+    <td class="col-money total-col">${PHPV(tot.total)}</td>
+    <td class="col-money pmt-col">${PHPV(tot.dp1)}</td>
+    <td class="col-money pmt-col">${PHPV(tot.dp2)}</td>
+    <td class="col-money pmt-col">${PHPV(tot.fullPmt)}</td>
+    <td class="col-money coll-col">${PHPV(tot.collected)}</td>
+    <td class="col-money ${tot.balance>0?'cell-balance':'cell-paid'}">${tot.balance>0?PHPV(tot.balance):'FULLY PAID'}</td>
+    <td class="col-money addon-col">${tot.addons>0?PHPV(tot.addons):'—'}</td>
+  </tr>`;
+
+  const collRate=tot.total>0?Math.round(tot.collected/tot.total*100):0;
+  const netOutstanding=tot.balance;
 
   const html=`<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>Booking Summary Report — ${esc(periodLabel)}</title>
+<title>Booking Summary — ${esc(meta.period)}</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  @page{size:A3 landscape;margin:15mm 12mm;}
-  body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;color:#1a1a1a;background:white;}
+/* ═══ RESET + BASE ═══════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;}
+@page{size:A3 landscape;margin:12mm 10mm 14mm;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:9px;color:#111;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 
-  /* ── HEADER ── */
-  .header{display:flex;justify-content:space-between;align-items:flex-start;padding:0 0 14px;border-bottom:3px solid #2d5a3b;margin-bottom:16px;}
-  .brand-block .brand{font-size:22px;font-weight:300;color:#2d5a3b;letter-spacing:-0.3px;}
-  .brand-block .brand-sub{font-size:10px;color:#888;margin-top:2px;letter-spacing:.06em;text-transform:uppercase;}
-  .report-title{text-align:right;}
-  .report-title h2{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:2px;}
-  .report-title .meta{font-size:9px;color:#888;line-height:1.6;}
+/* ═══ HEADER ═════════════════════════════════════════════════════ */
+.page-header{border-bottom:3px solid #1e3d28;padding-bottom:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-end;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand-logo{width:32px;height:32px;background:#2d5a3b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;flex-shrink:0;}
+.brand-text .name{font-size:16px;font-weight:700;color:#1e3d28;letter-spacing:-0.3px;}
+.brand-text .sub{font-size:8px;color:#888;letter-spacing:.08em;text-transform:uppercase;margin-top:1px;}
+.report-info{text-align:right;}
+.report-info .title{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:3px;}
+.report-info .meta-line{font-size:8px;color:#666;line-height:1.7;}
+.report-info .meta-line strong{color:#1a1a1a;}
 
-  /* ── SUMMARY CARDS ── */
-  .summary-bar{display:flex;gap:10px;margin-bottom:16px;}
-  .summary-card{flex:1;background:#f7f9f7;border:1px solid #e2e8e4;border-radius:8px;padding:10px 14px;}
-  .summary-card.highlight{background:#f0fdf4;border-color:#bbf7d0;}
-  .summary-card.warn{background:#fff7ed;border-color:#fed7aa;}
-  .summary-card.danger{background:#fff1f2;border-color:#fecdd3;}
-  .summary-card .card-label{font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:3px;}
-  .summary-card .card-val{font-size:16px;font-weight:700;color:#1a1a1a;}
-  .summary-card.highlight .card-val{color:#166534;}
-  .summary-card.warn .card-val{color:#c2410c;}
-  .summary-card.danger .card-val{color:#b91c1c;}
-  .summary-card .card-sub{font-size:8px;color:#999;margin-top:1px;}
+/* ═══ KPI CARDS ══════════════════════════════════════════════════ */
+.kpi-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px;}
+.kpi{border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;background:#fafafa;}
+.kpi.green{background:#f0fdf4;border-color:#bbf7d0;}
+.kpi.red{background:#fff1f2;border-color:#fecdd3;}
+.kpi.amber{background:#fffbeb;border-color:#fde68a;}
+.kpi.blue{background:#eff6ff;border-color:#bfdbfe;}
+.kpi-label{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:3px;}
+.kpi-val{font-size:14px;font-weight:800;color:#111;line-height:1;}
+.kpi.green .kpi-val{color:#166534;}
+.kpi.red .kpi-val{color:#991b1b;}
+.kpi.amber .kpi-val{color:#92400e;}
+.kpi.blue .kpi-val{color:#1e40af;}
+.kpi-sub{font-size:7px;color:#999;margin-top:3px;}
 
-  /* ── TABLE ── */
-  table{width:100%;border-collapse:collapse;font-size:9px;}
-  thead tr{background:#2d5a3b;}
-  thead th{color:white;padding:7px 6px;text-align:left;font-size:8.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;border:none;}
-  thead th.right,thead th.center{text-align:right;}
-  thead th.center{text-align:center;}
+/* ═══ SECTION HEADER ════════════════════════════════════════════ */
+.section-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2d5a3b;margin-bottom:5px;padding-bottom:3px;border-bottom:1.5px solid #d1fae5;}
 
-  .row-even td{background:#ffffff;}
-  .row-odd td{background:#f9fafb;}
-  .balance-due td{background:#fff8f4!important;}
+/* ═══ TABLE ══════════════════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse;font-size:8.5px;}
+thead tr{background:#1e3d28;}
+thead th{color:#fff;padding:6px 5px;text-align:left;font-size:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;border:none;}
+thead th.r{text-align:right;}
+thead th.c{text-align:center;}
+tbody tr td{padding:5px 5px;border-bottom:1px solid #f3f4f6;vertical-align:middle;}
+tbody tr.row-alt td{background:#f9fafb;}
+tbody tr.row-has-balance td{background:#fff7f7!important;}
+tbody tr.row-has-balance.row-alt td{background:#fff2f2!important;}
+.col-n{text-align:center;color:#bbb;font-size:7.5px;width:18px;}
+.col-ref{font-family:'Courier New',monospace;font-size:8px;color:#166534;font-weight:700;white-space:nowrap;}
+.col-guest .guest-name{font-weight:600;color:#111;}
+.col-guest .guest-sub{font-size:7.5px;color:#9ca3af;margin-top:1px;}
+.col-room{font-size:8px;color:#4b5563;max-width:70px;}
+.col-date{text-align:center;font-size:8px;color:#374151;white-space:nowrap;font-family:'Courier New',monospace;}
+.col-num{text-align:center;font-weight:700;color:#374151;}
+.col-money{text-align:right;white-space:nowrap;}
+.amount{font-weight:600;color:#111;}
+.meta{font-size:7px;color:#9ca3af;line-height:1.3;}
+.dash{color:#d1d5db;}
+.total-col .amount,.total-col{font-weight:800;color:#1e3d28;}
+.pmt-col .amount,.pmt-col{color:#166534;}
+.coll-col{background:#f0fdf4!important;font-weight:700;color:#166534;}
+.cell-balance{color:#991b1b;font-weight:800;}
+.cell-paid{color:#15803d;font-weight:700;}
+.addon-col{color:#92400e;}
 
-  td{padding:6px 6px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
-  td.num{color:#bbb;font-size:8px;text-align:center;width:22px;}
-  td.ref{font-family:monospace;font-size:8.5px;color:#2d5a3b;font-weight:600;white-space:nowrap;}
-  td.center{text-align:center;}
-  td.money{text-align:right;font-weight:600;white-space:nowrap;}
-  td.num-cell{font-weight:700;color:#374151;}
-  td.room-cell{font-size:8.5px;color:#4b5563;max-width:80px;}
-  .guest-name{font-weight:600;color:#111827;}
-  .guest-sub{font-size:8px;color:#9ca3af;margin-top:1px;}
-  .pay-meta{font-size:7.5px;color:#9ca3af;font-weight:400;margin-top:1px;}
-  .dash{color:#d1d5db;}
+/* ═══ TOTALS ROW ═════════════════════════════════════════════════ */
+.totals-row td{background:#1e3d28!important;color:#fff;padding:7px 5px;font-weight:800;font-size:9px;border:none;}
+.totals-row .totals-label{font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#a7f3d0;}
+.totals-row .coll-col{background:#166534!important;color:#fff;}
+.totals-row .cell-balance{color:#fca5a5!important;}
+.totals-row .cell-paid{color:#a7f3d0!important;}
+.totals-row .addon-col{color:#fde68a!important;}
 
-  /* Money column color coding */
-  td.total-col{color:#111827;}
-  td.pay-col{color:#166534;}
-  td.collected-col{color:#166534;background:#f0fdf4!important;}
-  td.balance-col{color:#b91c1c;font-weight:700;}
-  td.paid-col{color:#166534;}
-  td.addon-col{color:#92400e;}
+/* ═══ SIGNATURE BLOCK ════════════════════════════════════════════ */
+.sig-block{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;}
+.sig-box{text-align:center;}
+.sig-line{border-bottom:1px solid #333;margin-bottom:5px;height:28px;}
+.sig-label{font-size:7.5px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.sig-title{font-size:7px;color:#888;margin-top:2px;}
 
-  /* Status badges */
-  .status-badge{display:inline-block;padding:2px 6px;border-radius:999px;font-size:7.5px;font-weight:600;white-space:nowrap;}
-  .status-confirmed,.status-confirmed_balance_due{background:#d1fae5;color:#065f46;}
-  .status-fully_paid{background:#d1fae5;color:#065f46;}
-  .status-completed_stayed{background:#ede9fe;color:#5b21b6;}
-  .status-pending_payment_verification{background:#fef3c7;color:#92400e;}
-  .status-cancelled,.status-declined{background:#fee2e2;color:#991b1b;}
-  .status-col{text-align:center;width:72px;}
+/* ═══ FOOTER ══════════════════════════════════════════════════════ */
+.page-footer{margin-top:12px;padding-top:8px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;}
+.page-footer p{font-size:7.5px;color:#9ca3af;}
+.confidential{background:#fef3c7;border:1px solid #fde68a;border-radius:4px;padding:2px 7px;font-size:7.5px;color:#92400e;font-weight:700;letter-spacing:.06em;}
 
-  /* Totals footer */
-  tfoot td{padding:8px 6px;font-weight:700;font-size:9.5px;border-top:2px solid #2d5a3b;background:#f0fdf4!important;}
-  tfoot td.total-col{color:#111827;font-size:11px;}
-  tfoot td.balance-col{color:#b91c1c;}
-  tfoot td.paid-col{color:#166534;}
-  tfoot td.collected-col{color:#166534;}
-
-  /* ── FOOTER ── */
-  .page-footer{margin-top:16px;padding-top:10px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;}
-  .page-footer p{font-size:8px;color:#9ca3af;}
-  .page-footer .disclaimer{font-size:7.5px;color:#bbb;font-style:italic;}
-
-  @media print{
-    .no-print{display:none!important;}
-    body{font-size:9.5px;}
-  }
+/* ═══ PRINT CONTROLS (hidden when printing) ══════════════════════ */
+.print-controls{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:9999;background:rgba(255,255,255,.95);padding:8px;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);}
+.btn-print{background:#1e3d28;color:#fff;border:none;padding:10px 20px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.btn-close{background:#f3f4f6;color:#374151;border:none;padding:10px 14px;border-radius:7px;font-size:13px;cursor:pointer;}
+@media print{.print-controls{display:none!important;}}
 </style>
 </head>
 <body>
 
-  <!-- PRINT BUTTON (hidden when printing) -->
-  <div class="no-print" style="position:fixed;top:16px;right:16px;z-index:999;display:flex;gap:8px;">
-    <button onclick="window.print()" style="background:#2d5a3b;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">🖨 Print / Save PDF</button>
-    <button onclick="window.close()" style="background:#f3f4f6;color:#374151;border:none;padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;">✕ Close</button>
-  </div>
+<!-- PRINT CONTROLS -->
+<div class="print-controls">
+  <button class="btn-print" onclick="window.print()">🖨 Print / Save PDF</button>
+  <button class="btn-close" onclick="window.close()">✕</button>
+</div>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="brand-block">
-      <div class="brand">🌿 Balay Maysa Resort</div>
-      <div class="brand-sub">Private Resort · Booking Summary Report</div>
-    </div>
-    <div class="report-title">
-      <h2>Booking Summary Report</h2>
-      <div class="meta">
-        <strong>Period:</strong> ${esc(periodLabel)} &nbsp;|&nbsp; <strong>Status:</strong> ${esc(statusLabel)}<br/>
-        ${q?`<strong>Search:</strong> ${esc(q)} &nbsp;|&nbsp; `:''}
-        <strong>Generated:</strong> ${genDate}
-      </div>
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="brand">
+    <div class="brand-logo">🌿</div>
+    <div class="brand-text">
+      <div class="name">Balay Maysa Resort</div>
+      <div class="sub">Private Resort &amp; Function Venue</div>
     </div>
   </div>
-
-  <!-- SUMMARY CARDS -->
-  <div class="summary-bar">
-    <div class="summary-card">
-      <div class="card-label">Total Bookings</div>
-      <div class="card-val">${bsFiltered.length}</div>
-      <div class="card-sub">${totNights} total nights</div>
-    </div>
-    <div class="summary-card">
-      <div class="card-label">Total Amount</div>
-      <div class="card-val">₱${totTotal.toLocaleString()}</div>
-      <div class="card-sub">Gross booking value</div>
-    </div>
-    <div class="summary-card highlight">
-      <div class="card-label">Total Collected</div>
-      <div class="card-val">₱${totCollected.toLocaleString()}</div>
-      <div class="card-sub">${totTotal>0?Math.round(totCollected/totTotal*100):0}% collection rate</div>
-    </div>
-    ${totBal>0?`<div class="summary-card danger">
-      <div class="card-label">Outstanding Balance</div>
-      <div class="card-val">₱${totBal.toLocaleString()}</div>
-      <div class="card-sub">${bsFiltered.filter(b=>b.remaining_balance>0).length} bookings with balance</div>
-    </div>`:'<div class="summary-card highlight"><div class="card-label">Balance Due</div><div class="card-val" style="color:#166534">₱0 — All Paid ✓</div><div class="card-sub">No outstanding balances</div></div>'}
-    ${totAddons>0?`<div class="summary-card warn">
-      <div class="card-label">Add-on Revenue</div>
-      <div class="card-val">₱${totAddons.toLocaleString()}</div>
-      <div class="card-sub">On-site purchases</div>
-    </div>`:''}
+  <div class="report-info">
+    <div class="title">BOOKING SUMMARY REPORT</div>
+    <div class="meta-line"><strong>Report Period:</strong> ${esc(meta.period)} &nbsp;|&nbsp; <strong>Status:</strong> ${esc(meta.statusLabel)}</div>
+    ${meta.q?`<div class="meta-line"><strong>Search Filter:</strong> ${esc(meta.q)}</div>`:''}
+    <div class="meta-line"><strong>Generated:</strong> ${genDate}</div>
+    <div class="meta-line"><strong>Prepared by:</strong> Super Admin &nbsp;|&nbsp; <strong>Total Entries:</strong> ${tot.count}</div>
   </div>
+</div>
 
-  <!-- TABLE -->
-  <table>
-    <thead>
-      <tr>
-        <th style="width:22px">#</th>
-        <th>Ref #</th>
-        <th>Guest</th>
-        <th>Room(s)</th>
-        <th class="center">Check-in</th>
-        <th class="center">Check-out</th>
-        <th class="center" style="width:36px">Nts</th>
-        <th class="center" style="width:34px">Pax</th>
-        <th class="right" style="width:72px">Total</th>
-        <th class="right" style="width:80px">DP #1</th>
-        <th class="right" style="width:80px">DP #2</th>
-        <th class="right" style="width:80px">Full Pmt</th>
-        <th class="right" style="width:72px;background:#166534">Collected</th>
-        <th class="right" style="width:70px">Balance</th>
-        <th class="right" style="width:80px">Add-ons</th>
-        <th class="center" style="width:72px">Status</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-    <tfoot>
-      <tr>
-        <td colspan="8" style="color:#6b7280;font-size:9px;">TOTALS — ${bsFiltered.length} booking${bsFiltered.length!==1?'s':''} · ${totNights} nights</td>
-        <td class="total-col" style="text-align:right">₱${totTotal.toLocaleString()}</td>
-        <td colspan="3"></td>
-        <td class="collected-col" style="text-align:right">₱${totCollected.toLocaleString()}</td>
-        <td class="${totBal>0?'balance-col':'paid-col'}" style="text-align:right">${totBal>0?'₱'+totBal.toLocaleString():'FULLY PAID ✓'}</td>
-        <td class="addon-col" style="text-align:right">${totAddons>0?'₱'+totAddons.toLocaleString():'—'}</td>
-        <td></td>
-      </tr>
-    </tfoot>
-  </table>
-
-  <!-- PAGE FOOTER -->
-  <div class="page-footer">
-    <p>Balay Maysa Resort &nbsp;·&nbsp; Booking Management System &nbsp;·&nbsp; Confidential</p>
-    <p class="disclaimer">This document is computer-generated. Figures are accurate as of the generation date.</p>
-    <p>Page 1 of 1 &nbsp;·&nbsp; ${esc(periodLabel)}</p>
+<!-- KPI CARDS -->
+<div class="kpi-bar">
+  <div class="kpi">
+    <div class="kpi-label">Total Bookings</div>
+    <div class="kpi-val">${tot.count}</div>
+    <div class="kpi-sub">${tot.nights} room nights</div>
   </div>
+  <div class="kpi blue">
+    <div class="kpi-label">Gross Revenue</div>
+    <div class="kpi-val">${PHP(tot.total)}</div>
+    <div class="kpi-sub">Booking total value</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">Total Collected</div>
+    <div class="kpi-val">${PHP(tot.collected)}</div>
+    <div class="kpi-sub">${collRate}% collection rate</div>
+  </div>
+  <div class="${tot.balance>0?'kpi red':'kpi green'}">
+    <div class="kpi-label">${tot.balance>0?'Outstanding Balance':'All Collected ✓'}</div>
+    <div class="kpi-val">${tot.balance>0?PHP(tot.balance):'₱0.00'}</div>
+    <div class="kpi-sub">${tot.withBalance} booking${tot.withBalance!==1?'s':''} with balance</div>
+  </div>
+  <div class="kpi amber">
+    <div class="kpi-label">Add-on Revenue</div>
+    <div class="kpi-val">${PHP(tot.addons)}</div>
+    <div class="kpi-sub">On-site purchases</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-label">Fully Paid</div>
+    <div class="kpi-val">${tot.fullyPaid}</div>
+    <div class="kpi-sub">of ${tot.count} bookings (${tot.count>0?Math.round(tot.fullyPaid/tot.count*100):0}%)</div>
+  </div>
+</div>
+
+<!-- SECTION LABEL -->
+<div class="section-label">Booking Ledger — Detailed Payment Records</div>
+
+<!-- MAIN TABLE -->
+<table>
+  <thead>
+    <tr>
+      <th class="c" style="width:18px">#</th>
+      <th style="width:120px">Reference #</th>
+      <th style="width:130px">Guest</th>
+      <th style="width:80px">Room(s)</th>
+      <th class="c" style="width:52px">Check-in</th>
+      <th class="c" style="width:52px">Check-out</th>
+      <th class="c" style="width:28px">Nts</th>
+      <th class="c" style="width:26px">Pax</th>
+      <th class="r" style="width:70px">Total</th>
+      <th class="r" style="width:80px">DP #1</th>
+      <th class="r" style="width:80px">DP #2</th>
+      <th class="r" style="width:80px">Full Pmt</th>
+      <th class="r" style="width:70px;background:#166534">Collected</th>
+      <th class="r" style="width:70px">Balance</th>
+      <th class="r" style="width:62px">Add-ons</th>
+    </tr>
+  </thead>
+  <tbody>${rowsHTML}</tbody>
+  <tfoot>${totRow}</tfoot>
+</table>
+
+<!-- SIGNATURE BLOCK -->
+<div class="sig-block">
+  <div class="sig-box">
+    <div class="sig-line"></div>
+    <div class="sig-label">Prepared by</div>
+    <div class="sig-title">Accounting / Front Desk Officer</div>
+  </div>
+  <div class="sig-box">
+    <div class="sig-line"></div>
+    <div class="sig-label">Reviewed by</div>
+    <div class="sig-title">Operations Manager</div>
+  </div>
+  <div class="sig-box">
+    <div class="sig-line"></div>
+    <div class="sig-label">Approved by</div>
+    <div class="sig-title">Owner / General Manager</div>
+  </div>
+</div>
+
+<!-- PAGE FOOTER -->
+<div class="page-footer">
+  <p>Balay Maysa Resort &nbsp;·&nbsp; Booking Management System &nbsp;·&nbsp; ${esc(meta.period)}</p>
+  <span class="confidential">CONFIDENTIAL</span>
+  <p>This document is computer-generated on ${new Date().toLocaleDateString('en-PH')}. For auditing purposes only.</p>
+</div>
 
 </body>
 </html>`;
 
-  const w=window.open('','_blank','width=1200,height=800');
+  const w=window.open('','_blank','width=1250,height=800');
+  if(!w){toast('Pop-up blocked — allow pop-ups and try again.','error');return;}
   w.document.write(html);
   w.document.close();
+  // Let fonts and layout settle before auto-printing
+  setTimeout(()=>{
+    if(w.print) w.print();
+  },600);
 }
 
 // ── Fix acctSearch name search bug ────────────────────────────
