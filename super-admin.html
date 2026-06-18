@@ -419,7 +419,7 @@
         <div class="sc overflow-hidden">
           <table class="tbl w-full">
             <thead><tr>
-              <th>Code</th><th>Discount</th><th>Valid From</th><th>Valid To</th><th>Used / Limit</th><th>Status</th><th>Actions</th>
+              <th>Code</th><th>Discount</th><th>Days</th><th>Valid From</th><th>Valid To</th><th>Used / Limit</th><th>Status</th><th>Actions</th>
             </tr></thead>
             <tbody id="vouchersTable"><tr><td colspan="7" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody>
           </table>
@@ -510,19 +510,45 @@
 
       <!-- ═══ EXPENSES ═══ -->
       <div id="view-expenses" class="view">
-        <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
           <h2 class="font-heading text-3xl text-gray-800 font-light">Expense Tracker</h2>
-          <button onclick="openExpenseModal()" class="bg-forest text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-plus"></i> Add Expense</button>
+          <div class="flex gap-2 flex-wrap">
+            <button onclick="openCategoryManager()" class="text-xs bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-1"><i class="fas fa-tags"></i> Manage Categories</button>
+            <button onclick="openExpenseModal()" class="bg-forest text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-forest-dark flex items-center gap-2"><i class="fas fa-plus"></i> Add Expense</button>
+          </div>
         </div>
-        <div class="flex gap-3 mb-5 flex-wrap">
-          <select id="expMonthFilter" class="fi w-36" onchange="loadExpenses()"><option value="">All Months</option><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5" selected>June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select>
-          <select id="expCatFilter" class="fi w-44" onchange="loadExpenses()"><option value="">All Categories</option></select>
-          <button onclick="exportExpenses()" class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2"><i class="fas fa-download"></i> Export</button>
+        <!-- Filters -->
+        <div class="flex gap-3 mb-5 flex-wrap items-end">
+          <div>
+            <label class="fi-label text-xs">Month</label>
+            <select id="expMonthFilter" class="fi w-36" onchange="loadExpenses()"><option value="">All Months</option><option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option></select>
+          </div>
+          <div>
+            <label class="fi-label text-xs">Year</label>
+            <select id="expYearFilter" class="fi w-24" onchange="loadExpenses()"></select>
+          </div>
+          <div>
+            <label class="fi-label text-xs">Category</label>
+            <select id="expCatFilter" class="fi w-44" onchange="loadExpenses()"><option value="">All Categories</option></select>
+          </div>
+          <button onclick="exportExpenses()" class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2 self-end"><i class="fas fa-download"></i> Export</button>
         </div>
+        <!-- Summary KPIs -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5" id="expTotals"></div>
+        <!-- Category breakdown -->
+        <div class="sc p-5 mb-5">
+          <h3 class="font-semibold text-gray-700 text-sm mb-3">By Category</h3>
+          <div id="expCatSummary" class="space-y-2"></div>
+        </div>
+        <!-- Item list -->
         <div class="sc overflow-hidden">
-          <table class="tbl w-full"><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Amount</th><th>Method</th><th>Actions</th></tr></thead>
-          <tbody id="expensesTable"><tr><td colspan="7" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody></table>
+          <table class="tbl w-full">
+            <thead><tr>
+              <th>Date</th><th>Category</th><th>Description</th><th>Vendor</th>
+              <th>Amount</th><th>Method</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="expensesTable"><tr><td colspan="7" class="text-center py-8 text-gray-300">Loading…</td></tr></tbody>
+          </table>
         </div>
       </div>
 
@@ -1022,6 +1048,15 @@
           <p class="text-xs text-gray-400 mt-1">Each code is one-time use by default.</p>
         </div>
       </div>
+      <div>
+        <label class="fi-label">Applicable Days</label>
+        <select id="v_applicable" class="fi">
+          <option value="both">Both — Weekday (Sun–Thu) &amp; Weekend (Fri–Sat)</option>
+          <option value="weekday">Weekday only — Sun to Thu</option>
+          <option value="weekend">Weekend only — Fri &amp; Sat</option>
+        </select>
+        <p class="text-xs text-gray-400 mt-1">Restricts which day-types this voucher can be applied to.</p>
+      </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="fi-label">Valid From</label>
@@ -1069,12 +1104,32 @@
       <div><label class="fi-label">Date *</label><input type="date" id="exp_date" class="fi"/></div>
       <div><label class="fi-label">Category *</label><select id="exp_cat" class="fi"><option value="">Select</option></select></div>
       <div class="col-span-2"><label class="fi-label">Description</label><input type="text" id="exp_desc" class="fi" placeholder="e.g. Pool chemical refill"/></div>
-      <div><label class="fi-label">Amount (₱) *</label><input type="number" id="exp_amount" class="fi"/></div>
+      <div><label class="fi-label">Amount (₱) *</label><input type="number" id="exp_amount" class="fi" min="0" step="0.01"/></div>
       <div><label class="fi-label">Vendor</label><input type="text" id="exp_vendor" class="fi"/></div>
-      <div><label class="fi-label">Payment Method</label><select id="exp_method" class="fi"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="maya">Maya</option><option value="bank_transfer">Bank Transfer</option></select></div>
+      <div class="col-span-2"><label class="fi-label">Payment Method</label><select id="exp_method" class="fi"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="maya">Maya</option><option value="bank_transfer">Bank Transfer</option></select></div>
       <div class="col-span-2 flex gap-3 mt-2">
         <button onclick="closeModal('expenseModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
         <button onclick="saveExpense()" class="flex-1 bg-forest text-white py-2 rounded-lg text-sm font-medium hover:bg-forest-dark">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CATEGORY MANAGER MODAL ═══ -->
+<div id="categoryModal" class="modal hidden">
+  <div class="mbox">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+      <h3 class="font-heading text-xl text-forest font-light">Manage Expense Categories</h3>
+      <button onclick="closeModal('categoryModal')" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 text-gray-500"><i class="fas fa-times text-sm"></i></button>
+    </div>
+    <div class="p-5">
+      <!-- Add new category -->
+      <div class="flex gap-2 mb-5">
+        <input type="text" id="newCatName" class="fi" placeholder="New category name (e.g. Transport)"/>
+        <button onclick="addCategory()" class="bg-forest text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-forest-dark whitespace-nowrap flex items-center gap-1"><i class="fas fa-plus"></i> Add</button>
+      </div>
+      <div id="categoryList" class="space-y-2">
+        <p class="text-gray-400 text-sm text-center py-4">Loading…</p>
       </div>
     </div>
   </div>
@@ -1482,7 +1537,7 @@ function showView(name){
   const loaders={
     dashboard:refreshDashboard, calendar:renderCalendar,
     bookings:loadAllBookings, inquiries:loadInquiries,
-    vouchers:loadVouchers, finances:loadPL, expenses:loadExpenses,
+    vouchers:loadVouchers, finances:loadPL, expenses:()=>{populateYearSelects();loadExpenses();},
     accounting:loadAccounting,
     pricing:loadPricing, staff:loadStaff, tasks:loadTasks,
     inventory:loadInventory, maintenance:loadMaintenance,
@@ -1496,6 +1551,7 @@ function showView(name){
 // INIT
 // ═══════════════════════════════════════════════════════
 async function initDashboard(){
+  populateYearSelects();
   document.getElementById('dashDate').textContent=
     new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   // Pre-select current month in Revenue P&L tab filter
@@ -1572,7 +1628,10 @@ function populateDashFilters(){
   fm.innerHTML=monthNames.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('');
   tm.innerHTML=monthNames.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('');
   const curYear=new Date().getFullYear();
-  yr.innerHTML=[curYear-1,curYear,curYear+1].map(y=>`<option value="${y}">${y}</option>`).join('');
+  yr.innerHTML='';
+  for(let y=curYear-3;y<=curYear+2;y++){
+    const o=document.createElement('option'); o.value=y; o.textContent=y; yr.appendChild(o);
+  }
   fm.value=dashPeriod.fromMonth; tm.value=dashPeriod.toMonth; yr.value=dashPeriod.year;
 }
 
@@ -2137,7 +2196,19 @@ async function applyBookingStatus(id){
   await updateBookingStatus(id, sel.value);
 }
 
-// ── Mobile sidebar toggle ─────────────────────────────────────
+// ── Dynamic year dropdowns ────────────────────────────────────
+// Populates all year <select> elements dynamically so they never need
+// manual updates — always shows 3 years back through 2 years ahead.
+function populateYearSelects(){
+  const cur=new Date().getFullYear();
+  const years=[];
+  for(let y=cur-3;y<=cur+2;y++) years.push(y);
+  const opts=years.map(y=>`<option value="${y}"${y===cur?' selected':''}>${y}</option>`).join('');
+  ['plYear','acctYear'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML=opts;
+  });
+}
+
 function toggleSidebar(){
   const sb=document.getElementById('sidebar');
   const ov=document.getElementById('sidebarOverlay');
@@ -2430,6 +2501,7 @@ function renderVouchers(){
     return `<tr>
       <td class="font-mono font-bold text-forest">${v.code}</td>
       <td class="font-semibold">${(v.discount_amount>0)?`₱${Number(v.discount_amount).toLocaleString()} off`:`${v.discount_percent||0}% off`}</td>
+      <td class="text-xs"><span class="badge ${v.applicable_days==='weekday'?'b-conf':v.applicable_days==='weekend'?'b-pend':'b-canc'} text-xs">${v.applicable_days==='weekday'?'Weekday only':v.applicable_days==='weekend'?'Weekend only':'Both'}</span></td>
       <td class="text-xs text-gray-500">${v.valid_from?fmtDateTime(v.valid_from):'—'}</td>
       <td class="text-xs text-gray-500">${v.valid_to?fmtDateTime(v.valid_to):'—'}</td>
       <td><span class="${(v.times_used||0)>=(v.usage_limit||1)?'text-red-600':'text-gray-700'} font-medium">${v.times_used||0}</span><span class="text-gray-400"> / ${v.usage_limit||1}</span></td>
@@ -2453,6 +2525,7 @@ function openVoucherModal(id=null){
   document.getElementById('v_from').value='';
   document.getElementById('v_to').value='';
   document.getElementById('v_active').checked=true;
+  document.getElementById('v_applicable').value='both';
   document.getElementById('vModalTitle').textContent='Create Voucher';
   if(id){
     const v=allVouchers.find(x=>x.id===id); if(!v) return;
@@ -2463,6 +2536,7 @@ function openVoucherModal(id=null){
     document.getElementById('v_from').value=isoToLocalDatetime(v.valid_from);
     document.getElementById('v_to').value=isoToLocalDatetime(v.valid_to);
     document.getElementById('v_active').checked=v.is_active;
+    document.getElementById('v_applicable').value=v.applicable_days||'both';
     document.getElementById('vModalTitle').textContent='Edit Voucher';
   }
   document.getElementById('voucherModal').classList.remove('hidden');
@@ -2487,6 +2561,7 @@ async function saveVoucher(){
     valid_from:localDatetimeToISO(document.getElementById('v_from').value),
     valid_to:localDatetimeToISO(document.getElementById('v_to').value),
     is_active:document.getElementById('v_active').checked,
+    applicable_days:document.getElementById('v_applicable').value||'both',
   };
   setBtnLoad('vSaveText','vSaveSpin',true,'Saving…');
   try{
@@ -2767,41 +2842,232 @@ async function loadAcctIdImages(b){
 // ═══════════════════════════════════════════════════════
 async function loadExpenses(){
   await loadAllExpenses(true);
+  // Populate year filter if empty
+  const yrEl=document.getElementById('expYearFilter');
+  if(yrEl && !yrEl.options.length){
+    const cur=new Date().getFullYear();
+    for(let y=cur-3;y<=cur+2;y++){
+      const o=document.createElement('option'); o.value=y; o.textContent=y;
+      if(y===cur) o.selected=true; yrEl.appendChild(o);
+    }
+  }
   const mf=document.getElementById('expMonthFilter')?.value;
+  const yf=parseInt(document.getElementById('expYearFilter')?.value||new Date().getFullYear());
   const cf=document.getElementById('expCatFilter')?.value;
-  const yr=new Date().getFullYear();
   let f=[...allExpenses];
   if(mf!==''&&mf!=null){
-    const s=`${yr}-${String(parseInt(mf)+1).padStart(2,'0')}-01`;
-    const e=`${yr}-${String(parseInt(mf)+1).padStart(2,'0')}-${new Date(yr,parseInt(mf)+1,0).getDate()}`;
+    const s=`${yf}-${String(parseInt(mf)+1).padStart(2,'0')}-01`;
+    const e=`${yf}-${String(parseInt(mf)+1).padStart(2,'0')}-${new Date(yf,parseInt(mf)+1,0).getDate()}`;
     f=f.filter(ex=>ex.date>=s&&ex.date<=e);
+  } else {
+    f=f.filter(ex=>ex.date.startsWith(String(yf)));
   }
   if(cf) f=f.filter(ex=>ex.category===cf);
   const total=f.reduce((s,e)=>s+(e.amount||0),0);
+  const topCat=Object.entries(f.reduce((m,e)=>{m[e.category]=(m[e.category]||0)+(e.amount||0);return m;},{})).sort((a,b)=>b[1]-a[1])[0];
+
+  // KPI cards
   document.getElementById('expTotals').innerHTML=[
-    `<div class="stat-card"><p class="text-xs text-gray-400 mb-1">TOTAL</p><p class="text-2xl font-bold text-red-600">₱${total.toLocaleString()}</p></div>`,
-    `<div class="stat-card"><p class="text-xs text-gray-400 mb-1">TRANSACTIONS</p><p class="text-2xl font-bold text-gray-800">${f.length}</p></div>`,
+    `<div class="stat-card"><p class="text-xs text-gray-400 mb-1 uppercase">Total Expenses</p><p class="text-2xl font-bold text-red-600">₱${total.toLocaleString()}</p></div>`,
+    `<div class="stat-card"><p class="text-xs text-gray-400 mb-1 uppercase">Transactions</p><p class="text-2xl font-bold text-gray-800">${f.length}</p></div>`,
+    `<div class="stat-card"><p class="text-xs text-gray-400 mb-1 uppercase">Top Category</p><p class="text-lg font-bold text-gray-800">${topCat?topCat[0]:'—'}</p><p class="text-xs text-red-500">${topCat?'₱'+topCat[1].toLocaleString():''}</p></div>`,
+    `<div class="stat-card"><p class="text-xs text-gray-400 mb-1 uppercase">Avg per Entry</p><p class="text-2xl font-bold text-gray-800">${f.length?'₱'+(total/f.length).toLocaleString(undefined,{maximumFractionDigits:0}):'₱0'}</p></div>`,
   ].join('');
+
+  // Category summary bars
+  const catMap=f.reduce((m,e)=>{m[e.category]=(m[e.category]||0)+(e.amount||0);return m;},{});
+  const cats=Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  const catSummary=document.getElementById('expCatSummary');
+  if(catSummary){
+    catSummary.innerHTML=cats.length?cats.map(([cat,amt])=>{
+      const pct=total>0?Math.round(amt/total*100):0;
+      return `<div>
+        <div class="flex justify-between text-sm mb-1">
+          <span class="text-gray-600 font-medium">${esc(cat)}</span>
+          <span class="text-red-600 font-semibold">₱${amt.toLocaleString()} <span class="text-gray-400 text-xs font-normal">${pct}%</span></span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-1.5"><div class="bg-red-400 rounded-full h-1.5" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('') : '<p class="text-gray-400 text-sm text-center py-2">No data for this period.</p>';
+  }
+
+  // Expense table with edit + duplicate + delete
   const tbl=document.getElementById('expensesTable'); if(!tbl) return;
   tbl.innerHTML=f.length?f.map(e=>`<tr>
-    <td class="text-xs text-gray-400">${e.date}</td>
-    <td><span class="badge b-pend text-xs">${e.category}</span></td>
-    <td>${esc(e.description||'—')}</td>
+    <td class="text-xs text-gray-500 whitespace-nowrap">${fmtDate(e.date)}</td>
+    <td><span class="badge b-pend text-xs">${esc(e.category)}</span></td>
+    <td class="max-w-[180px] truncate" title="${esc(e.description||'')}">${esc(e.description||'—')}</td>
     <td class="text-xs text-gray-500">${esc(e.vendor_name||'—')}</td>
-    <td class="font-semibold text-red-600">₱${(e.amount||0).toLocaleString()}</td>
+    <td class="font-semibold text-red-600 whitespace-nowrap">₱${(e.amount||0).toLocaleString()}</td>
     <td class="text-xs text-gray-500">${e.payment_method||'cash'}</td>
-    <td><button onclick="deleteExpense('${e.id}')" class="text-xs text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button></td>
+    <td>
+      <div class="flex gap-1.5">
+        <button onclick="editExpense('${e.id}')" class="text-xs text-blue-500 hover:underline px-1">Edit</button>
+        <button onclick="duplicateExpense('${e.id}')" class="text-xs text-gray-400 hover:text-gray-600 px-1" title="Duplicate (copy without date/amount)">Copy</button>
+        <button onclick="deleteExpense('${e.id}')" class="text-xs text-red-400 hover:text-red-600 px-1"><i class="fas fa-trash"></i></button>
+      </div>
+    </td>
   </tr>`).join('')
-  :'<tr><td colspan="7" class="text-center py-8 text-gray-300">No expenses found.</td></tr>';
+  :'<tr><td colspan="7" class="text-center py-8 text-gray-300">No expenses found for this period.</td></tr>';
 }
-function openExpenseModal(){ ['exp_date','exp_amount','exp_desc','exp_vendor'].forEach(id=>document.getElementById(id).value=''); document.getElementById('exp_date').value=new Date().toISOString().split('T')[0]; document.getElementById('expenseModal').classList.remove('hidden'); }
+
+function openExpenseModal(prefill={}){
+  document.getElementById('exp_id').value='';
+  document.getElementById('exp_date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('exp_amount').value='';
+  document.getElementById('exp_desc').value=prefill.description||'';
+  document.getElementById('exp_vendor').value=prefill.vendor||'';
+  document.getElementById('exp_cat').value=prefill.category||'';
+  document.getElementById('exp_method').value=prefill.method||'cash';
+  document.getElementById('expModalTitle').textContent='Add Expense';
+  document.getElementById('expenseModal').classList.remove('hidden');
+}
+
+function editExpense(id){
+  const e=allExpenses.find(x=>x.id===id); if(!e) return;
+  document.getElementById('exp_id').value=e.id;
+  document.getElementById('exp_date').value=e.date||'';
+  document.getElementById('exp_amount').value=e.amount||'';
+  document.getElementById('exp_desc').value=e.description||'';
+  document.getElementById('exp_vendor').value=e.vendor_name||'';
+  document.getElementById('exp_cat').value=e.category||'';
+  document.getElementById('exp_method').value=e.payment_method||'cash';
+  document.getElementById('expModalTitle').textContent='Edit Expense';
+  document.getElementById('expenseModal').classList.remove('hidden');
+}
+
+function duplicateExpense(id){
+  // Copy the category, description, vendor, method — but NOT date or amount,
+  // so the admin fills in the new transaction's specific details.
+  const e=allExpenses.find(x=>x.id===id); if(!e) return;
+  openExpenseModal({category:e.category, description:e.description, vendor:e.vendor_name, method:e.payment_method});
+  toast('Pre-filled from copied expense — update date and amount.','info');
+}
+
 async function saveExpense(){
-  const cat=document.getElementById('exp_cat').value; const amt=parseInt(document.getElementById('exp_amount').value); const date=document.getElementById('exp_date').value;
-  if(!cat||!amt||!date){toast('Fill required fields.','error');return;}
-  try{const{error}=await db.from('expenses').insert({date,category:cat,description:document.getElementById('exp_desc').value,amount:amt,vendor_name:document.getElementById('exp_vendor').value,payment_method:document.getElementById('exp_method').value,created_by:'superadmin'});if(error)throw error;toast('Saved!','success');closeModal('expenseModal');await loadExpenses();}catch(e){toast('Failed.','error');}
+  const cat=document.getElementById('exp_cat').value;
+  const amt=parseFloat(document.getElementById('exp_amount').value);
+  const date=document.getElementById('exp_date').value;
+  const id=document.getElementById('exp_id').value;
+  if(!cat||!amt||!date){toast('Date, Category, and Amount are required.','error');return;}
+  const payload={
+    date, category:cat,
+    description:document.getElementById('exp_desc').value.trim()||null,
+    amount:amt,
+    vendor_name:document.getElementById('exp_vendor').value.trim()||null,
+    payment_method:document.getElementById('exp_method').value,
+    created_by:'superadmin'
+  };
+  try{
+    let error;
+    if(id){ ({error}=await db.from('expenses').update(payload).eq('id',id)); }
+    else   { ({error}=await db.from('expenses').insert(payload)); }
+    if(error) throw error;
+    toast(id?'Expense updated!':'Expense saved!','success');
+    closeModal('expenseModal');
+    await loadExpenses();
+  }catch(e){toast('Failed: '+(e.message||'Unknown error'),'error');}
 }
-async function deleteExpense(id){if(!confirm('Delete?'))return;await db.from('expenses').delete().eq('id',id);toast('Deleted.','success');await loadExpenses();}
-function exportExpenses(){const h=['Date','Category','Description','Vendor','Amount','Method'];const r=allExpenses.map(e=>[e.date,e.category,e.description||'',e.vendor_name||'',e.amount||0,e.payment_method||'cash']);dlCSV([h,...r],'expenses.csv');toast('Export started!','success');}
+
+async function deleteExpense(id){
+  if(!confirm('Delete this expense entry? This cannot be undone.')) return;
+  try{ await db.from('expenses').delete().eq('id',id); toast('Deleted.','success'); await loadExpenses(); }
+  catch(e){toast('Failed.','error');}
+}
+
+function exportExpenses(){
+  const h=['Date','Category','Description','Vendor','Amount','Method'];
+  const r=allExpenses.map(e=>[e.date,e.category,e.description||'',e.vendor_name||'',e.amount||0,e.payment_method||'cash']);
+  dlCSV([h,...r],'expenses.csv'); toast('Export started!','success');
+}
+
+// ── Category Manager ──────────────────────────────────────────
+async function openCategoryManager(){
+  document.getElementById('categoryModal').classList.remove('hidden');
+  document.getElementById('newCatName').value='';
+  await renderCategoryList();
+}
+
+async function renderCategoryList(){
+  await loadCategories();
+  const el=document.getElementById('categoryList'); if(!el) return;
+  el.innerHTML=expCategories.length?expCategories.map(c=>`
+    <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-xl" id="catrow-${c.id}">
+      <i class="fas fa-tag text-gray-300 flex-shrink-0"></i>
+      <input type="text" class="fi flex-1 text-sm py-1.5" value="${esc(c.name)}" id="catname-${c.id}"/>
+      <button onclick="renameCategory('${c.id}')" class="text-xs text-forest hover:underline whitespace-nowrap">Save</button>
+      <button onclick="deleteCategory('${c.id}','${esc(c.name)}')" class="text-xs text-red-400 hover:text-red-600 ml-1"><i class="fas fa-trash"></i></button>
+    </div>`).join(''):'<p class="text-gray-400 text-sm text-center py-4">No categories yet.</p>';
+}
+
+async function addCategory(){
+  const name=document.getElementById('newCatName').value.trim();
+  if(!name){toast('Enter a category name.','error');return;}
+  if(expCategories.some(c=>c.name.toLowerCase()===name.toLowerCase())){toast('That category already exists.','error');return;}
+  try{
+    const{error}=await db.from('expense_categories').insert({name});
+    if(error) throw error;
+    document.getElementById('newCatName').value='';
+    toast('Category added!','success');
+    await renderCategoryList();
+    // Refresh dropdowns
+    await loadCategories();
+  }catch(e){toast('Failed: '+(e.message||e),'error');}
+}
+
+async function renameCategory(id){
+  const input=document.getElementById('catname-'+id); if(!input) return;
+  const newName=input.value.trim();
+  const old=expCategories.find(c=>c.id===id)?.name||'';
+  if(!newName){toast('Category name cannot be empty.','error');return;}
+  if(newName===old) return;
+  // Show confirmation noting which expenses will be updated
+  const count=allExpenses.filter(e=>e.category===old).length;
+  if(count>0){
+    if(!confirm(`Rename "${old}" to "${newName}"?\n\nThis will also update the category name on ${count} existing expense${count>1?'s':''} to match.`)) return;
+  }
+  try{
+    // Update category table
+    const{error}=await db.from('expense_categories').update({name:newName}).eq('id',id);
+    if(error) throw error;
+    // Update all expenses that use the old category name
+    if(count>0) await db.from('expenses').update({category:newName}).eq('category',old);
+    toast('Category renamed!','success');
+    await renderCategoryList();
+    await loadCategories();
+    await loadAllExpenses(true);
+  }catch(e){toast('Failed: '+(e.message||e),'error');}
+}
+
+async function deleteCategory(id, name){
+  const count=allExpenses.filter(e=>e.category===name).length;
+  if(count>0){
+    // Block deletion if expenses exist under this category
+    const choice=confirm(
+      `"${name}" has ${count} existing expense${count>1?'s':''} under it.\n\n` +
+      `You must reassign or edit those expenses first before deleting this category.\n\n` +
+      `Press OK to view expenses under "${name}", or Cancel to go back.`
+    );
+    if(choice){
+      // Close modal, filter expenses by this category to help user clean up
+      closeModal('categoryModal');
+      document.getElementById('expCatFilter').value=name;
+      await loadExpenses();
+      showView('expenses');
+      toast(`Showing ${count} expense${count>1?'s':''} under "${name}" — edit or reassign them first.`,'info');
+    }
+    return;
+  }
+  if(!confirm(`Delete category "${name}"? This cannot be undone.`)) return;
+  try{
+    const{error}=await db.from('expense_categories').delete().eq('id',id);
+    if(error) throw error;
+    toast('Category deleted.','success');
+    await renderCategoryList();
+    await loadCategories();
+  }catch(e){toast('Failed: '+(e.message||e),'error');}
+}
+
 
 // ═══════════════════════════════════════════════════════
 // PRICING ENGINE
