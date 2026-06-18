@@ -110,6 +110,7 @@
       <button class="nav-item" onclick="showView('guestrecords')" id="nav-guestrecords"><i class="fas fa-users-viewfinder"></i> Guest Records</button>
       <p class="nav-group">Operations</p>
       <button class="nav-item" onclick="showView('calendar')" id="nav-calendar"><i class="fas fa-calendar-days"></i> Calendar</button>
+      <button class="nav-item" onclick="showView('tasks')" id="nav-tasks"><i class="fas fa-tasks"></i> My Tasks <span id="tasksBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden">0</span></button>
       <button class="nav-item" onclick="showView('personnel')" id="nav-personnel"><i class="fas fa-users"></i> Personnel</button>
       <button class="nav-item" onclick="showView('inventory')" id="nav-inventory"><i class="fas fa-boxes-stacked"></i> Inventory <span id="invBadge" class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden">0</span></button>
       <button class="nav-item" onclick="showView('announcements')" id="nav-announcements"><i class="fas fa-bullhorn"></i> Announcements <span id="annBadge" class="ml-auto bg-gold text-white text-xs px-1.5 py-0.5 rounded-full hidden">0</span></button>
@@ -462,6 +463,37 @@
         </div>
       </div>
 
+      <!-- ═══ TASKS ═══ -->
+      <div id="view-tasks" class="view">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <div>
+            <h2 class="font-heading text-3xl text-gray-800 font-light">My Tasks</h2>
+            <p class="text-gray-400 text-xs mt-0.5">Assigned by Super Admin — complete tasks and add progress notes in real time.</p>
+          </div>
+          <span id="adminTasksLive" class="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 border border-green-200 px-2.5 py-1.5 rounded-lg"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse inline-block"></span>Live</span>
+        </div>
+        <!-- Filter bar -->
+        <div class="flex gap-2 mb-5 flex-wrap">
+          <select id="adminTkFilter" class="fi w-36 text-sm py-2" onchange="renderAdminTasks()">
+            <option value="">All Tasks</option>
+            <option value="pending">Pending</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+          <select id="adminTkPriority" class="fi w-36 text-sm py-2" onchange="renderAdminTasks()">
+            <option value="">All Priorities</option>
+            <option value="urgent">🔴 Urgent</option>
+            <option value="high">🟠 High</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+        </div>
+        <!-- Task list -->
+        <div id="adminTasksList" class="space-y-3">
+          <p class="text-gray-300 text-center py-8">Loading tasks…</p>
+        </div>
+      </div>
+
       <!-- ═══ CALENDAR ═══ -->
       <div id="view-calendar" class="view">
         <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
@@ -780,6 +812,7 @@ function showView(name){
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-'+name)?.classList.add('active');
   const map={dashboard:renderDashboard,notifications:renderNotifications,bookings:()=>renderBookings(),
+    tasks:renderAdminTasks,
     calendar:()=>renderCal('cal'),guestlog:renderRecentLogs,
     guestrecords:()=>{const q=document.getElementById('grSearch')?.value;if(q&&q.length>1)searchGuestRecords();},
     personnel:renderPersonnel,
@@ -793,6 +826,8 @@ function updateBadges(){
   setBadge('pendingBadge',allBookings.filter(b=>b.status==='pending_payment_verification').length);
   setBadge('invBadge',allInventory.filter(i=>(i.quantity||0)<=(i.min_stock||0)).length);
   setBadge('annBadge',allAnnouncements.filter(a=>!a.acknowledged&&a.posted_by==='superadmin').length);
+  const activeTasks=allTasks.filter(t=>['pending','in_progress'].includes(t.status)).length;
+  setBadge('tasksBadge',activeTasks);
 }
 function setBadge(id,n){ const el=document.getElementById(id); if(!el)return; el.textContent=n; el.classList.toggle('hidden',n===0); }
 
@@ -834,14 +869,18 @@ function renderDashboard(){
   const tasks=allTasks.filter(t=>['pending','in_progress'].includes(t.status));
   setT('taskCount',tasks.length+' active');
   document.getElementById('tasksList').innerHTML=tasks.length
-    ?tasks.slice(0,6).map(t=>`<div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-      <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${t.priority==='urgent'?'bg-red-500':t.priority==='high'?'bg-orange-400':'bg-blue-400'}"></span>
-      <div class="flex-1 min-w-0">
-        <p class="font-medium text-xs text-gray-800 truncate">${esc(t.task_name)}</p>
-        <p class="text-xs text-gray-400">${t.due_date?'Due '+fmtDate(t.due_date):''}</p>
-      </div>
-      <button onclick="completeTask('${t.id}')" class="text-xs text-green-600 hover:underline flex-shrink-0">Done</button>
-    </div>`).join('')
+    ?tasks.slice(0,6).map(t=>{
+      const isOverdue=t.due_date&&t.due_date<todayLocal();
+      const priDot={urgent:'bg-red-500',high:'bg-orange-400',medium:'bg-yellow-400',low:'bg-gray-400'};
+      return `<div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl ${isOverdue?'border border-red-200 bg-red-50':''}">
+        <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${priDot[t.priority]||'bg-gray-400'}"></span>
+        <div class="flex-1 min-w-0">
+          <p class="font-medium text-xs text-gray-800 truncate">${esc(t.task_name)}</p>
+          <p class="text-[10px] text-gray-400">${t.due_date?(isOverdue?'⚠ Overdue — ':'Due ')+fmtDate(t.due_date):''} ${t.status==='in_progress'?'· <span class="text-blue-500">In progress</span>':''}</p>
+        </div>
+        <button onclick="adminUpdTask('${t.id}','completed')" class="text-xs text-green-600 hover:underline flex-shrink-0">Done</button>
+      </div>`;
+    }).join('')
     :'<p class="text-gray-300 text-xs text-center py-4">No active tasks.</p>';
 
   const reminders=allAnnouncements.filter(a=>a.posted_by==='superadmin'&&!a.acknowledged).slice(0,4);
@@ -1862,47 +1901,184 @@ async function ackAnnouncement(id,ack=true){
   allAnnouncements=data||[];updateBadges();renderAnnouncements();
   if(document.getElementById('view-dashboard').classList.contains('active'))renderDashboard();
 }
-async function completeTask(id){
-  await db.from('staff_tasks').update({status:'completed',completed_at:new Date().toISOString()}).eq('id',id);
-  const{data}=await db.from('staff_tasks').select('*').order('created_at',{ascending:false});
-  allTasks=data||[];toast('Task completed!','success');renderDashboard();
+// ══════════════════════════════════════════════════════
+// TASKS (Admin) — dedicated view with notes + actions
+// ══════════════════════════════════════════════════════
+const ADMIN_PRIORITY_DOT={urgent:'bg-red-500',high:'bg-orange-400',medium:'bg-yellow-400',low:'bg-gray-400'};
+const ADMIN_PRIORITY_CSS={urgent:'bg-red-100 text-red-700 border border-red-200',high:'bg-orange-100 text-orange-700 border border-orange-200',medium:'bg-yellow-50 text-yellow-700 border border-yellow-200',low:'bg-gray-100 text-gray-500 border border-gray-200'};
+const ADMIN_CAT_ICON={cleaning:'🧹',maintenance:'🔧','guest-service':'🛎',admin:'📋',general:'📌'};
+
+function renderAdminTasks(){
+  const sf=document.getElementById('adminTkFilter')?.value||'';
+  const pf=document.getElementById('adminTkPriority')?.value||'';
+  let tasks=[...allTasks];
+  if(sf) tasks=tasks.filter(t=>t.status===sf);
+  if(pf) tasks=tasks.filter(t=>t.priority===pf);
+
+  // Sort: urgent first, then by due date, then created
+  tasks.sort((a,b)=>{
+    const pri={urgent:0,high:1,medium:2,low:3};
+    if(pri[a.priority]!==pri[b.priority]) return pri[a.priority]-pri[b.priority];
+    if(a.due_date&&b.due_date) return a.due_date.localeCompare(b.due_date);
+    if(a.due_date) return -1; if(b.due_date) return 1;
+    return new Date(b.created_at)-new Date(a.created_at);
+  });
+
+  // Update task badge
+  const active=allTasks.filter(t=>['pending','in_progress'].includes(t.status)).length;
+  setBadge('tasksBadge', active);
+  setT('taskCount', active+' active');
+
+  const el=document.getElementById('adminTasksList');
+  if(!el) return;
+  if(!tasks.length){el.innerHTML='<div class="sc p-8 text-center text-gray-300">No tasks found.</div>';return;}
+  el.innerHTML=tasks.map(t=>buildAdminTaskCard(t)).join('');
 }
 
-// ── NOTIFY SA ──
-async function notifySA(type,title,message,extra={}){
-  try{await db.from('notifications').insert({type,title,message,payload:extra,target:'superadmin',created_by:'admin'});}
-  catch(e){console.warn('Could not notify SA:',e);}
+function buildAdminTaskCard(t){
+  const isOverdue=t.due_date&&t.due_date<todayLocal()&&!['completed','cancelled'].includes(t.status);
+  const statusCls={pending:'bg-gray-100 text-gray-600',in_progress:'bg-blue-100 text-blue-700',completed:'bg-green-100 text-green-700',cancelled:'bg-red-50 text-red-400'};
+  const dueColor=isOverdue?'text-red-500 font-medium':t.due_date===todayLocal()?'text-orange-500 font-medium':'text-gray-400';
+  return `<div class="sc p-4 ${isOverdue?'border-l-4 border-red-400':t.priority==='urgent'?'border-l-4 border-red-200':t.priority==='high'?'border-l-4 border-orange-200':''}" id="admin-task-${t.id}">
+    <div class="flex items-start gap-3">
+      <span class="w-2.5 h-2.5 rounded-full ${ADMIN_PRIORITY_DOT[t.priority]||'bg-gray-300'} mt-1.5 flex-shrink-0"></span>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2 flex-wrap mb-1">
+          <p class="font-semibold text-gray-800 text-sm">${esc(t.task_name)}</p>
+          <span class="badge text-xs ${statusCls[t.status]||''}">${t.status.replace('_',' ')}</span>
+        </div>
+        ${t.description?`<p class="text-xs text-gray-500 mb-2">${esc(t.description)}</p>`:''}
+        <div class="flex flex-wrap gap-1.5 mb-2">
+          <span class="text-[10px] px-1.5 py-0.5 rounded-md ${ADMIN_PRIORITY_CSS[t.priority]||''} font-medium">${t.priority}</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-500">${ADMIN_CAT_ICON[t.category||'general']} ${(t.category||'general').replace('-',' ')}</span>
+          ${t.due_date?`<span class="text-[10px] ${dueColor}">${isOverdue?'⚠ Overdue':'Due'} ${fmtDate(t.due_date)}</span>`:''}
+        </div>
+        <!-- Progress notes -->
+        ${t.notes?`<div class="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-2 text-xs text-blue-700"><i class="fas fa-comment mr-1"></i>${esc(t.notes)}</div>`:''}
+        <!-- Note input (inline) -->
+        <div class="flex gap-2 mb-3" id="noteArea-${t.id}">
+          <input type="text" id="taskNote-${t.id}" class="fi flex-1 text-xs py-2"
+            placeholder="Add progress note…" value="${esc(t.notes||'')}"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();saveTaskNote('${t.id}');}"/>
+          <button onclick="saveTaskNote('${t.id}')" class="text-xs bg-forest/10 text-forest px-3 py-2 rounded-lg hover:bg-forest/20 whitespace-nowrap">Save</button>
+        </div>
+        <!-- Action buttons -->
+        <div class="flex gap-2 flex-wrap">
+          ${t.status==='pending'?`<button onclick="adminUpdTask('${t.id}','in_progress')" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 font-medium">▶ Start</button>`:''}
+          ${t.status==='in_progress'?`<button onclick="adminUpdTask('${t.id}','completed')" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 font-medium">✓ Mark Done</button><button onclick="adminUpdTask('${t.id}','pending')" class="text-xs border border-gray-200 text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-50">↩ Back</button>`:''}
+          ${t.status==='completed'?`<span class="text-xs text-green-600"><i class="fas fa-check-circle mr-1"></i>Completed ${t.completed_at?fmtDateTime(t.completed_at):''}</span>`:''}
+          ${t.status==='cancelled'?`<span class="text-xs text-gray-400">Cancelled</span>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
-// ── REALTIME ──
+async function adminUpdTask(id, status){
+  const upd={status};
+  if(status==='completed') upd.completed_at=new Date().toISOString();
+  if(status==='in_progress'){const t=allTasks.find(x=>x.id===id);if(t?.status==='pending') upd.started_at=new Date().toISOString();}
+  // Optimistic update
+  allTasks=allTasks.map(t=>t.id===id?{...t,...upd}:t);
+  renderAdminTasks();
+  renderDashboard();
+  try{
+    const{error}=await db.from('staff_tasks').update(upd).eq('id',id);
+    if(error) throw error;
+    toast(status==='completed'?'Task marked done ✓':status==='in_progress'?'Task started!':'Updated!','success');
+    await notifySA('task_updated','Task '+status.replace('_',' '),'Admin '+(status==='completed'?'completed':'updated')+' a task.',{task_id:id});
+  }catch(e){
+    console.error(e); toast('Update failed.','error');
+    const{data}=await db.from('staff_tasks').select('*').order('created_at',{ascending:false});
+    allTasks=data||[]; renderAdminTasks(); renderDashboard();
+  }
+}
+
+async function completeTask(id){ await adminUpdTask(id,'completed'); }
+
+async function saveTaskNote(id){
+  const note=(document.getElementById('taskNote-'+id)?.value||'').trim();
+  try{
+    const{error}=await db.from('staff_tasks').update({notes:note||null}).eq('id',id);
+    if(error) throw error;
+    allTasks=allTasks.map(t=>t.id===id?{...t,notes:note||null}:t);
+    toast('Note saved!','success');
+    renderAdminTasks();
+  }catch(e){toast('Failed to save note.','error');}
+}
+
+// ══════════════════════════════════════════════════════
+// REALTIME — comprehensive, all tables, zero reload
+// ══════════════════════════════════════════════════════
 function subscribeRealtime(){
-  db.channel('admin-notifs').on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'target=eq.admin'},p=>{
-    allNotifications=[p.new,...allNotifications];updateBadges();
-    if(document.getElementById('view-notifications').classList.contains('active'))renderNotifications();
-    toast(p.new.title,'info');
+  const activeView=()=>document.querySelector('.view.active')?.id?.replace('view-','');
+  const inView=(n)=>activeView()===n;
+
+  // 1. NOTIFICATIONS → Admin
+  db.channel('admin-rt-notifs').on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'target=eq.admin'},p=>{
+    allNotifications=[p.new,...allNotifications];
+    updateBadges();
+    if(inView('notifications')) renderNotifications();
+    const icons={booking_walkin:'🚶',guest_checked_in:'✅',low_stock:'⚠️',task_updated:'✅'};
+    toast(`${icons[p.new.type]||'📣'} ${p.new.title}`,'info');
   }).subscribe();
-  db.channel('admin-inv').on('postgres_changes',{event:'*',schema:'public',table:'inventory'},async()=>{
-    const{data}=await db.from('inventory').select('*').order('item_name');
-    allInventory=data||[];updateBadges();
-    if(document.getElementById('view-inventory').classList.contains('active'))renderInventory();
-  }).subscribe();
-  db.channel('admin-bk').on('postgres_changes',{event:'*',schema:'public',table:'bookings'},async()=>{
+
+  // 2. BOOKINGS
+  db.channel('admin-rt-bookings').on('postgres_changes',{event:'*',schema:'public',table:'bookings'},async()=>{
     const{data}=await db.from('bookings').select('*').order('created_at',{ascending:false});
     allBookings=data||[];
-    if(document.getElementById('view-dashboard').classList.contains('active'))renderDashboard();
-    if(document.getElementById('view-bookings').classList.contains('active'))renderBookings();
+    updateBadges();
+    if(inView('dashboard')) renderDashboard();
+    else if(inView('bookings')) renderBookings();
+    else if(inView('calendar')) renderCal('cal');
   }).subscribe();
-  db.channel('admin-ann').on('postgres_changes',{event:'*',schema:'public',table:'announcements'},async()=>{
-    const{data}=await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
-    allAnnouncements=data||[];updateBadges();
-    if(document.getElementById('view-announcements').classList.contains('active'))renderAnnouncements();
-    if(document.getElementById('view-dashboard').classList.contains('active'))renderDashboard();
-  }).subscribe();
-  db.channel('admin-tasks').on('postgres_changes',{event:'*',schema:'public',table:'staff_tasks'},async()=>{
-    const{data}=await db.from('staff_tasks').select('*').order('created_at',{ascending:false});
+
+  // 3. TASKS — most important for admin UX
+  db.channel('admin-rt-tasks').on('postgres_changes',{event:'*',schema:'public',table:'staff_tasks'},async(p)=>{
+    const{data}=await db.from('staff_tasks').select('*,staff(name,role)').order('created_at',{ascending:false});
     allTasks=data||[];
-    if(document.getElementById('view-dashboard').classList.contains('active'))renderDashboard();
+    updateBadges();
+    if(inView('tasks')) renderAdminTasks();
+    if(inView('dashboard')) renderDashboard();
+    // Alert for new tasks assigned to admin
+    if(p.eventType==='INSERT') toast(`📋 New task: ${p.new.task_name}`,'info');
   }).subscribe();
+
+  // 4. INVENTORY
+  db.channel('admin-rt-inventory').on('postgres_changes',{event:'*',schema:'public',table:'inventory'},async()=>{
+    const[{data:inv},{data:log}]=await Promise.all([
+      db.from('inventory').select('*').order('item_name'),
+      db.from('inventory_log').select('*').order('created_at',{ascending:false}).limit(30),
+    ]);
+    allInventory=inv||[]; allInventoryLog=log||[];
+    updateBadges();
+    if(inView('inventory')) renderInventory();
+  }).subscribe();
+
+  // 5. ANNOUNCEMENTS + TASKS (pinned reminders)
+  db.channel('admin-rt-announcements').on('postgres_changes',{event:'*',schema:'public',table:'announcements'},async()=>{
+    const{data}=await db.from('announcements').select('*').order('pinned',{ascending:false}).order('created_at',{ascending:false});
+    allAnnouncements=data||[];
+    updateBadges();
+    if(inView('announcements')) renderAnnouncements();
+    if(inView('dashboard')) renderDashboard();
+  }).subscribe();
+
+  // 6. STAFF (for task assignee names)
+  db.channel('admin-rt-staff').on('postgres_changes',{event:'*',schema:'public',table:'staff'},async()=>{
+    const{data}=await db.from('staff').select('*').order('name');
+    allStaff=data||[];
+    if(inView('personnel')) renderPersonnel();
+    if(inView('dashboard')) renderDashboard();
+  }).subscribe();
+
+  // 7. GUEST LOGS — refresh records view if open
+  db.channel('admin-rt-guestlogs').on('postgres_changes',{event:'*',schema:'public',table:'guest_logs'},async()=>{
+    if(inView('guestlog')) renderRecentLogs();
+    if(inView('guestrecords')){const q=document.getElementById('grSearch')?.value;if(q&&q.length>1) searchGuestRecords();}
+  }).subscribe();
+
+  console.log('[RT] Admin: 7 realtime channels active');
 }
 
 // ── HELPERS ──
